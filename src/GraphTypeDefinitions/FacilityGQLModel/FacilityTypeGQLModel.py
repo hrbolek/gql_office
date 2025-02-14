@@ -28,7 +28,15 @@ from uoishelpers.resolvers import (
 
 from ..BaseGQLModel import BaseGQLModel, IDType
 
-FacilityCategoryGQLModel = typing.Annotated["FacilityCategoryGQLModel", strawberry.lazy(".FacilityCategoryGQLModel")]
+# FacilityCategoryGQLModel = typing.Annotated["FacilityCategoryGQLModel", strawberry.lazy(".FacilityCategoryGQLModel")]
+
+@createInputs
+@dataclasses.dataclass
+class FacilityTypeInputFilter:
+    name: str
+    name_en: str
+    id: IDType
+
 
 @strawberry.federation.type(
     keys=["id"], description="""Entity representing a Facility"""
@@ -53,20 +61,28 @@ class FacilityTypeGQLModel(BaseGQLModel):
         ]
     )
 
-    category: typing.Optional[FacilityCategoryGQLModel] = strawberry.field(
-        description="""Facility category""",
+    parent: typing.Optional["FacilityTypeGQLModel"] = strawberry.field(
+        description="""Facility type parent""",
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=ScalarResolver[FacilityCategoryGQLModel](fkey_field_name="category_id")
+        resolver=ScalarResolver["FacilityTypeGQLModel"](fkey_field_name="parent_id")
     )
 
-@createInputs
-@dataclasses.dataclass
-class FacilityTypeInputFilter:
-    name: str
-    name_en: str
-    id: IDType
+    parent_id: typing.Optional[IDType] = strawberry.field(
+        description="""Facility type parent id""",
+        permission_classes=[
+            OnlyForAuthentized
+        ]
+    )
+
+    children: typing.List["FacilityTypeGQLModel"] = strawberry.field(
+        description="""Facility type children""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=VectorResolver["FacilityTypeGQLModel"](fkey_field_name="parent_id", whereType=FacilityTypeInputFilter)
+    )
 
 @strawberry.interface(
     description=""""""

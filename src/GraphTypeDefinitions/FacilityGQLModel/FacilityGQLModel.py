@@ -9,7 +9,8 @@ from uoishelpers.gqlpermissions import (
     SimpleInsertPermission, 
     SimpleUpdatePermission, 
     SimpleDeletePermission
-)    
+)  
+
 from uoishelpers.resolvers import (
     getLoadersFromInfo, 
     createInputs,
@@ -27,6 +28,7 @@ from uoishelpers.resolvers import (
 )
 
 from ..BaseGQLModel import BaseGQLModel, IDType
+from ..TreeGQLModel import create_tree_parents_resolver, create_tree_parent_updater
 
 FacilityTypeGQLModel = typing.Annotated["FacilityTypeGQLModel", strawberry.lazy(".FacilityTypeGQLModel")]
 GroupGQLModel = typing.Annotated["GroupGQLModel", strawberry.lazy("..GroupGQLModel")]
@@ -165,6 +167,14 @@ class FacilityGQLModel(BaseGQLModel):
         resolver=ScalarResolver["FacilityGQLModel"](fkey_field_name="master_facility_id")
     )
 
+    master_facilities: typing.List["FacilityGQLModel"] = strawberry.field(
+        description="""Facilities above this""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=create_tree_parents_resolver["FacilityGQLModel"]
+    )
+
     sub_facilities: typing.List["FacilityGQLModel"] = strawberry.field(
         description="""Facilities inside facility (like buildings in an areal)""",
         permission_classes=[
@@ -256,3 +266,10 @@ class FacilityMutations:
     )
     async def facility_delete(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Optional[DeleteError[FacilityGQLModel]]:
         return await Delete[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
+    
+    @strawberry.field(
+        description="Move a facility",
+        permission_classes=[SimpleUpdatePermission]
+    )
+    async def facility_move(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
+        return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)

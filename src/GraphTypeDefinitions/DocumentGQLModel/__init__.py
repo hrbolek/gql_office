@@ -1,0 +1,2 @@
+from .DocumentGQLModel import DocumentGQLModel, DocumentQueries, DocumentMutations
+from .DocumentTypeGQLModel import DocumentTypeGQLModel

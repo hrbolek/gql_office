@@ -28,6 +28,18 @@ from uoishelpers.resolvers import (
 
 from ..BaseGQLModel import BaseGQLModel, IDType
 
+
+@createInputs
+@dataclasses.dataclass
+class DocumentInputFilter:
+    name: str
+    name_en: str
+    description: str
+    content: str
+    mimetype: str
+    parent_id: IDType
+
+
 @strawberry.type(
     description="""Entity representing a Document"""
 )
@@ -85,21 +97,19 @@ class DocumentGQLModel(BaseGQLModel):
     )
 
     parent: typing.Optional["DocumentGQLModel"] = strawberry.field(
-        default=None,
         description="""Document parent""",
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=ScalarResolver["DocumentGQLModel"](whereType="parent_id")
+        resolver=ScalarResolver["DocumentGQLModel"](fkey_field_name="parent_id")
     )
 
     children: typing.List["DocumentGQLModel"] = strawberry.field(
-        default=None,
         description="""Document children""",
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=VectorResolver["DocumentGQLModel"](whereType="parent_id")
+        resolver=VectorResolver["DocumentGQLModel"](fkey_field_name="parent_id", whereType=DocumentInputFilter)
     )
 
     group_id: typing.Optional[IDType] = strawberry.field(
@@ -111,29 +121,18 @@ class DocumentGQLModel(BaseGQLModel):
     )
 
     group: typing.Optional["DocumentGQLModel"] = strawberry.field(
-        default=None,
         description="""Document group""",
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=ScalarResolver["DocumentGQLModel"](whereType="group_id")
+        resolver=ScalarResolver["DocumentGQLModel"](fkey_field_name="group_id")
     )
-
-@createInputs
-@dataclasses.dataclass
-class DocumentInputFilter:
-    name: str
-    name_en: str
-    description: str
-    content: str
-    mimetype: str
-    parent_id: IDType
 
 
 @strawberry.interface(
     description="""Queries for Document"""
 )
-class DocumentQuery:
+class DocumentQueries:
     document_by_id: typing.Optional[DocumentGQLModel] = strawberry.field(
         description="""Get a Document by id""",
         permission_classes=[
@@ -147,7 +146,7 @@ class DocumentQuery:
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=PageResolver[DocumentGQLModel]()
+        resolver=PageResolver[DocumentGQLModel](whereType=DocumentInputFilter)
     )
 
 @strawberry.input(
@@ -257,3 +256,4 @@ class DocumentMutations:
         document: DocumentDeleteGQLModel
     ) -> typing.Optional[DeleteError[DocumentGQLModel]]:
         return await Delete[DocumentGQLModel].DoItSafeWay(document)
+    
