@@ -558,16 +558,6 @@ def generate_field_arguments(args, types_by_name):
         return ""
 
 def get_fragment_name(type_name):
-    # Custom mapping: remove "GQLModel" suffix for success branch,
-    # map types with "UpdateError" to "Error".
-    if type_name.endswith("GQLModelUpdateError"):
-        return "Error"
-    elif type_name.endswith("GQLModel"):
-        return type_name[:-len("GQLModel")]
-    else:
-        return type_name
-
-def get_fragment_name(type_name):
     # Map "GQLModelUpdateError" types to "Error" and remove "GQLModel" suffix otherwise.
     if type_name.endswith("GQLModelUpdateError"):
         return "Error"
@@ -578,7 +568,7 @@ def get_fragment_name(type_name):
 
 def generate_selection_set_with_fragments(type_ref, types_by_name, fragments, depth=0, max_depth=2, indent_level=1, indent_str="  "):
     base = get_named_type(type_ref)
-    # Handle UNION types: always generate an inline fragment for each possible member.
+    # Handle UNION types: generate inline fragments for every possible member.
     if base.get("kind") == "UNION":
         possible_types = base.get("possibleTypes")
         if not possible_types:
@@ -612,10 +602,15 @@ def generate_selection_set_with_fragments(type_ref, types_by_name, fragments, de
             for f in type_def["fields"]:
                 f_type = f["type"]
                 f_named = get_named_type(f_type)
+                # Avoid recursive self-reference: if the field's fragment name equals the current type's fragment name, use fallback.
+                frag_name = get_fragment_name(f_named.get("name"))
+                current_frag = get_fragment_name(type_name)
                 if f_named.get("kind") in ["OBJECT", "UNION"]:
-                    if depth + 1 < max_depth:
+                    if frag_name == current_frag:
+                        fragment_lines.append(indent_str * indent_level + f"{f['name']} {{ id }}")
+                    elif depth + 1 < max_depth:
                         _ = generate_selection_set_with_fragments(f_type, types_by_name, fragments, depth + 1, max_depth, indent_level + 1, indent_str)
-                        fragment_lines.append(indent_str * indent_level + f"{f['name']} {{ ...{get_fragment_name(f_named.get('name'))} }}")
+                        fragment_lines.append(indent_str * indent_level + f"{f['name']} {{ ...{frag_name} }}")
                     else:
                         fragment_lines.append(indent_str * indent_level + f"{f['name']} {{ id }}")
                 else:
@@ -625,10 +620,7 @@ def generate_selection_set_with_fragments(type_ref, types_by_name, fragments, de
         fragments[type_name] = fragment_def
     return "{\n" + indent_str + f"...{get_fragment_name(type_name)}\n}}"
 
-
-
 def generate_query_example(field, types_by_name, operation_type="query", max_depth=2):
-    # For mutations, use a higher recursion depth.
     if operation_type == "mutation":
         max_depth = 3
     args = field.get("args") or []

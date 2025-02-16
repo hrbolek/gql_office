@@ -109,30 +109,6 @@ fragment RBACObject on RBACObjectGQLModel {
     id
   }
 
-fragment Event on EventGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby { ...User }
-  changedby { ...User }
-  rbacobject { ...RBACObject }
-  name
-  nameEn
-  description
-  startDate
-  endDate
-  parentId
-  parent { ...Event }
-  children { ...Event }
-  typeId
-  type { ...EventType }
-  invitations { ...EventInvitation }
-}
-
 fragment EventType on EventTypeGQLModel {
     __typename
     id
@@ -171,6 +147,30 @@ fragment EventInvitation on EventInvitationGQLModel {
     user { id }
     state { id }
   }
+
+fragment Event on EventGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby { ...User }
+  changedby { ...User }
+  rbacobject { ...RBACObject }
+  name
+  nameEn
+  description
+  startDate
+  endDate
+  parentId
+  parent { id }
+  children { id }
+  typeId
+  type { ...EventType }
+  invitations { ...EventInvitation }
+}
 ```
 
 - **eventPage**: [[EventGQLModel](#eventgqlmodel)!]! – get a page of events
@@ -199,30 +199,6 @@ fragment RBACObject on RBACObjectGQLModel {
     id
   }
 
-fragment Event on EventGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby { ...User }
-  changedby { ...User }
-  rbacobject { ...RBACObject }
-  name
-  nameEn
-  description
-  startDate
-  endDate
-  parentId
-  parent { ...Event }
-  children { ...Event }
-  typeId
-  type { ...EventType }
-  invitations { ...EventInvitation }
-}
-
 fragment EventType on EventTypeGQLModel {
     __typename
     id
@@ -261,6 +237,30 @@ fragment EventInvitation on EventInvitationGQLModel {
     user { id }
     state { id }
   }
+
+fragment Event on EventGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby { ...User }
+  changedby { ...User }
+  rbacobject { ...RBACObject }
+  name
+  nameEn
+  description
+  startDate
+  endDate
+  parentId
+  parent { id }
+  children { id }
+  typeId
+  type { ...EventType }
+  invitations { ...EventInvitation }
+}
 ```
 
 - **facilityById**: [FacilityGQLModel](#facilitygqlmodel) – Get a facility by id
@@ -304,6 +304,11 @@ fragment FacilityType on FacilityTypeGQLModel {
     children { id }
   }
 
+fragment Group on GroupGQLModel {
+    __typename
+    id
+  }
+
 fragment Facility on FacilityGQLModel {
   __typename
   id
@@ -329,16 +334,11 @@ fragment Facility on FacilityGQLModel {
   facilitytypeId
   masterFacilityId
   type { ...FacilityType }
-  masterFacility { ...Facility }
-  masterFacilities { ...Facility }
-  subFacilities { ...Facility }
+  masterFacility { id }
+  masterFacilities { id }
+  subFacilities { id }
   group { ...Group }
 }
-
-fragment Group on GroupGQLModel {
-    __typename
-    id
-  }
 ```
 
 - **facilityPage**: [[FacilityGQLModel](#facilitygqlmodel)!]! – Get a page of facilities
@@ -385,6 +385,11 @@ fragment FacilityType on FacilityTypeGQLModel {
     children { id }
   }
 
+fragment Group on GroupGQLModel {
+    __typename
+    id
+  }
+
 fragment Facility on FacilityGQLModel {
   __typename
   id
@@ -410,16 +415,11 @@ fragment Facility on FacilityGQLModel {
   facilitytypeId
   masterFacilityId
   type { ...FacilityType }
-  masterFacility { ...Facility }
-  masterFacilities { ...Facility }
-  subFacilities { ...Facility }
+  masterFacility { id }
+  masterFacilities { id }
+  subFacilities { id }
   group { ...Group }
 }
-
-fragment Group on GroupGQLModel {
-    __typename
-    id
-  }
 ```
 
 - **documentById**: [ElectronicDocumentGQLModel](#electronicdocumentgqlmodel) – Get a Document by id
@@ -445,29 +445,6 @@ fragment RBACObject on RBACObjectGQLModel {
     id
   }
 
-fragment ElectronicDocument on ElectronicDocumentGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby { ...User }
-  changedby { ...User }
-  rbacobject { ...RBACObject }
-  name
-  nameEn
-  description
-  content
-  mimetype
-  parentId
-  parent { ...ElectronicDocument }
-  children { ...ElectronicDocument }
-  typeId
-  type { ...DocumentType }
-}
-
 fragment DocumentType on DocumentTypeGQLModel {
     __typename
     id
@@ -486,6 +463,29 @@ fragment DocumentType on DocumentTypeGQLModel {
     parent { id }
     children { id }
   }
+
+fragment ElectronicDocument on ElectronicDocumentGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby { ...User }
+  changedby { ...User }
+  rbacobject { ...RBACObject }
+  name
+  nameEn
+  description
+  content
+  mimetype
+  parentId
+  parent { id }
+  children { id }
+  typeId
+  type { ...DocumentType }
+}
 ```
 
 - **documentPage**: [[ElectronicDocumentGQLModel](#electronicdocumentgqlmodel)!]! – Get a page of Documents
@@ -514,29 +514,6 @@ fragment RBACObject on RBACObjectGQLModel {
     id
   }
 
-fragment ElectronicDocument on ElectronicDocumentGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby { ...User }
-  changedby { ...User }
-  rbacobject { ...RBACObject }
-  name
-  nameEn
-  description
-  content
-  mimetype
-  parentId
-  parent { ...ElectronicDocument }
-  children { ...ElectronicDocument }
-  typeId
-  type { ...DocumentType }
-}
-
 fragment DocumentType on DocumentTypeGQLModel {
     __typename
     id
@@ -555,6 +532,29 @@ fragment DocumentType on DocumentTypeGQLModel {
     parent { id }
     children { id }
   }
+
+fragment ElectronicDocument on ElectronicDocumentGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby { ...User }
+  changedby { ...User }
+  rbacobject { ...RBACObject }
+  name
+  nameEn
+  description
+  content
+  mimetype
+  parentId
+  parent { id }
+  children { id }
+  typeId
+  type { ...DocumentType }
+}
 ```
 
 - **digitalDocumentById**: [DigitalFormGQLModel](#digitalformgqlmodel) – Get a DigitalForm by id
@@ -821,30 +821,6 @@ fragment RBACObject on RBACObjectGQLModel {
       id
     }
 
-fragment Event on EventGQLModel {
-    __typename
-    id
-    lastchange
-    created
-    createdbyId
-    changedbyId
-    rbacobjectId
-    createdby { ...User }
-    changedby { ...User }
-    rbacobject { ...RBACObject }
-    name
-    nameEn
-    description
-    startDate
-    endDate
-    parentId
-    parent { ...Event }
-    children { ...Event }
-    typeId
-    type { ...EventType }
-    invitations { ...EventInvitation }
-  }
-
 fragment EventType on EventTypeGQLModel {
       __typename
       id
@@ -883,6 +859,30 @@ fragment EventInvitation on EventInvitationGQLModel {
       user { id }
       state { id }
     }
+
+fragment Event on EventGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { ...User }
+    changedby { ...User }
+    rbacobject { ...RBACObject }
+    name
+    nameEn
+    description
+    startDate
+    endDate
+    parentId
+    parent { id }
+    children { id }
+    typeId
+    type { ...EventType }
+    invitations { ...EventInvitation }
+  }
 
 fragment InsertError on InsertError {
     __typename
@@ -916,30 +916,6 @@ fragment RBACObject on RBACObjectGQLModel {
       id
     }
 
-fragment Event on EventGQLModel {
-    __typename
-    id
-    lastchange
-    created
-    createdbyId
-    changedbyId
-    rbacobjectId
-    createdby { ...User }
-    changedby { ...User }
-    rbacobject { ...RBACObject }
-    name
-    nameEn
-    description
-    startDate
-    endDate
-    parentId
-    parent { ...Event }
-    children { ...Event }
-    typeId
-    type { ...EventType }
-    invitations { ...EventInvitation }
-  }
-
 fragment EventType on EventTypeGQLModel {
       __typename
       id
@@ -978,6 +954,30 @@ fragment EventInvitation on EventInvitationGQLModel {
       user { id }
       state { id }
     }
+
+fragment Event on EventGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { ...User }
+    changedby { ...User }
+    rbacobject { ...RBACObject }
+    name
+    nameEn
+    description
+    startDate
+    endDate
+    parentId
+    parent { id }
+    children { id }
+    typeId
+    type { ...EventType }
+    invitations { ...EventInvitation }
+  }
 
 fragment Error on EventGQLModelUpdateError {
     __typename
@@ -1011,30 +1011,6 @@ fragment RBACObject on RBACObjectGQLModel {
       id
     }
 
-fragment Event on EventGQLModel {
-    __typename
-    id
-    lastchange
-    created
-    createdbyId
-    changedbyId
-    rbacobjectId
-    createdby { ...User }
-    changedby { ...User }
-    rbacobject { ...RBACObject }
-    name
-    nameEn
-    description
-    startDate
-    endDate
-    parentId
-    parent { ...Event }
-    children { ...Event }
-    typeId
-    type { ...EventType }
-    invitations { ...EventInvitation }
-  }
-
 fragment EventType on EventTypeGQLModel {
       __typename
       id
@@ -1073,6 +1049,30 @@ fragment EventInvitation on EventInvitationGQLModel {
       user { id }
       state { id }
     }
+
+fragment Event on EventGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { ...User }
+    changedby { ...User }
+    rbacobject { ...RBACObject }
+    name
+    nameEn
+    description
+    startDate
+    endDate
+    parentId
+    parent { id }
+    children { id }
+    typeId
+    type { ...EventType }
+    invitations { ...EventInvitation }
+  }
 
 fragment EventGQLModelDeleteError on EventGQLModelDeleteError {
   __typename
