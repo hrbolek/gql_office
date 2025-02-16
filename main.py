@@ -123,6 +123,16 @@ async def graphiql():
     realpath = os.path.realpath("./voyager.html")
     return realpath
 
+@app.get("/schema", response_class=FileResponse)
+async def graphiql():
+    realpath = os.path.realpath("./schema.html")
+    return realpath
+
+@app.get("/md", response_class=FileResponse)
+async def graphiql():
+    realpath = os.path.realpath("./graphql_schema.md")
+    return realpath
+
 import prometheus_client
 @app.get("/metrics")
 async def metrics():

@@ -37,7 +37,7 @@ class DocumentTypeInputFilter:
     name_en: str
     id: IDType
 
-@strawberry.type(
+@strawberry.federation.type(
     description="""Entity representing a Document"""
 )
 class DocumentTypeGQLModel(BaseGQLModel):

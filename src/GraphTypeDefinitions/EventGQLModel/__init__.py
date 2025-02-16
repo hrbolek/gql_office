@@ -1,1 +1,1 @@
-from .EventGQLModel import EventGQLModel, EventQueries, EventMutations
+from .EventGQLModel import EventGQLModel, EventQuery, EventMutations

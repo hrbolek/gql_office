@@ -28,6 +28,10 @@ from uoishelpers.resolvers import (
 
 from ..BaseGQLModel import BaseGQLModel, IDType
 
+EventTypeGQLModel = typing.Annotated["EventTypeGQLModel", strawberry.lazy(".EventTypeGQLModel")]
+EventInvitationGQLModel = typing.Annotated["EventInvitationGQLModel", strawberry.lazy(".EventInvitationGQLModel")]
+EventInvitationInputFilter = typing.Annotated["EventInvitationInputFilter", strawberry.lazy(".EventInvitationGQLModel")]
+
 @createInputs
 @dataclasses.dataclass
 class EventInputFilter:
@@ -39,7 +43,7 @@ class EventInputFilter:
     id: IDType
 
 
-@strawberry.type(
+@strawberry.federation.type(
     description="""Entity representing a Event"""
 )
 class EventGQLModel(BaseGQLModel):
@@ -111,11 +115,36 @@ class EventGQLModel(BaseGQLModel):
         resolver=VectorResolver["EventGQLModel"](fkey_field_name="parent_id", whereType=EventInputFilter)
     )
 
+    type_id: typing.Optional[IDType] = strawberry.field(
+        description="""Event type id""",
+        permission_classes=[
+            OnlyForAuthentized
+        ]
+    )
+
+    type_: typing.Optional["EventTypeGQLModel"] = strawberry.field(
+        name="type",
+        description="""Event type""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver["EventTypeGQLModel"](fkey_field_name="type_id")
+    )
+
+    invitations: typing.List["EventInvitationGQLModel"] = strawberry.field(
+        description="""Event invitations""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=VectorResolver["EventInvitationGQLModel"](fkey_field_name="event_id", whereType=EventInvitationInputFilter)
+    )
+
+
 
 @strawberry.interface(
     description="""Event queries"""
 )
-class EventQueries:
+class EventQuery:
     event_by_id: typing.Optional[EventGQLModel] = strawberry.field(
         description="""get a event by its id""",
         permission_classes=[OnlyForAuthentized],

@@ -39,7 +39,7 @@ class FacilityTypeInputFilter:
 
 
 @strawberry.federation.type(
-    keys=["id"], description="""Entity representing a Facility"""
+    keys=["id"], description="""Entity representing a Facility type tree"""
 )
 class FacilityTypeGQLModel(BaseGQLModel):
     async def getLoader(cls, info: strawberry.types.Info):

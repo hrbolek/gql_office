@@ -16,12 +16,18 @@ from .GroupGQLModel import GroupGQLModel
 from .EventGQLModel import EventGQLModel
 from .BaseGQLModel import BaseGQLModel
 
+
+from .DocumentGQLModel import DocumentGQLModel
+
+
+
+
 from .query import Query
 from .mutation import Mutation
 schema = strawberry.federation.Schema(
     query=Query, 
     mutation=Mutation, 
-    types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel), 
+    types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentGQLModel), 
     extensions=[]
 )
 

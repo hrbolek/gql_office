@@ -1,11 +1,12 @@
 
 import strawberry
 
-from .EventGQLModel import EventGQLModel, EventQueries
-from .FacilityGQLModel import FacilityGQLModel, FacilityQueries
-from .DocumentGQLModel import DocumentGQLModel, DocumentQueries
+from .EventGQLModel import EventGQLModel, EventQuery
+from .FacilityGQLModel import FacilityGQLModel, FacilityQuery
+from .DocumentGQLModel import ElectronicDocumentGQLModel, DocumentQuery
+from .DocumentGQLModel import DigitalDocumentGQLModel, DigitalFormQuery
 
 @strawberry.type(description="""Type for query root""")
-class Query(EventQueries, FacilityQueries, DocumentQueries):
+class Query(EventQuery, FacilityQuery, DocumentQuery, DigitalFormQuery):
 
     pass

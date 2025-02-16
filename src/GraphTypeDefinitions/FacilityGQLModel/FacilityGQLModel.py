@@ -172,7 +172,7 @@ class FacilityGQLModel(BaseGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=create_tree_parents_resolver["FacilityGQLModel"]
+        # resolver=create_tree_parents_resolver(FacilityGQLModel)
     )
 
     sub_facilities: typing.List["FacilityGQLModel"] = strawberry.field(
@@ -207,7 +207,7 @@ class FacilityInputFilter:
 @strawberry.federation.interface(
     keys=["id"], description="""Facility queries"""
 )
-class FacilityQueries:
+class FacilityQuery:
     
     facility_by_id: typing.Optional[FacilityGQLModel] = strawberry.field(
         description="Get a facility by id",
@@ -241,7 +241,7 @@ class FacilityInsertGQLModel:
         strawberry.field(description="group_id or user_id defines access rights", default=None)
     createdby_id: strawberry.Private[IDType] = None
 
-@strawberry.type(
+@strawberry.federation.type(
     description="""Facility mutations"""
 )
 class FacilityMutations:

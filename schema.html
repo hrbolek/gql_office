@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Markdown Internal Links Example</title>
+  <!-- Load markdown-it -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+  <!-- Load markdown-it-anchor v9.2.0 (UMD build) -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-anchor@9.2.0/dist/markdownItAnchor.umd.js"></script>
+  <style>
+    body {
+        font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+        padding: 20px;
+    }
+    h4 {
+        background-color: aliceblue;
+        padding-top: 20px;
+        padding-bottom: 20px;   
+    }    
+    #content {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="content">Loading markdown...</div>
+  
+  <script>
+    // Initialize markdown-it with the markdown-it-anchor plugin.
+    var md = window.markdownit().use(window.markdownItAnchor, {
+      slugify: function(s) {
+        return s.trim().toLowerCase().replace(/\s+/g, '-');
+      }
+    });
+    
+    // Read the "md" query parameter to determine the Markdown URI. Defaults to "/md".
+    const urlParams = new URLSearchParams(window.location.search);
+    const markdownUri = urlParams.get('md') || '/md';
+    
+    // Use fetch to get Markdown content from the specified URI.
+    fetch(markdownUri)
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response.text();
+      })
+      .then(function(markdownText) {
+        // Render the fetched Markdown to HTML and insert it into the content div.
+        document.getElementById('content').innerHTML = md.render(markdownText);
+      })
+      .catch(function(error) {
+        document.getElementById('content').innerHTML = 'Error loading markdown: ' + error;
+      });
+  </script>
+</body>
+</html>
