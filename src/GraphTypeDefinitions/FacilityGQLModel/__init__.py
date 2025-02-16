@@ -1,2 +1,2 @@
-from .FacilityGQLModel import FacilityGQLModel, FacilityQuery
-from .FacilityTypeGQLModel import FacilityTypeGQLModel
+from .FacilityGQLModel import FacilityGQLModel, FacilityQuery, FacilityMutation
+from .FacilityTypeGQLModel import FacilityTypeGQLModel, FacilityTypeQuery, FacilityTypeMutation

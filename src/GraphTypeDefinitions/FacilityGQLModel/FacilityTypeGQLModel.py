@@ -117,24 +117,30 @@ class FacilityTypeInsertGQLModel:
         description="""FacilityType eng name""",
         default=None
     )
-    category_id: IDType = strawberry.field(
-        description="""FacilityType category id"""
+    parent_id: IDType = strawberry.field(
+        description="""FacilityType master id"""
+    )
+    id: IDType = strawberry.field(
+        description="""FacilityType id client generated"""
     )
 
 @strawberry.input(
     description="""FacilityType update mutation"""
 )
 class FacilityTypeUpdateGQLModel:
+    id: IDType = strawberry.field(
+        description="""FacilityType id"""
+    )
+    lastchange: datetime.datetime = strawberry.field(
+        description="""FacilityType lastchange"""
+    )
+
     name: typing.Optional[str] = strawberry.field(
         description="""FacilityType name""",
         default=None
     )
     name_en: typing.Optional[str] = strawberry.field(
         description="""FacilityType eng name""",
-        default=None
-    )
-    category_id: typing.Optional[IDType] = strawberry.field(
-        description="""FacilityType category id""",
         default=None
     )
 
@@ -150,14 +156,14 @@ class FacilityTypeDeleteGQLModel:
     )
 
 
-@strawberry.interface(
+@strawberry.type(
     description="""FacilityType mutation"""
 )
 class FacilityTypeMutation:
-    @strawberry.field(
+    @strawberry.mutation(
         description="""Insert a FacilityType""",
         permission_classes=[
-            SimpleInsertPermission
+            SimpleInsertPermission[FacilityTypeGQLModel](roles=["administrátor"])
         ]
     )
     async def facility_type_insert(
@@ -167,10 +173,10 @@ class FacilityTypeMutation:
     ) -> typing.Union[FacilityTypeGQLModel, InsertError[FacilityTypeGQLModel]]:
         return await Insert[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility)
     
-    @strawberry.field(
+    @strawberry.mutation(
         description="""Update a FacilityType""",
         permission_classes=[
-            SimpleUpdatePermission
+            SimpleUpdatePermission[FacilityTypeGQLModel](roles=["administrátor"])
         ]
     )
     async def facility_type_update(
@@ -180,10 +186,10 @@ class FacilityTypeMutation:
     ) -> typing.Union[FacilityTypeGQLModel, UpdateError[FacilityTypeGQLModel]]:
         return await Update[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility)
     
-    @strawberry.field(
+    @strawberry.mutation(
         description="""Delete a FacilityType""",
         permission_classes=[
-            SimpleDeletePermission
+            SimpleDeletePermission[FacilityTypeGQLModel](roles=["administrátor"])
         ]
     )
     async def facility_type_delete(

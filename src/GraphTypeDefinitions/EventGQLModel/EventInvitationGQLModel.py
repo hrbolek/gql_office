@@ -96,3 +96,116 @@ class EventInvitationGQLModel(BaseGQLModel):
         
     )
 
+@strawberry.type(description="")
+class EventInvitationQuery:
+
+    event_invitation_by_id: typing.Optional[EventInvitationGQLModel] = strawberry.field(
+        description="Invitation by its id",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=EventInvitationGQLModel.load_with_loader
+    )
+
+    event_invitation_page: typing.List[EventInvitationGQLModel] = strawberry.field(
+        description="selected invitations to events",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=PageResolver[EventInvitationGQLModel](whereType=EventInvitationInputFilter)
+    )
+
+
+    
+@strawberry.input(
+    description="""EventInvitation insert mutation"""
+)
+class EventInvitationInsertGQLModel:
+    event_id: IDType = strawberry.field(
+        description="event id to which invitation is sent"
+    )
+
+    user_id: IDType = strawberry.field(
+        description="user id who receive invitation"
+    )
+
+    state_id: typing.Optional[IDType] = strawberry.field(
+        description="invitation kind",
+        default=None
+    )
+
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""client generated id"""
+    )
+
+@strawberry.input(
+    description="""EventInvitation update mutation"""
+)
+class EventInvitationUpdateGQLModel:
+    id: IDType = strawberry.field(
+        description="""id"""
+    )
+
+    lastchange: datetime.datetime = strawberry.field(
+        description="""timestamp"""
+    )
+
+    state_id: typing.Optional[IDType] = strawberry.field(
+        description="invitation kind and presence type",
+        default=None
+    )
+
+@strawberry.input(
+    description="""EventInvitation delete mutation"""
+)
+class EventInvitationDeleteGQLModel:
+    id: IDType = strawberry.field(
+        description="""EventInvitation id"""
+    )
+    lastchange: datetime.datetime = strawberry.field(
+        description="""EventInvitation lastchange"""
+    )
+
+
+@strawberry.type(
+    description="""EventInvitation mutation"""
+)
+class EventInvitationMutation:
+    @strawberry.field(
+        description="""Insert a EventInvitation""",
+        permission_classes=[
+            SimpleInsertPermission[EventInvitationGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def event_invitation_insert(
+        self,
+        info: strawberry.types.Info,
+        invitation: EventInvitationInsertGQLModel
+    ) -> typing.Union[EventInvitationGQLModel, InsertError[EventInvitationGQLModel]]:
+        return await Insert[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)
+    
+    @strawberry.field(
+        description="""Update a EventInvitation""",
+        permission_classes=[
+            SimpleUpdatePermission[EventInvitationGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def event_invitation_update(
+        self,
+        info: strawberry.types.Info,
+        invitation: EventInvitationUpdateGQLModel
+    ) -> typing.Union[EventInvitationGQLModel, UpdateError[EventInvitationGQLModel]]:
+        return await Update[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)
+    
+    @strawberry.field(
+        description="""Delete a EventInvitation""",
+        permission_classes=[
+            SimpleDeletePermission[EventInvitationGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def event_invitation_delete(
+        self,
+        info: strawberry.types.Info,
+        invitation: EventInvitationDeleteGQLModel
+    ) -> typing.Optional[DeleteError[EventInvitationGQLModel]]:
+        return await Delete[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)        

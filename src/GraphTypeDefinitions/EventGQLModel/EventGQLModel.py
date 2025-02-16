@@ -228,10 +228,12 @@ class EventDeleteGQLModel:
 @strawberry.interface(
     description="""Event mutations"""
 )
-class EventMutations:
+class EventMutation:
     @strawberry.mutation(
         description="""Insert a Event""",
-        permission_classes=[SimpleInsertPermission]
+        permission_classes=[
+            SimpleInsertPermission[EventGQLModel](roles=["administrátor"])
+        ]
     )
     async def event_insert(
         self,
@@ -242,7 +244,9 @@ class EventMutations:
     
     @strawberry.mutation(
         description="""Update a Event""",
-        permission_classes=[SimpleUpdatePermission]
+        permission_classes=[
+            SimpleUpdatePermission[EventGQLModel](roles=["administrátor"])
+        ]
     )
     async def event_update(
         self,
@@ -253,7 +257,9 @@ class EventMutations:
     
     @strawberry.mutation(
         description="""Delete a Event""",
-        permission_classes=[SimpleDeletePermission]
+        permission_classes=[
+            SimpleDeletePermission[EventGQLModel](roles=["administrátor"])
+        ]
     )   
     async def event_delete(
         self,

@@ -11,10 +11,11 @@ from uoishelpers.gqlpermissions import RBACObjectGQLModel
 #
 ###########################################################################################################################
 
+from .BaseGQLModel import BaseGQLModel
 from .UserGQLModel import UserGQLModel
 from .GroupGQLModel import GroupGQLModel
 from .EventGQLModel import EventGQLModel
-from .BaseGQLModel import BaseGQLModel
+from .StateGQLModel import StateGQLModel
 
 
 from .DocumentGQLModel import DocumentGQLModel
@@ -27,7 +28,7 @@ from .mutation import Mutation
 schema = strawberry.federation.Schema(
     query=Query, 
     mutation=Mutation, 
-    types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentGQLModel), 
+    types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentGQLModel, StateGQLModel), 
     extensions=[]
 )
 

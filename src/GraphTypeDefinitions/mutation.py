@@ -1,10 +1,25 @@
 import strawberry
 
-from .EventGQLModel import EventMutations
+from .EventGQLModel import (
+    EventMutation,
+    EventTypeMutation,
+    EventInvitationMutation
+)
 
+from .FacilityGQLModel import (
+    FacilityMutation,
+    FacilityTypeMutation
+)
 
 @strawberry.federation.type(extend=True)
-class Mutation(EventMutations):
+class Mutation(
+    EventMutation,
+    EventTypeMutation,
+    EventInvitationMutation,
+    
+    FacilityMutation,
+    FacilityTypeMutation
+    ):
 
     # from .FacilityGQLModel import (
     #     facility_insert,

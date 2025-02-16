@@ -241,35 +241,62 @@ class FacilityInsertGQLModel:
         strawberry.field(description="group_id or user_id defines access rights", default=None)
     createdby_id: strawberry.Private[IDType] = None
 
+@strawberry.input(description="Input definition for facility update")
+class FacilityUpdateGQLModel:
+    id: IDType = strawberry.field(description="client generated primary key")
+    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    name: typing.Optional[str] = strawberry.field(description="name of the type", default=None)
+    name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default="")
+    label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default="")
+    address: typing.Optional[str] = strawberry.field(description="postal address", default="")
+    valid: typing.Optional[bool] = strawberry.field(description="if facility exists", default=True)
+    capacity: typing.Optional[int] = strawberry.field(description="facility capacity", default=0)
+    geometry: typing.Optional[str] = strawberry.field(description="SVG overlay for leaflet", default="")
+    geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default="")
+    changedby_id: strawberry.Private[IDType]
+
+@strawberry.input(description="Input definition for facility delete")
+class FacilityDeleteGQLModel:
+    id: IDType = strawberry.field(description="client generated primary key")
+    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+
 @strawberry.federation.type(
     description="""Facility mutations"""
 )
-class FacilityMutations:
+class FacilityMutation:
 
     @strawberry.field(
         description="Insert a facility",
-        permission_classes=[SimpleInsertPermission]
+        permission_classes=[
+            SimpleInsertPermission[FacilityGQLModel](roles=["administrátor"])
+        ]
     )
     async def facility_insert(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Union[FacilityGQLModel, InsertError[FacilityGQLModel]]:
         return await Insert[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
     @strawberry.field(
         description="Update a facility",
-        permission_classes=[SimpleUpdatePermission]
+        permission_classes=[
+            SimpleUpdatePermission[FacilityGQLModel](roles=["administrátor"])
+        ]
     )
-    async def facility_update(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
+    async def facility_update(self, info: strawberry.types.Info, facility: FacilityUpdateGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
         return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
     @strawberry.field(
         description="Delete a facility",
-        permission_classes=[SimpleDeletePermission]
+        permission_classes=[
+            SimpleDeletePermission[FacilityGQLModel](roles=["administrátor"])
+        ]
     )
-    async def facility_delete(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Optional[DeleteError[FacilityGQLModel]]:
+    async def facility_delete(self, info: strawberry.types.Info, facility: FacilityDeleteGQLModel) -> typing.Optional[DeleteError[FacilityGQLModel]]:
         return await Delete[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
     @strawberry.field(
         description="Move a facility",
-        permission_classes=[SimpleUpdatePermission]
+        permission_classes=[
+            SimpleUpdatePermission[FacilityGQLModel](roles=["administrátor"])
+        ]
     )
     async def facility_move(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
         return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)

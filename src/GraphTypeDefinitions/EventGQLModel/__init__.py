@@ -1,1 +1,3 @@
-from .EventGQLModel import EventGQLModel, EventQuery, EventMutations
+from .EventGQLModel import EventGQLModel, EventQuery, EventMutation
+from .EventTypeGQLModel import EventTypeGQLModel, EventTypeQuery, EventTypeMutation
+from .EventInvitationGQLModel import EventInvitationGQLModel, EventInvitationQuery, EventInvitationMutation

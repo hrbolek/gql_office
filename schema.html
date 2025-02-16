@@ -16,11 +16,73 @@
         background-color: aliceblue;
         padding-top: 20px;
         padding-bottom: 20px;   
+
+        display: block;
+        border: 1px solid #a3d9a5;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+    }
+
+    .h4-section {
+        background-color: #f2fbff; /* a light, cool background similar to aliceblue */
+        border: 1px solid #a3d9a5;
+        padding: 10px;
+        border-radius: 4px;
+        /* margin-left: 10%; aligns with your code block margin */
+        margin-top: 10px;
     }    
+
     #content {
       border: 1px solid #ccc;
       padding: 10px;
       margin-top: 20px;
+    }
+    /* Style for the copy button */
+    .copy-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        padding: 4px 8px;
+        font-size: 12px;
+        background-color: #007BFF;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: 0.85;
+        transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+
+    .copy-btn:hover {
+        opacity: 1;
+        background-color: #0056b3;
+    }
+
+    pre {
+      position: relative;
+    }
+
+    code.language-graphql {
+        display: block;
+        background-color: #e0fbe0;
+        border: 1px solid #a3d9a5;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-family: monospace;
+        margin-left: 10%;
+    }
+
+    ul + p {
+        display: block;
+        background-color: #e0fbf6;
+        border: 1px solid #a3d9a5;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-family: monospace;
+        margin-left: 10%;
     }
   </style>
 </head>
@@ -28,18 +90,94 @@
   <div id="content">Loading markdown...</div>
   
   <script>
+
+    function wrapH4Sections(md) {
+    md.core.ruler.after('block', 'wrap_h4_sections', function (state) {
+        let tokens = state.tokens;
+        let newTokens = [];
+        let sectionTokens = [];
+        let inSection = false;
+
+        for (let i = 0; i < tokens.length; i++) {
+        let token = tokens[i];
+        // When we hit an H4, start a new section
+        if (token.type === 'heading_open' && token.tag === 'h4') {
+            // if we were in a section, close the previous section container
+            if (inSection) {
+            newTokens.push(new state.Token('container_close', 'div', -1));
+            inSection = false;
+            }
+            // push the H4 tokens normally
+            newTokens.push(token);
+            // Next token is the inline content of the heading, then heading_close
+            newTokens.push(tokens[i + 1]);
+            newTokens.push(tokens[i + 2]);
+            i += 2;
+            // Now start a container for the following tokens until next heading
+            let containerOpen = new state.Token('container_open', 'div', 1);
+            containerOpen.block = true;
+            containerOpen.attrSet('class', 'h4-section');
+            newTokens.push(containerOpen);
+            inSection = true;
+        } else if (
+            inSection &&
+            token.type === 'heading_open' &&
+            // if it's a heading of level 4 or higher, close the container
+            (parseInt(token.tag.slice(1)) <= 4)
+        ) {
+            newTokens.push(new state.Token('container_close', 'div', -1));
+            inSection = false;
+            newTokens.push(token);
+        } else {
+            newTokens.push(token);
+        }
+        }
+        // close any open container at the end
+        if (inSection) {
+        newTokens.push(new state.Token('container_close', 'div', -1));
+        }
+        state.tokens = newTokens;
+    });
+    }
+
     // Initialize markdown-it with the markdown-it-anchor plugin.
     var md = window.markdownit().use(window.markdownItAnchor, {
       slugify: function(s) {
         return s.trim().toLowerCase().replace(/\s+/g, '-');
       }
-    });
+    })
+    .use(wrapH4Sections, {}); // now every content after an h4 until the next heading of level 4 or higher is wrapped in a <div class="h4-section">    
+    
+    // Function to add "Copy" buttons to all code blocks.
+    function addCopyButtons() {
+      document.querySelectorAll('pre code').forEach((codeBlock) => {
+        // Create the button element.
+        var button = document.createElement('button');
+        button.innerText = 'Copy';
+        button.classList.add('copy-btn');
+        // Make sure the parent pre element is relatively positioned.
+        codeBlock.parentElement.style.position = 'relative';
+        // Add click event to copy the text.
+        button.addEventListener('click', () => {
+          navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+            button.innerText = 'Copied!';
+            setTimeout(() => {
+              button.innerText = 'Copy';
+            }, 2000);
+          }).catch(err => {
+            console.error('Failed to copy!', err);
+          });
+        });
+        // Append the button to the pre element.
+        codeBlock.parentElement.appendChild(button);
+      });
+    }
     
     // Read the "md" query parameter to determine the Markdown URI. Defaults to "/md".
     const urlParams = new URLSearchParams(window.location.search);
     const markdownUri = urlParams.get('md') || '/md';
     
-    // Use fetch to get Markdown content from the specified URI.
+    // Fetch and render the markdown.
     fetch(markdownUri)
       .then(function(response) {
         if (!response.ok) {
@@ -48,8 +186,10 @@
         return response.text();
       })
       .then(function(markdownText) {
-        // Render the fetched Markdown to HTML and insert it into the content div.
+        // Render the fetched Markdown to HTML.
         document.getElementById('content').innerHTML = md.render(markdownText);
+        // Add copy buttons to the code blocks.
+        addCopyButtons();
       })
       .catch(function(error) {
         document.getElementById('content').innerHTML = 'Error loading markdown: ' + error;

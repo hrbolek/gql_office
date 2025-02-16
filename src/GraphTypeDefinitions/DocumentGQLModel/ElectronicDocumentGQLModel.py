@@ -228,7 +228,7 @@ class DocumentMutations:
     @strawberry.mutation(
         description="""Insert a Document""",
         permission_classes=[
-            SimpleInsertPermission
+            SimpleInsertPermission[ElectronicDocumentGQLModel](roles=["administrátor"])
         ]
     )
     async def document_insert(
@@ -239,7 +239,7 @@ class DocumentMutations:
     @strawberry.mutation(
         description="""Update a Document""",
         permission_classes=[
-            SimpleUpdatePermission
+            SimpleUpdatePermission[ElectronicDocumentGQLModel](roles=["administrátor"])
         ]
     )
     async def document_update(
@@ -250,7 +250,7 @@ class DocumentMutations:
     @strawberry.mutation(
         description="""Delete a Document""",
         permission_classes=[
-            SimpleDeletePermission
+            SimpleDeletePermission[ElectronicDocumentGQLModel](roles=["administrátor"])
         ]
     )
     async def document_delete(
