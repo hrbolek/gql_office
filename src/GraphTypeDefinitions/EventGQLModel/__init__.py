@@ -1,3 +1,10 @@
 from .EventGQLModel import EventGQLModel, EventQuery, EventMutation
 from .EventTypeGQLModel import EventTypeGQLModel, EventTypeQuery, EventTypeMutation
 from .EventInvitationGQLModel import EventInvitationGQLModel, EventInvitationQuery, EventInvitationMutation
+
+from .EventFacilityReservationGQLModel import (
+    EventFacilityReservationGQLModel, 
+    EventFacilityReservationInputFilter, 
+    EventFacilityReservationQuery,
+    EventFacilityReservationMutation
+)

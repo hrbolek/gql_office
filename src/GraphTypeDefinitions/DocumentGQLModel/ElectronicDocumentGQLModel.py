@@ -224,7 +224,7 @@ class ElectronicDocumentDeleteGQLModel:
 @strawberry.interface(
     description="""Document mutations"""
 )
-class DocumentMutations:
+class DocumentMutation:
     @strawberry.mutation(
         description="""Insert a Document""",
         permission_classes=[

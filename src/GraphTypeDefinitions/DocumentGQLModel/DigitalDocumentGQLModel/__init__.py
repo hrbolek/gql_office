@@ -1,1 +1,3 @@
-from .DigitalFormGQLModel import DigitalFormGQLModel, DigitalFormQuery
+from .DigitalFormGQLModel import DigitalFormGQLModel, DigitalFormQuery, DigitalFormMutation
+from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel, DigitalFormSectionQuery, DigitalFormSectionMutation
+from .DigitalFormSubmissionGQLModel import DigitalFormSubmissionQuery, DigitalFormSubmissionMutation

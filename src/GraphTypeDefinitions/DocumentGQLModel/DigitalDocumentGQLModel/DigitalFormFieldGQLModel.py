@@ -4,6 +4,7 @@ import datetime
 import typing
 import strawberry
 
+import strawberry.types
 from uoishelpers.gqlpermissions import (
     OnlyForAuthentized,
     SimpleInsertPermission, 
@@ -159,4 +160,72 @@ Example: "price * quantity" where "price" and "quantity" reference other fields.
         ]
     )
 
+@strawberry.type(
+    description=""
+)
+class DigitalFormFieldQuery:
+    pass
+
+@strawberry.input(description="DigitalFormField insert parameter description")
+class DigitalFormFieldInsertGQLModel:
+    type_id: IDType = strawberry.field(description="type id of the field")
+    form_section_id: IDType = strawberry.field(description="section id where the field is placed")
+    id: typing.Optional[IDType] = strawberry.field(description="client side generated id", default=None)
     
+@strawberry.input(description="DigitalFormField insert parameter description")
+class DigitalFormFieldUpdateGQLModel:
+    id: IDType = strawberry.field(description="primary key")
+    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    type_id: typing.Optional[IDType] = strawberry.field(description="type id of the field", default=None)
+    
+@strawberry.input(description="DigitalFormField insert parameter description")
+class DigitalFormFieldDeleteGQLModel:
+    id: IDType = strawberry.field(description="primary key")
+    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+
+
+async def digital_form_field_insert_internal(self, info: strawberry.types.Info, form_field: DigitalFormFieldInsertGQLModel):
+    return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)
+
+@strawberry.type(
+    description=""
+)
+class DigitalFormFieldMutation:
+    @strawberry.mutation(
+        description="""Insert a DigitalFormField""",
+        permission_classes=[
+            SimpleInsertPermission[DigitalFormFieldGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def digital_form_field_insert(
+        self,
+        info: strawberry.types.Info,
+        form_field: DigitalFormFieldInsertGQLModel
+    ) -> typing.Union[DigitalFormFieldGQLModel, InsertError[DigitalFormFieldGQLModel]]:
+        return await digital_form_field_insert_internal(self, info=info, form_field=form_field)
+    
+    @strawberry.mutation(
+        description="""Update a DigitalFormField""",
+        permission_classes=[
+            SimpleUpdatePermission[DigitalFormFieldGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def digital_form_field_update(
+        self,
+        info: strawberry.types.Info,
+        form_field: DigitalFormFieldUpdateGQLModel
+    ) -> typing.Union[DigitalFormFieldGQLModel, UpdateError[DigitalFormFieldGQLModel]]:
+        return await Update[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)
+    
+    @strawberry.mutation(
+        description="""Delete a DigitalFormField""",
+        permission_classes=[
+            SimpleDeletePermission[DigitalFormFieldGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def digital_form_field_delete(
+        self,
+        info: strawberry.types.Info,
+        form_field: DigitalFormFieldDeleteGQLModel
+    ) -> typing.Optional[DeleteError[DigitalFormFieldGQLModel]]:
+        return await Delete[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)

@@ -11,6 +11,13 @@ from .FacilityGQLModel import (
     FacilityTypeMutation
 )
 
+from .DocumentGQLModel import (
+    DocumentMutation,
+    DigitalFormMutation,
+    DigitalFormSectionMutation,
+    DigitalFormSubmissionMutation
+)
+
 @strawberry.federation.type(extend=True)
 class Mutation(
     EventMutation,
@@ -18,7 +25,12 @@ class Mutation(
     EventInvitationMutation,
     
     FacilityMutation,
-    FacilityTypeMutation
+    FacilityTypeMutation,
+
+    DocumentMutation,
+    DigitalFormMutation,
+    DigitalFormSectionMutation,
+    DigitalFormSubmissionMutation
     ):
 
     # from .FacilityGQLModel import (

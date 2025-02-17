@@ -31,6 +31,10 @@ from ..BaseGQLModel import BaseGQLModel, IDType
 EventTypeGQLModel = typing.Annotated["EventTypeGQLModel", strawberry.lazy(".EventTypeGQLModel")]
 EventInvitationGQLModel = typing.Annotated["EventInvitationGQLModel", strawberry.lazy(".EventInvitationGQLModel")]
 EventInvitationInputFilter = typing.Annotated["EventInvitationInputFilter", strawberry.lazy(".EventInvitationGQLModel")]
+FacilityGQLModel = typing.Annotated["FacilityGQLModel", strawberry.lazy("..FacilityGQLModel")]
+
+EventFacilityReservationGQLModel = typing.Annotated["EventFacilityReservationGQLModel", strawberry.lazy(".EventFacilityReservationGQLModel")]
+EventFacilityReservationInputFilter = typing.Annotated["EventFacilityReservationInputFilter", strawberry.lazy(".EventFacilityReservationGQLModel")]
 
 @createInputs
 @dataclasses.dataclass
@@ -89,6 +93,38 @@ class EventGQLModel(BaseGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ]
+    )
+
+    place: typing.Optional[str] = strawberry.field(
+        default=None,
+        description="where the event will happen",
+        permission_classes=[
+            OnlyForAuthentized
+        ]
+    )
+
+    facility_id: typing.Optional[IDType] = strawberry.field(
+        default=None,
+        description="place where the event will happen",
+        permission_classes=[
+            OnlyForAuthentized
+        ]
+    )
+
+    facility: typing.Optional[FacilityGQLModel] = strawberry.field(
+        description="place where the event will happen",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver[FacilityGQLModel](fkey_field_name="facility_id")
+    )
+
+    reservations: typing.List[EventFacilityReservationGQLModel] = strawberry.field(
+        description="reservations for this event",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=VectorResolver[EventFacilityReservationGQLModel](fkey_field_name="facility_id", whereType=EventFacilityReservationInputFilter)
     )
 
     parent_id: typing.Optional[IDType] = strawberry.field(

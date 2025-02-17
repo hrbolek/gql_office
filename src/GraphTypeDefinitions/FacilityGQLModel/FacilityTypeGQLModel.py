@@ -169,9 +169,9 @@ class FacilityTypeMutation:
     async def facility_type_insert(
         self,
         info: strawberry.types.Info,
-        facility: FacilityTypeInsertGQLModel
+        facility_type: FacilityTypeInsertGQLModel
     ) -> typing.Union[FacilityTypeGQLModel, InsertError[FacilityTypeGQLModel]]:
-        return await Insert[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility)
+        return await Insert[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility_type)
     
     @strawberry.mutation(
         description="""Update a FacilityType""",
@@ -182,9 +182,9 @@ class FacilityTypeMutation:
     async def facility_type_update(
         self,
         info: strawberry.types.Info,
-        facility: FacilityTypeUpdateGQLModel
+        facility_type: FacilityTypeUpdateGQLModel
     ) -> typing.Union[FacilityTypeGQLModel, UpdateError[FacilityTypeGQLModel]]:
-        return await Update[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility)
+        return await Update[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility_type)
     
     @strawberry.mutation(
         description="""Delete a FacilityType""",
@@ -195,6 +195,6 @@ class FacilityTypeMutation:
     async def facility_type_delete(
         self,
         info: strawberry.types.Info,
-        facility: FacilityTypeDeleteGQLModel
+        facility_type: FacilityTypeDeleteGQLModel
     ) -> typing.Optional[DeleteError[FacilityTypeGQLModel]]:
-        return await Delete[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility)
+        return await Delete[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility_type)

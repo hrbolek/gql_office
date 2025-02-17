@@ -32,6 +32,9 @@ from ..TreeGQLModel import create_tree_parents_resolver, create_tree_parent_upda
 
 FacilityTypeGQLModel = typing.Annotated["FacilityTypeGQLModel", strawberry.lazy(".FacilityTypeGQLModel")]
 GroupGQLModel = typing.Annotated["GroupGQLModel", strawberry.lazy("..GroupGQLModel")]
+EventFacilityReservationGQLModel = typing.Annotated["EventFacilityReservationGQLModel", strawberry.lazy("..EventGQLModel.EventFacilityReservationGQLModel")]
+EventFacilityReservationInputFilter = typing.Annotated["EventFacilityReservationInputFilter", strawberry.lazy("..EventGQLModel.EventFacilityReservationGQLModel")]
+
 
 # region FacilityGQLModel
 @strawberry.federation.type(
@@ -124,6 +127,14 @@ class FacilityGQLModel(BaseGQLModel):
         permission_classes=[
             OnlyForAuthentized
             ]
+    )
+
+    reservations: typing.List[EventFacilityReservationGQLModel] = strawberry.field(
+        description="reservations for this event",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=VectorResolver[EventFacilityReservationGQLModel](fkey_field_name="facility_id", whereType=EventFacilityReservationInputFilter)
     )
 
     group_id: typing.Optional[IDType] = strawberry.field(

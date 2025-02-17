@@ -59,3 +59,119 @@ class DigitalFormSubmissionGQLModel(BaseGQLModel, DocumentGQLModel):
         ],
         resolver=VectorResolver["DigitalFieldSubmissionGQLModel"](fkey_field_name="submission_id", whereType=DigitalFieldSubmissionInputFilter)
     )
+
+
+@strawberry.interface(
+    description=""""""
+)
+class DigitalFormSubmissionQuery:
+    digital_form_submission_by_id: typing.Optional[DigitalFormSubmissionGQLModel] = strawberry.field(
+        description="""Get a DigitalFormSubmission by id""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=DigitalFormSubmissionGQLModel.load_with_loader
+    )
+
+    digital_form_submission_page: typing.List[DigitalFormSubmissionGQLModel] = strawberry.field(
+        description="""Get a page of DigitalFormSubmissions""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=PageResolver[DigitalFormSubmissionInputFilter](whereType=DigitalFormSubmissionInputFilter)
+    )
+
+    
+@strawberry.input(
+    description="""DigitalFormSubmission insert mutation"""
+)
+class DigitalFormSubmissionInsertGQLModel:
+    name: typing.Optional[str] = strawberry.field(
+        description="""DigitalFormSubmission name""",
+        default=None
+    )
+    name_en: typing.Optional[str] = strawberry.field(
+        description="""DigitalFormSubmission eng name""",
+        default=None
+    )
+    parent_id: IDType = strawberry.field(
+        description="""DigitalFormSubmission master id"""
+    )
+    id: IDType = strawberry.field(
+        description="""DigitalFormSubmission id client generated"""
+    )
+
+@strawberry.input(
+    description="""DigitalFormSubmission update mutation"""
+)
+class DigitalFormSubmissionUpdateGQLModel:
+    id: IDType = strawberry.field(
+        description="""DigitalFormSubmission id"""
+    )
+    lastchange: datetime.datetime = strawberry.field(
+        description="""DigitalFormSubmission lastchange"""
+    )
+
+    name: typing.Optional[str] = strawberry.field(
+        description="""DigitalFormSubmission name""",
+        default=None
+    )
+    name_en: typing.Optional[str] = strawberry.field(
+        description="""DigitalFormSubmission eng name""",
+        default=None
+    )
+
+@strawberry.input(
+    description="""DigitalFormSubmission delete mutation"""
+)
+class DigitalFormSubmissionDeleteGQLModel:
+    id: IDType = strawberry.field(
+        description="""DigitalFormSubmission id"""
+    )
+    lastchange: datetime.datetime = strawberry.field(
+        description="""DigitalFormSubmission lastchange"""
+    )
+
+
+@strawberry.type(
+    description="""DigitalFormSubmission mutation"""
+)
+class DigitalFormSubmissionMutation:
+    @strawberry.mutation(
+        description="""Insert a DigitalFormSubmission""",
+        permission_classes=[
+            SimpleInsertPermission[DigitalFormSubmissionGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def digital_form_submission_insert(
+        self,
+        info: strawberry.types.Info,
+        digital_form_submission: DigitalFormSubmissionInsertGQLModel
+    ) -> typing.Union[DigitalFormSubmissionGQLModel, InsertError[DigitalFormSubmissionGQLModel]]:
+        return await Insert[DigitalFormSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)
+    
+    @strawberry.mutation(
+        description="""Update a DigitalFormSubmission""",
+        permission_classes=[
+            SimpleUpdatePermission[DigitalFormSubmissionGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def digital_form_submission_update(
+        self,
+        info: strawberry.types.Info,
+        digital_form_submission: DigitalFormSubmissionUpdateGQLModel
+    ) -> typing.Union[DigitalFormSubmissionGQLModel, UpdateError[DigitalFormSubmissionGQLModel]]:
+        return await Update[DigitalFormSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)
+    
+    @strawberry.mutation(
+        description="""Delete a DigitalFormSubmission""",
+        permission_classes=[
+            SimpleDeletePermission[DigitalFormSubmissionGQLModel](roles=["administrátor"])
+        ]
+    )
+    async def digital_form_submission_delete(
+        self,
+        info: strawberry.types.Info,
+        digital_form_submission: DigitalFormSubmissionDeleteGQLModel
+    ) -> typing.Optional[DeleteError[DigitalFormSubmissionGQLModel]]:
+        return await Delete[DigitalFormSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)    
