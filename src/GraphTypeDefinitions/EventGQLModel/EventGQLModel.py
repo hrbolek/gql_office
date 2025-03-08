@@ -4,6 +4,7 @@ import datetime
 import typing
 import strawberry
 
+import strawberry.types
 from uoishelpers.gqlpermissions import (
     OnlyForAuthentized,
     SimpleInsertPermission, 
@@ -27,6 +28,7 @@ from uoishelpers.resolvers import (
 )
 
 from ..BaseGQLModel import BaseGQLModel, IDType
+from .TimeUnit import TimeUnit
 
 EventTypeGQLModel = typing.Annotated["EventTypeGQLModel", strawberry.lazy(".EventTypeGQLModel")]
 EventInvitationGQLModel = typing.Annotated["EventInvitationGQLModel", strawberry.lazy(".EventInvitationGQLModel")]
@@ -80,7 +82,7 @@ class EventGQLModel(BaseGQLModel):
         ]
     )
 
-    start_date: typing.Optional[datetime.datetime] = strawberry.field(
+    startdate: typing.Optional[datetime.datetime] = strawberry.field(
         default=None,
         description="""Event start date""",
         permission_classes=[
@@ -88,13 +90,47 @@ class EventGQLModel(BaseGQLModel):
         ]
     )
 
-    end_date: typing.Optional[datetime.datetime] = strawberry.field(
+    enddate: typing.Optional[datetime.datetime] = strawberry.field(
         default=None,
         description="""Event end date""",
         permission_classes=[
             OnlyForAuthentized
         ]
     )
+
+    # duration: strawberry.Private[object] = None
+    duration: typing.Optional[datetime.timedelta] = strawberry.field(
+        name="duration_raw",
+        default=None,
+        description="""len""",
+        permission_classes=[
+            OnlyForAuthentized
+        ]
+    )
+
+    @strawberry.field(
+        name="duration",
+        description="""Event duration, implicitly in minutes""",
+        permission_classes=[
+            # OnlyForAuthentized,
+            # OnlyForAdmins
+        ],
+    )
+    def _duration(self, unit: TimeUnit=TimeUnit.MINUTES) -> typing.Optional[float]:
+        duration = self.duration or (self.enddate - self.startdate)
+        result = duration.total_seconds()
+        if unit == TimeUnit.SECONDS:
+            return result
+        if unit == TimeUnit.MINUTES:
+            return result / 60
+        if unit == TimeUnit.HOURS:
+            return result / 60 / 60
+        if unit == TimeUnit.DAYS:
+            return result / 60 / 60 / 24
+        if unit == TimeUnit.WEEKS:
+            return result / 60 / 60 / 24 / 7
+        # raise Exception("Unknown unit for duration")
+
 
     place: typing.Optional[str] = strawberry.field(
         default=None,
@@ -128,7 +164,7 @@ class EventGQLModel(BaseGQLModel):
         resolver=VectorResolver[EventFacilityReservationGQLModel](fkey_field_name="facility_id", whereType=EventFacilityReservationInputFilter)
     )
 
-    parent_id: typing.Optional[IDType] = strawberry.field(
+    masterevent_id: typing.Optional[IDType] = strawberry.field(
         default=None,
         description="""Event parent id""",
         permission_classes=[
@@ -144,7 +180,7 @@ class EventGQLModel(BaseGQLModel):
         metadata={
             # "alchemy": lambda selectStatement, leftModel, rightModel: selectStatement.join(rightModel)
         },
-        resolver=ScalarResolver["EventGQLModel"](fkey_field_name="parent_id")
+        resolver=ScalarResolver["EventGQLModel"](fkey_field_name="masterevent_id")
     )
 
     children: typing.List["EventGQLModel"] = strawberry.field(
@@ -152,7 +188,7 @@ class EventGQLModel(BaseGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=VectorResolver["EventGQLModel"](fkey_field_name="parent_id", whereType=EventInputFilter)
+        resolver=VectorResolver["EventGQLModel"](fkey_field_name="masterevent_id", whereType=EventInputFilter)
     )
 
     type_id: typing.Optional[IDType] = strawberry.field(

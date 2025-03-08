@@ -23,7 +23,7 @@ from src.DBDefinitions import (
 )
 
 get_demodata = lambda :readJsonFile(jsonFileName="./systemdata.json")
-async def initDB(asyncSessionMaker):
+async def initDB(asyncSessionMaker, filename="./systemdata.json"):
 
     isDemo = os.environ.get("DEMODATA", None) in ["True", "true"]
     if isDemo:
@@ -43,7 +43,6 @@ async def initDB(asyncSessionMaker):
             DigitalSubmissionSectionModel,
             DigitalSubmissionFieldModel,
 
-            DocumentModel,
             ElectronicDocumentModel,
 
             FacilityModel,
@@ -61,7 +60,7 @@ async def initDB(asyncSessionMaker):
 
         ]
 
-    jsonData = get_demodata()
+    jsonData = readJsonFile(filename)
     await ImportModels(asyncSessionMaker, dbModels, jsonData)
     
     print("Data initialized", flush=True)

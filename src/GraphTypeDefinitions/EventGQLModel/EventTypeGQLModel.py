@@ -76,6 +76,7 @@ class EventTypeGQLModel(BaseGQLModel):
     )
 
     parent_id: typing.Optional[IDType] = strawberry.field(
+        default=None,
         description="""Event Type parent id""",
         permission_classes=[
             OnlyForAuthentized

@@ -1,3 +1,4 @@
+import datetime
 import strawberry
 
 import strawberry.extensions
@@ -21,6 +22,21 @@ from .StateGQLModel import StateGQLModel
 from .DocumentGQLModel import DocumentInterfaceGQLModel
 
 
+###########################################################################################################################
+# 
+# Custom scalar
+# https://strawberry.rocks/docs/types/scalars#custom-scalars
+# 
+###########################################################################################################################
+
+timedelta = strawberry.scalar(
+    # NewType("TimeDelta", float),
+    datetime.timedelta,
+    name="timedelta",
+    serialize=lambda v: v.total_seconds() / 60,
+    parse_value=lambda v: datetime.timedelta(minutes=v),
+)
+
 
 
 from .query import Query
@@ -29,6 +45,8 @@ schema = strawberry.federation.Schema(
     query=Query, 
     mutation=Mutation, 
     types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentInterfaceGQLModel, StateGQLModel), 
+    scalar_overrides={datetime.timedelta: timedelta._scalar_definition},
+
     extensions=[]
 )
 

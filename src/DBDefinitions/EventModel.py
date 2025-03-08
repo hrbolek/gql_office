@@ -28,7 +28,7 @@ class EventModel(BaseModel):
     enddate: Mapped[datetime.datetime] = mapped_column(default=None, nullable=True)
     
     place: Mapped[str] = mapped_column(default=None, nullable=True)
-    place_id: Mapped[IDType] = UUIDFKey(nullable=True)
+    facility_id: Mapped[IDType] = UUIDFKey(nullable=True)
 
     @hybrid_property
     def duration(self):

@@ -11,10 +11,15 @@ fragment Event on EventGQLModel {
   name
   startdate
   enddate
-  duration(unit: MINUTES)
+  mins: duration(unit: MINUTES)
+  secs: duration(unit: SECONDS)
+  hours: duration(unit: HOURS)
+  days: duration(unit: DAYS)
+  weeks: duration(unit: WEEKS)
   description
-  placeId
-  eventType { id name }
-  masterEvent { id name }
-  subEvents { id name }
+  facilityId
+  place
+  type { id name }
+  parent { id name }
+  children { id name }
 }

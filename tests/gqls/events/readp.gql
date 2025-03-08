@@ -16,9 +16,9 @@ fragment Event on EventGQLModel {
   days: duration(unit: DAYS)
   weeks: duration(unit: WEEKS)
   description
-  placeId
+  facilityId
   place
-  eventType { id name }
-  masterEvent { id name }
-  subEvents { id name }
+  type { id name }
+  parent { id name }
+  children { id name }
 }
