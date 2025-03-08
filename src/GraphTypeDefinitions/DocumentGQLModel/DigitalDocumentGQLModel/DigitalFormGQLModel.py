@@ -28,12 +28,12 @@ from uoishelpers.resolvers import (
 )
 
 from ...BaseGQLModel import BaseGQLModel, IDType
-from ..DocumentGQLModel import DocumentGQLModel
+from ..DocumentInterfaceGQLModel import DocumentInterfaceGQLModel
 
 DigitalFormSectionGQLModel = typing.Annotated["DigitalFormSectionGQLModel", strawberry.lazy(".DigitalFormSectionGQLModel")]
 DigitalFormSectionInputFilter = typing.Annotated["DigitalFormSectionInputFilter", strawberry.lazy(".DigitalFormSectionGQLModel")]
-DigitalFormSubmissionGQLModel = typing.Annotated["DigitalFormSubmissionGQLModel", strawberry.lazy(".DigitalFormSubmissionGQLModel")]
-DigitalFormSubmissionInputFilter = typing.Annotated["DigitalFormSubmissionInputFilter", strawberry.lazy(".DigitalFormSubmissionGQLModel")]
+DigitalSubmissionGQLModel = typing.Annotated["DigitalSubmissionGQLModel", strawberry.lazy(".DigitalSubmissionGQLModel")]
+DigitalSubmissionInputFilter = typing.Annotated["DigitalSubmissionInputFilter", strawberry.lazy(".DigitalSubmissionGQLModel")]
 
 @createInputs
 @dataclasses.dataclass
@@ -46,10 +46,10 @@ class DigitalFormInputFilter:
 
 
 @strawberry.federation.type(
-    description="""Represents a digital form used to capture user input.
+    keys=["id"], description="""Represents a digital form used to capture user input.
 Defines the overall structure of the form and stores its submissions."""
 )
-class DigitalFormGQLModel(BaseGQLModel, DocumentGQLModel):
+class DigitalFormGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
     @classmethod
     def getLoader(cls, info: strawberry.types.Info):
         return getLoadersFromInfo(info).DigitalFormModel
@@ -63,12 +63,12 @@ class DigitalFormGQLModel(BaseGQLModel, DocumentGQLModel):
         resolver=VectorResolver["DigitalFormSectionGQLModel"](fkey_field_name="document_id", whereType=DigitalFormSectionInputFilter)
     )
 
-    submissions: typing.List["DigitalFormSubmissionGQLModel"] = strawberry.field(
+    submissions: typing.List["DigitalSubmissionGQLModel"] = strawberry.field(
         description="""Digital Document submissions""",
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=VectorResolver["DigitalFormSubmissionGQLModel"](fkey_field_name="document_id", whereType=DigitalFormSubmissionInputFilter)
+        resolver=VectorResolver["DigitalSubmissionGQLModel"](fkey_field_name="document_id", whereType=DigitalSubmissionInputFilter)
     )
 
 @strawberry.type(

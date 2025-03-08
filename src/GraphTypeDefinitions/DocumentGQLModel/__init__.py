@@ -1,13 +1,14 @@
 import strawberry
 
-from .ElectronicDocumentGQLModel import ElectronicDocumentGQLModel, DocumentQuery, DocumentMutation
+from .ElectronicDocumentGQLModel import ElectronicDocumentGQLModel, ElectronicDocumentQuery, DocumentMutation
 from .DigitalDocumentGQLModel import (
     DigitalFormGQLModel, DigitalFormQuery, DigitalFormMutation,
     DigitalFormSectionGQLModel, DigitalFormSectionQuery, DigitalFormSectionMutation,
-    DigitalFormSubmissionQuery, DigitalFormSubmissionMutation
+    DigitalSubmissionQuery, DigitalSubmissionMutation
 )
+from .DocumentGQLModel import DocumentQuery
 
 from .DocumentTypeGQLModel import DocumentTypeGQLModel
 
 
-from .DocumentGQLModel import DocumentGQLModel
+from .DocumentInterfaceGQLModel import DocumentInterfaceGQLModel

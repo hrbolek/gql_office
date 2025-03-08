@@ -1,0 +1,28 @@
+mutation roleCategoryDelete($id: UUID!, $lastchange: DateTime!) {
+  result: roleCategoryDelete(roleCategory: {id: $id, lastchange: $lastchange}) {
+    ...Error
+  }
+}
+
+
+fragment Error on RoleCategoryGQLModelDeleteError {
+  __typename
+  failed
+  input
+  msg
+  Entity {
+    ...RoleCategory
+  }
+}
+
+fragment RoleCategory on RoleCategoryGQLModel {
+	__typename
+  id
+  lastchange
+  name
+  nameEn
+  
+  created
+  createdby { id email }
+  changedby { id email }
+}

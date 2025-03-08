@@ -1,0 +1,2717 @@
+"""Entity representing an interface"""
+interface BaseGQLModel @key(fields: "id") {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+}
+
+"""Integer filter methods, only one constrain allowed"""
+input BoolFilter {
+  """operation for select.filter() method"""
+  _eq: Boolean = null
+}
+
+"""Date (isoformat)"""
+scalar Date
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+"""Datetime filter methods, only one constrain allowed"""
+input DatetimeFilter {
+  """operation for select.filter() method"""
+  _eq: DateTime = null
+
+  """operation for select.filter() method"""
+  _le: DateTime = null
+
+  """operation for select.filter() method"""
+  _lt: DateTime = null
+
+  """operation for select.filter() method"""
+  _ge: DateTime = null
+
+  """operation for select.filter() method"""
+  _gt: DateTime = null
+}
+
+"""DigitalForm delete mutation"""
+input DigitalFormDeleteGQLModel {
+  """DigitalForm id"""
+  id: UUID!
+
+  """DigitalForm lastchange"""
+  lastchange: DateTime!
+}
+
+"""
+Represents a field in a digital form.
+Defines properties of an individual input, including support for computed values.
+"""
+type DigitalFormFieldGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """name for reference, must be unique and must start with a lower letter"""
+  name: String
+
+  """Digital Form Field label for display"""
+  label: String
+
+  """Digital Form Field label for display in english"""
+  labelEn: String
+
+  """Digital Form Field placeholder"""
+  description: String
+
+  """Digital form section where this field belongs"""
+  formSectionId: UUID
+
+  """Digital form section where this field belongs"""
+  formSection: DigitalFormSectionGQLModel
+
+  """Digital form where this field belongs"""
+  formId: UUID
+
+  """Digital form where this field belongs"""
+  form: DigitalFormGQLModel
+
+  """Indicates whether this field is mandatory."""
+  required: Boolean
+
+  """Order index to determine the field's position within its section."""
+  order: Int
+
+  """
+  Indicates whether the field's value is computed automatically from other fields.
+  Probably alias for `formula is not None`
+  """
+  computed: Int
+
+  """
+  A mathematical formula (as a string) for computing the field's value.
+  Example: "price * quantity" where "price" and "quantity" reference other fields.
+  """
+  formula: String
+
+  """
+  Specifies the type of input (e.g., "text", "number", "date", "boolean", "select").
+  """
+  typeId: UUID
+
+  """Specifies the backend payload constant(s)."""
+  backendFormula: String
+
+  """Specifies the operation on incomming data."""
+  flattenFormula: String
+}
+
+"""Operators definition on DigitalFormFieldInputFilter"""
+input DigitalFormFieldInputFilter {
+  """Filter method"""
+  _or: [DigitalFormFieldInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [DigitalFormFieldInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""And operator definition on DigitalFormFieldInputFilter"""
+input DigitalFormFieldInputFilterAnd {
+  """Filter method"""
+  _or: [DigitalFormFieldInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Or operator definition on DigitalFormFieldInputFilter"""
+input DigitalFormFieldInputFilterOr {
+  """Filter method"""
+  _and: [DigitalFormFieldInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""DigitalFormField insert parameter description"""
+input DigitalFormFieldInsertGQLModel {
+  """type id of the field"""
+  typeId: UUID!
+
+  """section id where the field is placed"""
+  formSectionId: UUID!
+
+  """client side generated id"""
+  id: UUID = null
+}
+
+"""
+Represents a digital form used to capture user input.
+Defines the overall structure of the form and stores its submissions.
+"""
+type DigitalFormGQLModel implements BaseGQLModel & DocumentGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Document name"""
+  name: String
+
+  """Document eng name"""
+  nameEn: String
+
+  """Document description"""
+  description: String
+
+  """State id"""
+  stateId: UUID
+
+  """State"""
+  state: StateGQLModel
+
+  """Type id"""
+  typeId: UUID
+
+  """Type"""
+  type: DocumentTypeGQLModel
+
+  """Digital Document sections"""
+  sections(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalFormSectionInputFilter = null): [DigitalFormSectionGQLModel!]!
+
+  """Digital Document submissions"""
+  submissions(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalSubmissionInputFilter = null): [DigitalSubmissionGQLModel!]!
+}
+
+"""Error object returned as an result of Delete operation"""
+type DigitalFormGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: DigitalFormGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union DigitalFormGQLModelDigitalFormGQLModelUpdateError = DigitalFormGQLModel | DigitalFormGQLModelUpdateError
+
+union DigitalFormGQLModelInsertError = DigitalFormGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type DigitalFormGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: DigitalFormGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on DigitalFormInputFilter"""
+input DigitalFormInputFilter {
+  """Filter method"""
+  _or: [DigitalFormInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [DigitalFormInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""And operator definition on DigitalFormInputFilter"""
+input DigitalFormInputFilterAnd {
+  """Filter method"""
+  _or: [DigitalFormInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Or operator definition on DigitalFormInputFilter"""
+input DigitalFormInputFilterOr {
+  """Filter method"""
+  _and: [DigitalFormInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""DigitalForm insert mutation input type, can contain whole structure"""
+input DigitalFormInsertGQLModel {
+  """DigitalForm name"""
+  name: String = null
+
+  """DigitalForm eng name"""
+  nameEn: String = null
+
+  """DigitalForm id client generated"""
+  id: UUID!
+
+  """sections with fields and sections"""
+  sections: [DigitalFormSectionInsertGQLModel!] = []
+}
+
+"""DigitalFormSection delete mutation"""
+input DigitalFormSectionDeleteGQLModel {
+  """DigitalFormSection id"""
+  id: UUID!
+
+  """DigitalFormSection lastchange"""
+  lastchange: DateTime!
+}
+
+"""
+Represents a section (group) of a digital form.
+Supports nested sections and repetition.
+"""
+type DigitalFormSectionGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Label for display"""
+  label: String
+
+  """
+  name for reference, must be unique and must start with a capitalized letter
+  """
+  name: String
+
+  """Label for display in english"""
+  labelEn: String
+
+  """Explanation of the form section"""
+  description: String
+
+  """Digital document form section parent id which this section belongs to"""
+  parentId: UUID
+
+  """Digital document form section children"""
+  sections(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalFormSectionInputFilter = null): [DigitalFormSectionGQLModel!]!
+
+  """Digital document form section fields"""
+  fields(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalFormFieldInputFilter = null): [DigitalFormFieldGQLModel!]!
+
+  """Order of the section"""
+  order: Int!
+
+  """Minimum number of repetitions"""
+  repatableMin: Int!
+
+  """Maximum number of repetitions"""
+  repatableMax: Int!
+
+  """Is section repeatable"""
+  repeatable: Boolean!
+
+  """"form section or document """
+  parent: DigitalFormSectionGQLModelDigitalFormGQLModel!
+}
+
+"""Error object returned as an result of Delete operation"""
+type DigitalFormSectionGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: DigitalFormSectionGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union DigitalFormSectionGQLModelDigitalFormGQLModel = DigitalFormSectionGQLModel | DigitalFormGQLModel
+
+union DigitalFormSectionGQLModelDigitalFormSectionGQLModelUpdateError = DigitalFormSectionGQLModel | DigitalFormSectionGQLModelUpdateError
+
+union DigitalFormSectionGQLModelInsertError = DigitalFormSectionGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type DigitalFormSectionGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: DigitalFormSectionGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on DigitalFormSectionInputFilter"""
+input DigitalFormSectionInputFilter {
+  """Filter method"""
+  _or: [DigitalFormSectionInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [DigitalFormSectionInputFilterAnd!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  label: StrFilter = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  label_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""And operator definition on DigitalFormSectionInputFilter"""
+input DigitalFormSectionInputFilterAnd {
+  """Filter method"""
+  _or: [DigitalFormSectionInputFilterOr!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  label: StrFilter = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  label_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Or operator definition on DigitalFormSectionInputFilter"""
+input DigitalFormSectionInputFilterOr {
+  """Filter method"""
+  _and: [DigitalFormSectionInputFilterAnd!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  label: StrFilter = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  label_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""DigitalFormSection insert mutation"""
+input DigitalFormSectionInsertGQLModel {
+  """DigitalFormSection name"""
+  name: String = null
+
+  """DigitalFormSection eng name"""
+  nameEn: String = null
+
+  """DigitalFormSection master id"""
+  parentId: UUID!
+
+  """DigitalFormSection id client generated"""
+  id: UUID!
+
+  """fields inside this section"""
+  fields: [DigitalFormFieldInsertGQLModel!] = []
+
+  """sections inside this section"""
+  sections: [DigitalFormSectionInsertGQLModel!] = []
+}
+
+""""""
+interface DigitalFormSectionQuery {
+  """Get a DigitalFormSection by id"""
+  digitalFormSectionById(id: UUID!): DigitalFormSectionGQLModel
+
+  """Get a page of DigitalFormSections"""
+  digitalFormSectionPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalFormSectionInputFilter = null): [DigitalFormSectionGQLModel!]!
+}
+
+"""DigitalFormSection update mutation"""
+input DigitalFormSectionUpdateGQLModel {
+  """DigitalFormSection id"""
+  id: UUID!
+
+  """DigitalFormSection lastchange"""
+  lastchange: DateTime!
+
+  """DigitalFormSection name"""
+  name: String = null
+
+  """DigitalFormSection eng name"""
+  nameEn: String = null
+}
+
+"""DigitalForm update mutation"""
+input DigitalFormUpdateGQLModel {
+  """DigitalForm id"""
+  id: UUID!
+
+  """DigitalForm lastchange"""
+  lastchange: DateTime!
+
+  """DigitalForm name"""
+  name: String = null
+
+  """DigitalForm eng name"""
+  nameEn: String = null
+}
+
+"""DigitalSubmission delete mutation"""
+input DigitalSubmissionDeleteGQLModel {
+  """DigitalSubmission id"""
+  id: UUID!
+
+  """DigitalSubmission lastchange"""
+  lastchange: DateTime!
+}
+
+"""
+Represents a response for a specific form field within a submission.
+Links the user's provided value with the corresponding form field.
+"""
+type DigitalSubmissionFieldGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Digital Field Response value typed by a user"""
+  value: String
+
+  """Digital Field id"""
+  fieldId: UUID
+
+  """Digital Form Submission id"""
+  submissionId: UUID
+
+  """Digital Field"""
+  field: DigitalFormFieldGQLModel
+
+  """Digital Form Submission"""
+  submission: DigitalSubmissionGQLModel
+
+  """State id"""
+  stateId: UUID
+
+  """State"""
+  state: StateGQLModel
+}
+
+"""Operators definition on DigitalSubmissionFieldInputFilter"""
+input DigitalSubmissionFieldInputFilter {
+  """Filter method"""
+  _or: [DigitalSubmissionFieldInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [DigitalSubmissionFieldInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+
+  """Filter method"""
+  field_id: UuidFilter = null
+
+  """Filter method"""
+  submission_id: UuidFilter = null
+}
+
+"""And operator definition on DigitalSubmissionFieldInputFilter"""
+input DigitalSubmissionFieldInputFilterAnd {
+  """Filter method"""
+  _or: [DigitalSubmissionFieldInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+
+  """Filter method"""
+  field_id: UuidFilter = null
+
+  """Filter method"""
+  submission_id: UuidFilter = null
+}
+
+"""Or operator definition on DigitalSubmissionFieldInputFilter"""
+input DigitalSubmissionFieldInputFilterOr {
+  """Filter method"""
+  _and: [DigitalSubmissionFieldInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+
+  """Filter method"""
+  field_id: UuidFilter = null
+
+  """Filter method"""
+  submission_id: UuidFilter = null
+}
+
+"""
+Represents a submission of a digital form filled out by a user.
+Aggregates responses for all the fields defined in the form.
+"""
+type DigitalSubmissionGQLModel implements BaseGQLModel & DocumentGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Document name"""
+  name: String
+
+  """Document eng name"""
+  nameEn: String
+
+  """Document description"""
+  description: String
+
+  """State id"""
+  stateId: UUID
+
+  """State"""
+  state: StateGQLModel
+
+  """Type id"""
+  typeId: UUID
+
+  """Type"""
+  type: DocumentTypeGQLModel
+
+  """Digital Form Submission fields assigned by an administrator"""
+  submittedFields(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalSubmissionFieldInputFilter = null): [DigitalSubmissionFieldGQLModel!]!
+}
+
+"""Error object returned as an result of Delete operation"""
+type DigitalSubmissionGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: DigitalSubmissionGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union DigitalSubmissionGQLModelDigitalSubmissionGQLModelUpdateError = DigitalSubmissionGQLModel | DigitalSubmissionGQLModelUpdateError
+
+union DigitalSubmissionGQLModelInsertError = DigitalSubmissionGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type DigitalSubmissionGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: DigitalSubmissionGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on DigitalSubmissionInputFilter"""
+input DigitalSubmissionInputFilter {
+  """Filter method"""
+  _or: [DigitalSubmissionInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [DigitalSubmissionInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""And operator definition on DigitalSubmissionInputFilter"""
+input DigitalSubmissionInputFilterAnd {
+  """Filter method"""
+  _or: [DigitalSubmissionInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Or operator definition on DigitalSubmissionInputFilter"""
+input DigitalSubmissionInputFilterOr {
+  """Filter method"""
+  _and: [DigitalSubmissionInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""DigitalSubmission insert mutation"""
+input DigitalSubmissionInsertGQLModel {
+  """DigitalSubmission name"""
+  name: String = null
+
+  """DigitalSubmission eng name"""
+  nameEn: String = null
+
+  """DigitalSubmission master id"""
+  parentId: UUID!
+
+  """DigitalSubmission id client generated"""
+  id: UUID!
+}
+
+""""""
+interface DigitalSubmissionQuery {
+  """Get a DigitalSubmission by id"""
+  digitalFormSubmissionById(id: UUID!): DigitalSubmissionGQLModel
+
+  """Get a page of DigitalSubmissions"""
+  digitalFormSubmissionPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalSubmissionInputFilter = null): [DigitalSubmissionGQLModel!]!
+}
+
+"""DigitalSubmission update mutation"""
+input DigitalSubmissionUpdateGQLModel {
+  """DigitalSubmission id"""
+  id: UUID!
+
+  """DigitalSubmission lastchange"""
+  lastchange: DateTime!
+
+  """DigitalSubmission name"""
+  name: String = null
+
+  """DigitalSubmission eng name"""
+  nameEn: String = null
+}
+
+"""
+Interface for a Document either a DigitalDocument or a PhysicalDocument
+"""
+interface DocumentGQLModel {
+  """Document name"""
+  name: String
+
+  """Document eng name"""
+  nameEn: String
+
+  """Document description"""
+  description: String
+
+  """State id"""
+  stateId: UUID
+
+  """State"""
+  state: StateGQLModel
+
+  """Type id"""
+  typeId: UUID
+
+  """Type"""
+  type: DocumentTypeGQLModel
+}
+
+"""Document mutations"""
+interface DocumentMutation {
+  """Insert a Document"""
+  documentInsert(document: ElectronicDocumentInsertGQLModel!): ElectronicDocumentGQLModelInsertError!
+
+  """Update a Document"""
+  documentUpdate(document: ElectronicDocumentUpdateGQLModel!): ElectronicDocumentGQLModelElectronicDocumentGQLModelUpdateError!
+
+  """Delete a Document"""
+  documentDelete(document: ElectronicDocumentDeleteGQLModel!): ElectronicDocumentGQLModelDeleteError
+}
+
+"""Queries for Document"""
+interface DocumentQuery {
+  """Get a Document by id"""
+  documentById(id: UUID!): ElectronicDocumentGQLModel
+
+  """Get a page of Documents"""
+  documentPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: ElectronicDocumentInputFilter = null): [ElectronicDocumentGQLModel!]!
+}
+
+"""Entity representing a Document type"""
+type DocumentTypeGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Document type name"""
+  name: String
+
+  """Document eng name """
+  nameEn: String
+
+  """Document type description"""
+  description: String
+
+  """Parent document type id"""
+  parentId: UUID
+
+  """Parent document type"""
+  parent: DocumentTypeGQLModel
+
+  """Children document types"""
+  children(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DocumentTypeInputFilter = null): [DocumentTypeGQLModel!]!
+}
+
+"""Input type for filtering DocumentTypeGQLModel"""
+input DocumentTypeInputFilter {
+  name: String!
+  nameEn: String!
+  id: UUID!
+}
+
+"""Document delete mutation"""
+input ElectronicDocumentDeleteGQLModel {
+  """Document id"""
+  id: UUID!
+
+  """last change"""
+  lastchange: DateTime!
+}
+
+"""
+Represents a digital form used to capture user input.
+Defines the overall structure of the form and stores its submissions.
+"""
+type ElectronicDocumentGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """The title of the digital form."""
+  name: String
+
+  """The eng title of the digital form."""
+  nameEn: String
+
+  """Document description"""
+  description: String
+
+  """Document content"""
+  content: String
+
+  """Document mimetype"""
+  mimetype: String
+
+  """Document parent id"""
+  parentId: UUID
+
+  """Document parent"""
+  parent: ElectronicDocumentGQLModel
+
+  """Document children"""
+  children(skip: Int = 0, limit: Int = 10, orderby: String = null, where: ElectronicDocumentInputFilter = null): [ElectronicDocumentGQLModel!]!
+
+  """Document type id"""
+  typeId: UUID
+
+  """Document type"""
+  type: DocumentTypeGQLModel
+}
+
+"""Error object returned as an result of Delete operation"""
+type ElectronicDocumentGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: ElectronicDocumentGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union ElectronicDocumentGQLModelElectronicDocumentGQLModelUpdateError = ElectronicDocumentGQLModel | ElectronicDocumentGQLModelUpdateError
+
+union ElectronicDocumentGQLModelInsertError = ElectronicDocumentGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type ElectronicDocumentGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: ElectronicDocumentGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on ElectronicDocumentInputFilter"""
+input ElectronicDocumentInputFilter {
+  """Filter method"""
+  _or: [ElectronicDocumentInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [ElectronicDocumentInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  mimetype: StrFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""And operator definition on ElectronicDocumentInputFilter"""
+input ElectronicDocumentInputFilterAnd {
+  """Filter method"""
+  _or: [ElectronicDocumentInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  mimetype: StrFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Or operator definition on ElectronicDocumentInputFilter"""
+input ElectronicDocumentInputFilterOr {
+  """Filter method"""
+  _and: [ElectronicDocumentInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  mimetype: StrFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Document insert mutation"""
+input ElectronicDocumentInsertGQLModel {
+  """Document id"""
+  id: UUID
+
+  """Document name"""
+  name: String
+
+  """Document eng name"""
+  nameEn: String
+
+  """Document description"""
+  description: String
+
+  """Document content"""
+  content: String
+
+  """Document mimetype"""
+  mimetype: String
+
+  """Document parent id"""
+  parentId: UUID
+
+  """Document group id"""
+  groupId: UUID
+}
+
+"""Document update mutation"""
+input ElectronicDocumentUpdateGQLModel {
+  """Document id"""
+  id: UUID!
+
+  """Document name"""
+  name: String
+
+  """Document eng name"""
+  nameEn: String
+
+  """Document description"""
+  description: String
+
+  """Document content"""
+  content: String
+
+  """Document mimetype"""
+  mimetype: String
+
+  """Document parent id"""
+  parentId: UUID
+
+  """Document group id"""
+  groupId: UUID
+}
+
+"""Input type for deleting a Event"""
+input EventDeleteGQLModel {
+  """Event id"""
+  id: UUID!
+
+  """last change"""
+  lastchange: DateTime!
+}
+
+"""Entity representing a reservation of a Facility for the Event """
+type EventFacilityReservationGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Event id"""
+  eventId: UUID
+
+  """event linked to this reservation"""
+  event: EventGQLModel
+
+  """facility id"""
+  facilityId: UUID
+
+  """event linked to this reservation"""
+  facility: FacilityGQLModel
+
+  """state of reservatio"""
+  stateId: UUID
+
+  """state of this reservation"""
+  state: StateGQLModel
+}
+
+"""Operators definition on EventFacilityReservationInputFilter"""
+input EventFacilityReservationInputFilter {
+  """Filter method"""
+  _or: [EventFacilityReservationInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [EventFacilityReservationInputFilterAnd!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  event_id: UuidFilter = null
+
+  """Filter method"""
+  facility_id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+}
+
+"""And operator definition on EventFacilityReservationInputFilter"""
+input EventFacilityReservationInputFilterAnd {
+  """Filter method"""
+  _or: [EventFacilityReservationInputFilterOr!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  event_id: UuidFilter = null
+
+  """Filter method"""
+  facility_id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+}
+
+"""Or operator definition on EventFacilityReservationInputFilter"""
+input EventFacilityReservationInputFilterOr {
+  """Filter method"""
+  _and: [EventFacilityReservationInputFilterAnd!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  event_id: UuidFilter = null
+
+  """Filter method"""
+  facility_id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+}
+
+"""Entity representing a Event"""
+type EventGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Event name assigned by an administrator"""
+  name: String
+
+  """Event eng name assigned by an administrator"""
+  nameEn: String
+
+  """Event description"""
+  description: String
+
+  """Event start date"""
+  startDate: DateTime
+
+  """Event end date"""
+  endDate: DateTime
+
+  """where the event will happen"""
+  place: String
+
+  """place where the event will happen"""
+  facilityId: UUID
+
+  """place where the event will happen"""
+  facility: FacilityGQLModel
+
+  """reservations for this event"""
+  reservations(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventFacilityReservationInputFilter = null): [EventFacilityReservationGQLModel!]!
+
+  """Event parent id"""
+  parentId: UUID
+
+  """Event parent"""
+  parent: EventGQLModel
+
+  """Event children"""
+  children(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventInputFilter = null): [EventGQLModel!]!
+
+  """Event type id"""
+  typeId: UUID
+
+  """Event type"""
+  type: EventTypeGQLModel
+
+  """Event invitations"""
+  invitations(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventInvitationInputFilter = null): [EventInvitationGQLModel!]!
+}
+
+"""Error object returned as an result of Delete operation"""
+type EventGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: EventGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union EventGQLModelEventGQLModelUpdateError = EventGQLModel | EventGQLModelUpdateError
+
+union EventGQLModelInsertError = EventGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type EventGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: EventGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on EventInputFilter"""
+input EventInputFilter {
+  """Filter method"""
+  _or: [EventInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [EventInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  start_date: DatetimeFilter = null
+
+  """Filter method"""
+  end_date: DatetimeFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+}
+
+"""And operator definition on EventInputFilter"""
+input EventInputFilterAnd {
+  """Filter method"""
+  _or: [EventInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  start_date: DatetimeFilter = null
+
+  """Filter method"""
+  end_date: DatetimeFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+}
+
+"""Or operator definition on EventInputFilter"""
+input EventInputFilterOr {
+  """Filter method"""
+  _and: [EventInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  description: StrFilter = null
+
+  """Filter method"""
+  start_date: DatetimeFilter = null
+
+  """Filter method"""
+  end_date: DatetimeFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+}
+
+"""Input type for creating a Event"""
+input EventInsertGQLModel {
+  """Event name assigned by an administrator"""
+  name: String
+
+  """Event eng name assigned by an administrator"""
+  nameEn: String
+
+  """Event description"""
+  description: String
+
+  """Event start date"""
+  startDate: DateTime
+
+  """Event end date"""
+  endDate: DateTime
+
+  """Event parent id"""
+  parentId: UUID
+
+  """Event id"""
+  id: UUID
+
+  """Event rbacobject id"""
+  rbacobjectId: UUID
+}
+
+"""EventInvitation delete mutation"""
+input EventInvitationDeleteGQLModel {
+  """EventInvitation id"""
+  id: UUID!
+
+  """EventInvitation lastchange"""
+  lastchange: DateTime!
+}
+
+"""
+Entity representing a Invitation to an Event and also presence of a user, invitation state and presence is managed by state
+"""
+type EventInvitationGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Event assigned to the invitation"""
+  eventId: UUID
+
+  """User assigned to the invitation"""
+  userId: UUID
+
+  """State assigned to the invitation"""
+  stateId: UUID
+
+  """Event assigned to the invitation"""
+  event: EventGQLModel
+
+  """User assigned to the invitation"""
+  user: UserGQLModel
+
+  """State assigned to the invitation"""
+  state: StateGQLModel
+}
+
+"""Error object returned as an result of Delete operation"""
+type EventInvitationGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: EventInvitationGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union EventInvitationGQLModelEventInvitationGQLModelUpdateError = EventInvitationGQLModel | EventInvitationGQLModelUpdateError
+
+union EventInvitationGQLModelInsertError = EventInvitationGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type EventInvitationGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: EventInvitationGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on EventInvitationInputFilter"""
+input EventInvitationInputFilter {
+  """Filter method"""
+  _or: [EventInvitationInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [EventInvitationInputFilterAnd!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  event_id: UuidFilter = null
+
+  """Filter method"""
+  user_id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+}
+
+"""And operator definition on EventInvitationInputFilter"""
+input EventInvitationInputFilterAnd {
+  """Filter method"""
+  _or: [EventInvitationInputFilterOr!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  event_id: UuidFilter = null
+
+  """Filter method"""
+  user_id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+}
+
+"""Or operator definition on EventInvitationInputFilter"""
+input EventInvitationInputFilterOr {
+  """Filter method"""
+  _and: [EventInvitationInputFilterAnd!] = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  event_id: UuidFilter = null
+
+  """Filter method"""
+  user_id: UuidFilter = null
+
+  """Filter method"""
+  state_id: UuidFilter = null
+}
+
+"""EventInvitation insert mutation"""
+input EventInvitationInsertGQLModel {
+  """event id to which invitation is sent"""
+  eventId: UUID!
+
+  """user id who receive invitation"""
+  userId: UUID!
+
+  """invitation kind"""
+  stateId: UUID = null
+
+  """client generated id"""
+  id: UUID
+}
+
+"""EventInvitation update mutation"""
+input EventInvitationUpdateGQLModel {
+  """id"""
+  id: UUID!
+
+  """timestamp"""
+  lastchange: DateTime!
+
+  """invitation kind and presence type"""
+  stateId: UUID = null
+}
+
+"""Event mutations"""
+interface EventMutation {
+  """Insert a Event"""
+  eventInsert(event: EventInsertGQLModel!): EventGQLModelInsertError!
+
+  """Update a Event"""
+  eventUpdate(event: EventUpdateGQLModel!): EventGQLModelEventGQLModelUpdateError!
+
+  """Delete a Event"""
+  eventDelete(event: EventDeleteGQLModel!): EventGQLModelDeleteError
+}
+
+"""Event queries"""
+interface EventQuery {
+  """get a event by its id"""
+  eventById(id: UUID!): EventGQLModel
+
+  """get a page of events"""
+  eventPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventInputFilter = null): [EventGQLModel!]!
+}
+
+"""Entity representing a Event Type"""
+type EventTypeGQLModel implements BaseGQLModel {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Event Type name"""
+  name: String
+
+  """Event Type eng name"""
+  nameEn: String
+
+  """Event Type description"""
+  description: String
+
+  """Event Type parent id"""
+  parentId: UUID
+
+  """Event Type parent"""
+  parent: EventTypeGQLModel
+
+  """Event Type children"""
+  children(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventTypeInputFilter = null): [EventTypeGQLModel!]!
+
+  """Event Type events"""
+  events(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventInputFilter = null): [EventGQLModel!]!
+}
+
+"""Operators definition on EventTypeInputFilter"""
+input EventTypeInputFilter {
+  """Filter method"""
+  _or: [EventTypeInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [EventTypeInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""And operator definition on EventTypeInputFilter"""
+input EventTypeInputFilterAnd {
+  """Filter method"""
+  _or: [EventTypeInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Or operator definition on EventTypeInputFilter"""
+input EventTypeInputFilterOr {
+  """Filter method"""
+  _and: [EventTypeInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+
+  """Filter method"""
+  parent_id: UuidFilter = null
+}
+
+"""Input type for updating a Event"""
+input EventUpdateGQLModel {
+  """Event id"""
+  id: UUID!
+
+  """Event name assigned by an administrator"""
+  name: String
+
+  """Event eng name assigned by an administrator"""
+  nameEn: String
+
+  """Event description"""
+  description: String
+
+  """Event start date"""
+  startDate: DateTime
+
+  """Event end date"""
+  endDate: DateTime
+
+  """Event parent id"""
+  parentId: UUID
+}
+
+"""Input definition for facility delete"""
+input FacilityDeleteGQLModel {
+  """client generated primary key"""
+  id: UUID!
+
+  """timestamp for concurrent update"""
+  lastchange: UUID!
+}
+
+"""Entity representing a Facility"""
+type FacilityGQLModel implements BaseGQLModel @key(fields: "id") {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Facility name assigned by an administrator"""
+  name: String
+
+  """Facility eng name assigned by an administrator"""
+  nameEn: String
+
+  """Facility full name assigned by an administrator"""
+  label: String
+
+  """Facility datetime """
+  startdate: DateTime
+
+  """Facility datetime """
+  enddate: DateTime
+
+  """Facility address"""
+  address: String
+
+  """is the facility still valid"""
+  valid: Boolean
+
+  """Facility's capacity"""
+  capacity: Int
+
+  """Facility geometry (SVG)"""
+  geometry: String
+
+  """Facility geo address (WGS84+zoom)"""
+  geolocation: String
+
+  """reservations for this event"""
+  reservations(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventFacilityReservationInputFilter = null): [EventFacilityReservationGQLModel!]!
+
+  """Facility geo address (WGS84+zoom)"""
+  groupId: UUID
+
+  """Facility geo address (WGS84+zoom)"""
+  facilitytypeId: UUID
+
+  """Facility geo address (WGS84+zoom)"""
+  masterFacilityId: UUID
+
+  """Facility type"""
+  type: FacilityTypeGQLModel
+
+  """Facility above this"""
+  masterFacility: FacilityGQLModel
+
+  """Facilities above this"""
+  masterFacilities: [FacilityGQLModel!]!
+
+  """Facilities inside facility (like buildings in an areal)"""
+  subFacilities(skip: Int = 0, limit: Int = 10, orderby: String = null, where: Void = null): [FacilityGQLModel!]!
+
+  """Group"""
+  group: GroupGQLModel
+}
+
+"""Error object returned as an result of Delete operation"""
+type FacilityGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: FacilityGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union FacilityGQLModelFacilityGQLModelUpdateError = FacilityGQLModel | FacilityGQLModelUpdateError
+
+union FacilityGQLModelInsertError = FacilityGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type FacilityGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: FacilityGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on FacilityInputFilter"""
+input FacilityInputFilter {
+  """Filter method"""
+  _or: [FacilityInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [FacilityInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  valid: BoolFilter = null
+
+  """Filter method"""
+  label: StrFilter = null
+
+  """Filter method"""
+  capacity: IntFilter = null
+
+  """Filter method"""
+  group_id: UuidFilter = null
+
+  """Filter method"""
+  master_facility_id: UuidFilter = null
+
+  """Filter method"""
+  facilitytype_id: UuidFilter = null
+
+  """Filter method"""
+  address: StrFilter = null
+}
+
+"""And operator definition on FacilityInputFilter"""
+input FacilityInputFilterAnd {
+  """Filter method"""
+  _or: [FacilityInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  valid: BoolFilter = null
+
+  """Filter method"""
+  label: StrFilter = null
+
+  """Filter method"""
+  capacity: IntFilter = null
+
+  """Filter method"""
+  group_id: UuidFilter = null
+
+  """Filter method"""
+  master_facility_id: UuidFilter = null
+
+  """Filter method"""
+  facilitytype_id: UuidFilter = null
+
+  """Filter method"""
+  address: StrFilter = null
+}
+
+"""Or operator definition on FacilityInputFilter"""
+input FacilityInputFilterOr {
+  """Filter method"""
+  _and: [FacilityInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  valid: BoolFilter = null
+
+  """Filter method"""
+  label: StrFilter = null
+
+  """Filter method"""
+  capacity: IntFilter = null
+
+  """Filter method"""
+  group_id: UuidFilter = null
+
+  """Filter method"""
+  master_facility_id: UuidFilter = null
+
+  """Filter method"""
+  facilitytype_id: UuidFilter = null
+
+  """Filter method"""
+  address: StrFilter = null
+}
+
+"""initial attributes for facility insert"""
+input FacilityInsertGQLModel {
+  """name of the new facility"""
+  name: String!
+
+  """facility type"""
+  facilitytypeId: UUID = null
+
+  """primary key (UUID), could be client generated"""
+  id: UUID = null
+
+  """english name of facility"""
+  nameEn: String = ""
+
+  """full name (including masterfacility)"""
+  label: String = ""
+
+  """postal address"""
+  address: String = ""
+
+  """if facility exists"""
+  valid: Boolean = true
+
+  """facility capacity"""
+  capacity: Int = 0
+
+  """SVG overlay for leaflet"""
+  geometry: String = ""
+
+  """WSGBLX;WGSBLY;ZOOM"""
+  geolocation: String = ""
+
+  """group which is responsible for management of this facility"""
+  groupId: UUID = null
+
+  """to which facility this facility belongs"""
+  masterFacilityId: UUID = null
+
+  """group_id or user_id defines access rights"""
+  rbacobjectId: UUID = null
+}
+
+"""Facility queries"""
+interface FacilityQuery @key(fields: "id") {
+  """Get a facility by id"""
+  facilityById(id: UUID!): FacilityGQLModel
+
+  """Get a page of facilities"""
+  facilityPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: FacilityInputFilter = null): [FacilityGQLModel!]!
+}
+
+"""FacilityType delete mutation"""
+input FacilityTypeDeleteGQLModel {
+  """FacilityType id"""
+  id: UUID!
+
+  """FacilityType lastchange"""
+  lastchange: DateTime!
+}
+
+"""Entity representing a Facility type tree"""
+type FacilityTypeGQLModel implements BaseGQLModel @key(fields: "id") {
+  """primary key"""
+  id: UUID
+
+  """timestamp"""
+  lastchange: Date
+
+  """date & time of unit born"""
+  created: Date
+
+  """who created this entity"""
+  createdbyId: UUID
+
+  """who changed this entity"""
+  changedbyId: UUID
+
+  """rbac ruling object"""
+  rbacobjectId: UUID
+
+  """who created this entity"""
+  createdby: UserGQLModel
+
+  """who created this entity"""
+  changedby: UserGQLModel
+
+  """rbac holds relations of user"""
+  rbacobject: RBACObjectGQLModel
+
+  """Facility type name assigned by an administrator"""
+  name: String
+
+  """Facility type eng name assigned by an administrator"""
+  nameEn: String
+
+  """Facility type parent"""
+  parent: FacilityTypeGQLModel
+
+  """Facility type parent id"""
+  parentId: UUID
+
+  """Facility type children"""
+  children(skip: Int = 0, limit: Int = 10, orderby: String = null, where: FacilityTypeInputFilter = null): [FacilityTypeGQLModel!]!
+}
+
+"""Error object returned as an result of Delete operation"""
+type FacilityTypeGQLModelDeleteError {
+  """Entity to be updated"""
+  Entity: FacilityTypeGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+union FacilityTypeGQLModelFacilityTypeGQLModelUpdateError = FacilityTypeGQLModel | FacilityTypeGQLModelUpdateError
+
+union FacilityTypeGQLModelInsertError = FacilityTypeGQLModel | InsertError
+
+"""Error object returned as an result of Update operation"""
+type FacilityTypeGQLModelUpdateError {
+  """Entity to be updated"""
+  Entity: FacilityTypeGQLModel
+
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Operators definition on FacilityTypeInputFilter"""
+input FacilityTypeInputFilter {
+  """Filter method"""
+  _or: [FacilityTypeInputFilterOr!] = null
+
+  """Filter method"""
+  _and: [FacilityTypeInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+}
+
+"""And operator definition on FacilityTypeInputFilter"""
+input FacilityTypeInputFilterAnd {
+  """Filter method"""
+  _or: [FacilityTypeInputFilterOr!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+}
+
+"""Or operator definition on FacilityTypeInputFilter"""
+input FacilityTypeInputFilterOr {
+  """Filter method"""
+  _and: [FacilityTypeInputFilterAnd!] = null
+
+  """Filter method"""
+  name: StrFilter = null
+
+  """Filter method"""
+  name_en: StrFilter = null
+
+  """Filter method"""
+  id: UuidFilter = null
+}
+
+"""FacilityType insert mutation"""
+input FacilityTypeInsertGQLModel {
+  """FacilityType name"""
+  name: String = null
+
+  """FacilityType eng name"""
+  nameEn: String = null
+
+  """FacilityType master id"""
+  parentId: UUID!
+
+  """FacilityType id client generated"""
+  id: UUID!
+}
+
+""""""
+interface FacilityTypeQuery {
+  """Get a FacilityType by id"""
+  facilityTypeById(id: UUID!): FacilityTypeGQLModel
+
+  """Get a page of FacilityTypes"""
+  facilityTypePage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: FacilityTypeInputFilter = null): [FacilityTypeGQLModel!]!
+}
+
+"""FacilityType update mutation"""
+input FacilityTypeUpdateGQLModel {
+  """FacilityType id"""
+  id: UUID!
+
+  """FacilityType lastchange"""
+  lastchange: DateTime!
+
+  """FacilityType name"""
+  name: String = null
+
+  """FacilityType eng name"""
+  nameEn: String = null
+}
+
+"""Input definition for facility update"""
+input FacilityUpdateGQLModel {
+  """client generated primary key"""
+  id: UUID!
+
+  """timestamp for concurrent update"""
+  lastchange: UUID!
+
+  """name of the type"""
+  name: String = null
+
+  """english name of facility"""
+  nameEn: String = ""
+
+  """full name (including masterfacility)"""
+  label: String = ""
+
+  """postal address"""
+  address: String = ""
+
+  """if facility exists"""
+  valid: Boolean = true
+
+  """facility capacity"""
+  capacity: Int = 0
+
+  """SVG overlay for leaflet"""
+  geometry: String = ""
+
+  """WSGBLX;WGSBLY;ZOOM"""
+  geolocation: String = ""
+}
+
+extend type GroupGQLModel @key(fields: "id") {
+  id: UUID! @external
+}
+
+"""Error object returned as an result of Insert operation"""
+type InsertError {
+  """reason of fail"""
+  msg: String!
+
+  """always True, available when error"""
+  failed: Boolean!
+
+  """original data"""
+  input: JSON
+}
+
+"""Integer filter methods, only one constrain allowed"""
+input IntFilter {
+  """operation for select.filter() method"""
+  _eq: Int = null
+
+  """operation for select.filter() method"""
+  _le: Int = null
+
+  """operation for select.filter() method"""
+  _lt: Int = null
+
+  """operation for select.filter() method"""
+  _ge: Int = null
+
+  """operation for select.filter() method"""
+  _gt: Int = null
+
+  """operation for select.filter() method"""
+  _in: [Int!] = null
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+extend type Mutation implements EventMutation & DocumentMutation {
+  """Insert a Event"""
+  eventInsert(event: EventInsertGQLModel!): EventGQLModelInsertError!
+
+  """Update a Event"""
+  eventUpdate(event: EventUpdateGQLModel!): EventGQLModelEventGQLModelUpdateError!
+
+  """Delete a Event"""
+  eventDelete(event: EventDeleteGQLModel!): EventGQLModelDeleteError
+
+  """Insert a EventInvitation"""
+  eventInvitationInsert(invitation: EventInvitationInsertGQLModel!): EventInvitationGQLModelInsertError!
+
+  """Update a EventInvitation"""
+  eventInvitationUpdate(invitation: EventInvitationUpdateGQLModel!): EventInvitationGQLModelEventInvitationGQLModelUpdateError!
+
+  """Delete a EventInvitation"""
+  eventInvitationDelete(invitation: EventInvitationDeleteGQLModel!): EventInvitationGQLModelDeleteError
+
+  """Insert a facility"""
+  facilityInsert(facility: FacilityInsertGQLModel!): FacilityGQLModelInsertError!
+
+  """Update a facility"""
+  facilityUpdate(facility: FacilityUpdateGQLModel!): FacilityGQLModelFacilityGQLModelUpdateError!
+
+  """Delete a facility"""
+  facilityDelete(facility: FacilityDeleteGQLModel!): FacilityGQLModelDeleteError
+
+  """Move a facility"""
+  facilityMove(facility: FacilityInsertGQLModel!): FacilityGQLModelFacilityGQLModelUpdateError!
+
+  """Insert a FacilityType"""
+  facilityTypeInsert(facilityType: FacilityTypeInsertGQLModel!): FacilityTypeGQLModelInsertError!
+
+  """Update a FacilityType"""
+  facilityTypeUpdate(facilityType: FacilityTypeUpdateGQLModel!): FacilityTypeGQLModelFacilityTypeGQLModelUpdateError!
+
+  """Delete a FacilityType"""
+  facilityTypeDelete(facilityType: FacilityTypeDeleteGQLModel!): FacilityTypeGQLModelDeleteError
+
+  """Insert a Document"""
+  documentInsert(document: ElectronicDocumentInsertGQLModel!): ElectronicDocumentGQLModelInsertError!
+
+  """Update a Document"""
+  documentUpdate(document: ElectronicDocumentUpdateGQLModel!): ElectronicDocumentGQLModelElectronicDocumentGQLModelUpdateError!
+
+  """Delete a Document"""
+  documentDelete(document: ElectronicDocumentDeleteGQLModel!): ElectronicDocumentGQLModelDeleteError
+
+  """Insert a DigitalForm"""
+  digitalFormInsert(digitalForm: DigitalFormInsertGQLModel!): DigitalFormGQLModelInsertError!
+
+  """Update a DigitalForm"""
+  digitalFormUpdate(digitalForm: DigitalFormUpdateGQLModel!): DigitalFormGQLModelDigitalFormGQLModelUpdateError!
+
+  """Delete a DigitalForm"""
+  digitalFormDelete(digitalForm: DigitalFormDeleteGQLModel!): DigitalFormGQLModelDeleteError
+
+  """Insert a DigitalFormSection"""
+  digitalFormSectionInsert(digitalFormSection: DigitalFormSectionInsertGQLModel!): DigitalFormSectionGQLModelInsertError!
+
+  """Update a DigitalFormSection"""
+  digitalFormSectionUpdate(digitalFormSection: DigitalFormSectionUpdateGQLModel!): DigitalFormSectionGQLModelDigitalFormSectionGQLModelUpdateError!
+
+  """Delete a DigitalFormSection"""
+  digitalFormSectionDelete(digitalFormSection: DigitalFormSectionDeleteGQLModel!): DigitalFormSectionGQLModelDeleteError
+
+  """Insert a DigitalSubmission"""
+  digitalFormSubmissionInsert(digitalFormSubmission: DigitalSubmissionInsertGQLModel!): DigitalSubmissionGQLModelInsertError!
+
+  """Update a DigitalSubmission"""
+  digitalFormSubmissionUpdate(digitalFormSubmission: DigitalSubmissionUpdateGQLModel!): DigitalSubmissionGQLModelDigitalSubmissionGQLModelUpdateError!
+
+  """Delete a DigitalSubmission"""
+  digitalFormSubmissionDelete(digitalFormSubmission: DigitalSubmissionDeleteGQLModel!): DigitalSubmissionGQLModelDeleteError
+}
+
+type Query implements EventQuery & FacilityQuery & FacilityTypeQuery & DocumentQuery & DigitalFormSectionQuery & DigitalSubmissionQuery {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+
+  """get a event by its id"""
+  eventById(id: UUID!): EventGQLModel
+
+  """get a page of events"""
+  eventPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventInputFilter = null): [EventGQLModel!]!
+
+  """Event type by its id"""
+  eventTypeById(id: UUID!): EventTypeGQLModel
+
+  """return list of events"""
+  eventTypePage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventTypeInputFilter = null): [EventTypeGQLModel!]!
+
+  """Invitation by its id"""
+  eventInvitationById(id: UUID!): EventInvitationGQLModel
+
+  """selected invitations to events"""
+  eventInvitationPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: EventInvitationInputFilter = null): [EventInvitationGQLModel!]!
+
+  """Get a facility by id"""
+  facilityById(id: UUID!): FacilityGQLModel
+
+  """Get a page of facilities"""
+  facilityPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: FacilityInputFilter = null): [FacilityGQLModel!]!
+
+  """Get a FacilityType by id"""
+  facilityTypeById(id: UUID!): FacilityTypeGQLModel
+
+  """Get a page of FacilityTypes"""
+  facilityTypePage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: FacilityTypeInputFilter = null): [FacilityTypeGQLModel!]!
+
+  """Get a Document by id"""
+  documentById(id: UUID!): ElectronicDocumentGQLModel
+
+  """Get a page of Documents"""
+  documentPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: ElectronicDocumentInputFilter = null): [ElectronicDocumentGQLModel!]!
+
+  """Get a DigitalForm by id"""
+  digitalDocumentById(id: UUID!): DigitalFormGQLModel
+
+  """Get all DigitalForms with pagination"""
+  digitalDocumentPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalFormInputFilter = null): [DigitalFormGQLModel!]!
+
+  """Get a DigitalFormSection by id"""
+  digitalFormSectionById(id: UUID!): DigitalFormSectionGQLModel
+
+  """Get a page of DigitalFormSections"""
+  digitalFormSectionPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalFormSectionInputFilter = null): [DigitalFormSectionGQLModel!]!
+
+  """Get a DigitalSubmission by id"""
+  digitalFormSubmissionById(id: UUID!): DigitalSubmissionGQLModel
+
+  """Get a page of DigitalSubmissions"""
+  digitalFormSubmissionPage(skip: Int = 0, limit: Int = 10, orderby: String = null, where: DigitalSubmissionInputFilter = null): [DigitalSubmissionGQLModel!]!
+}
+
+extend type RBACObjectGQLModel @key(fields: "id") {
+  id: UUID! @external
+}
+
+extend type StateGQLModel @key(fields: "id") {
+  id: UUID! @external
+}
+
+"""Str filter methods, only one constrain allowed"""
+input StrFilter {
+  """operation for select.filter() method"""
+  _eq: String = null
+
+  """operation for select.filter() method"""
+  _le: String = null
+
+  """operation for select.filter() method"""
+  _lt: String = null
+
+  """operation for select.filter() method"""
+  _ge: String = null
+
+  """operation for select.filter() method"""
+  _gt: String = null
+
+  """operation for select.filter() method"""
+  _like: String = null
+
+  """operation for select.filter() method"""
+  _ilike: String = null
+
+  """operation for select.filter() method"""
+  _startswith: String = null
+
+  """operation for select.filter() method"""
+  _endswith: String = null
+}
+
+scalar UUID
+
+extend type UserGQLModel @key(fields: "id") {
+  id: UUID! @external
+}
+
+"""Integer filter methods, only one constrain allowed"""
+input UuidFilter {
+  """operation for select.filter() method"""
+  _eq: UUID = null
+
+  """operation for select.filter() method"""
+  _in: [UUID!] = null
+}
+
+"""Represents NULL values"""
+scalar Void
+
+scalar _Any
+
+union _Entity = FacilityGQLModel | FacilityTypeGQLModel | GroupGQLModel | RBACObjectGQLModel | StateGQLModel | UserGQLModel
+
+type _Service {
+  sdl: String!
+}

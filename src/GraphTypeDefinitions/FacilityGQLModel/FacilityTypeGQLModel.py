@@ -42,7 +42,8 @@ class FacilityTypeInputFilter:
     keys=["id"], description="""Entity representing a Facility type tree"""
 )
 class FacilityTypeGQLModel(BaseGQLModel):
-    async def getLoader(cls, info: strawberry.types.Info):
+    @classmethod
+    def getLoader(cls, info: strawberry.types.Info):
         return getLoadersFromInfo(info).FacilityTypeModel
     
     name: typing.Optional[str] = strawberry.field(
@@ -101,7 +102,7 @@ class FacilityTypeQuery:
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=PageResolver[FacilityTypeInputFilter](whereType=FacilityTypeInputFilter)
+        resolver=PageResolver[FacilityTypeGQLModel](whereType=FacilityTypeInputFilter)
     )
 
     
@@ -123,6 +124,7 @@ class FacilityTypeInsertGQLModel:
     id: IDType = strawberry.field(
         description="""FacilityType id client generated"""
     )
+    createdby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(
     description="""FacilityType update mutation"""
@@ -143,6 +145,7 @@ class FacilityTypeUpdateGQLModel:
         description="""FacilityType eng name""",
         default=None
     )
+    changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(
     description="""FacilityType delete mutation"""

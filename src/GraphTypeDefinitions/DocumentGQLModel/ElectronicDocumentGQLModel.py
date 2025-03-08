@@ -41,7 +41,7 @@ class ElectronicDocumentInputFilter:
 
 
 @strawberry.federation.type(
-    description="""Represents a digital form used to capture user input.
+    keys=["id"], description="""Represents a digital form used to capture user input.
 Defines the overall structure of the form and stores its submissions."""
 )
 class ElectronicDocumentGQLModel(BaseGQLModel):
@@ -133,8 +133,8 @@ class ElectronicDocumentGQLModel(BaseGQLModel):
 @strawberry.interface(
     description="""Queries for Document"""
 )
-class DocumentQuery:
-    document_by_id: typing.Optional[ElectronicDocumentGQLModel] = strawberry.field(
+class ElectronicDocumentQuery:
+    electronic_document_by_id: typing.Optional[ElectronicDocumentGQLModel] = strawberry.field(
         description="""Get a Document by id""",
         permission_classes=[
             OnlyForAuthentized
@@ -142,7 +142,7 @@ class DocumentQuery:
         resolver=ElectronicDocumentGQLModel.load_with_loader
     )
 
-    document_page: typing.List[ElectronicDocumentGQLModel] = strawberry.field(
+    electronic_document_page: typing.List[ElectronicDocumentGQLModel] = strawberry.field(
         description="""Get a page of Documents""",
         permission_classes=[
             OnlyForAuthentized

@@ -15,7 +15,7 @@ from .DocumentGQLModel import (
     DocumentMutation,
     DigitalFormMutation,
     DigitalFormSectionMutation,
-    DigitalFormSubmissionMutation
+    DigitalSubmissionMutation
 )
 
 @strawberry.federation.type(extend=True)
@@ -30,7 +30,7 @@ class Mutation(
     DocumentMutation,
     DigitalFormMutation,
     DigitalFormSectionMutation,
-    DigitalFormSubmissionMutation
+    DigitalSubmissionMutation
     ):
 
     # from .FacilityGQLModel import (

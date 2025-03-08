@@ -264,7 +264,7 @@ class FacilityUpdateGQLModel:
     capacity: typing.Optional[int] = strawberry.field(description="facility capacity", default=0)
     geometry: typing.Optional[str] = strawberry.field(description="SVG overlay for leaflet", default="")
     geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default="")
-    changedby_id: strawberry.Private[IDType]
+    changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for facility delete")
 class FacilityDeleteGQLModel:

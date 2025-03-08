@@ -43,7 +43,7 @@ class DigitalFormFieldInputFilter:
 
 
 @strawberry.federation.type(
-    description="""Represents a field in a digital form.
+    keys=["id"], description="""Represents a field in a digital form.
 Defines properties of an individual input, including support for computed values."""
 )
 class DigitalFormFieldGQLModel(BaseGQLModel):
@@ -164,6 +164,21 @@ Example: "price * quantity" where "price" and "quantity" reference other fields.
     description=""
 )
 class DigitalFormFieldQuery:
+    form_field_by_id: typing.Optional[DigitalFormFieldGQLModel] = strawberry.field(
+        description="finds a form field by its id",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=DigitalFormFieldGQLModel.load_with_loader
+    )
+
+    form_field_page: typing.List[DigitalFormFieldGQLModel] = strawberry.field(
+        description="finds form fields by filter",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=PageResolver[DigitalFormFieldGQLModel](whereType=DigitalFormFieldInputFilter)
+    )
     pass
 
 @strawberry.input(description="DigitalFormField insert parameter description")

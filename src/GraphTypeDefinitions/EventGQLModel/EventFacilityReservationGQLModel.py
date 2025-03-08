@@ -101,7 +101,8 @@ class EventFacilityReservationGQLModel(BaseGQLModel):
 
 
 
-@strawberry.federation.type(description="")
+@strawberry.federation.type(
+    keys=["id"], description="Reservation of factility to particular event")
 class EventFacilityReservationQuery:
 
     facility_reservation_by_id: typing.Optional[EventFacilityReservationGQLModel] = strawberry.field(
@@ -113,7 +114,7 @@ class EventFacilityReservationQuery:
     )
 
     facility_reservation_page: typing.List[EventFacilityReservationGQLModel] = strawberry.field(
-        description="Facility for Event reservations",
+        description="Facility reservations for Event ",
         permission_classes=[
             OnlyForAuthentized
         ],
@@ -155,7 +156,7 @@ class EventFacilityReservationMutation:
         return result
     
     @strawberry.mutation(
-        description="standard insert operation",
+        description="standard update operation",
         permission_classes=[
             OnlyForAuthentized,
             SimpleUpdatePermission[EventFacilityReservationGQLModel](roles=["administrátor"])
@@ -167,7 +168,7 @@ class EventFacilityReservationMutation:
 
 
     @strawberry.mutation(
-        description="standard insert operation",
+        description="standard delete operation",
         permission_classes=[
             OnlyForAuthentized,
             SimpleDeletePermission[EventFacilityReservationGQLModel](roles=["administrátor"])

@@ -48,7 +48,8 @@ class EventInputFilter:
 
 
 @strawberry.federation.type(
-    description="""Entity representing a Event"""
+    description="""Entity representing a Event""",
+    keys=["id"]
 )
 class EventGQLModel(BaseGQLModel):
     @classmethod
@@ -140,6 +141,9 @@ class EventGQLModel(BaseGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ],
+        metadata={
+            # "alchemy": lambda selectStatement, leftModel, rightModel: selectStatement.join(rightModel)
+        },
         resolver=ScalarResolver["EventGQLModel"](fkey_field_name="parent_id")
     )
 

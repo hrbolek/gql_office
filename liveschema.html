@@ -2,94 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Markdown Internal Links Example</title>
+  <title>GraphQL Schema Documentation</title>
   <!-- Load markdown-it -->
   <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
-  <!-- Load markdown-it-anchor v9.2.0 (UMD build) -->
+  <!-- Load markdown-it-anchor -->
   <script src="https://cdn.jsdelivr.net/npm/markdown-it-anchor@9.2.0/dist/markdownItAnchor.umd.js"></script>
   <style>
     body {
-        font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
-        padding: 20px;
+      font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+      padding: 20px;
     }
     h4 {
-        background-color: aliceblue;
-        padding-top: 20px;
-        padding-bottom: 20px;   
-
-        display: block;
-        border: 1px solid #a3d9a5;
-        padding: 10px;
-        border-radius: 4px;
-        overflow-x: auto;
+      background-color: aliceblue;
+      padding: 10px;
+      border: 1px solid #a3d9a5;
+      border-radius: 4px;
+      overflow-x: auto;
     }
-
     .h4-section {
-        background-color: #f2fbff; /* a light, cool background similar to aliceblue */
-        border: 1px solid #a3d9a5;
-        padding: 10px;
-        border-radius: 4px;
-        /* margin-left: 10%; aligns with your code block margin */
-        margin-top: 10px;
-    }    
-
+      background-color: #f2fbff;
+      border: 1px solid #a3d9a5;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
     #content {
       border: 1px solid #ccc;
       padding: 10px;
       margin-top: 20px;
     }
-    /* Style for the copy button */
     .copy-btn {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        padding: 4px 8px;
-        font-size: 12px;
-        background-color: #007BFF;
-        color: #fff;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        opacity: 0.85;
-        transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      padding: 4px 8px;
+      font-size: 12px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
     }
-
     .copy-btn:hover {
-        opacity: 1;
-        background-color: #0056b3;
+      opacity: 1;
+      background-color: #0056b3;
     }
-
     pre {
       position: relative;
     }
-
     code.language-graphql {
-        display: block;
-        background-color: #e0fbe0;
-        border: 1px solid #a3d9a5;
-        padding: 10px;
-        border-radius: 4px;
-        overflow-x: auto;
-        font-family: monospace;
-        margin-left: 10%;
-    }
-
-    ul + p {
-        display: block;
-        background-color: #e0fbf6;
-        border: 1px solid #a3d9a5;
-        padding: 10px;
-        border-radius: 4px;
-        overflow-x: auto;
-        font-family: monospace;
-        margin-left: 10%;
+      display: block;
+      background-color: #e0fbe0;
+      border: 1px solid #a3d9a5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: monospace;
+      margin-left: 10%;
     }
   </style>
 </head>
 <body>
   <div id="content">Loading markdown...</div>
-  
   <script>
+    // Format a type by unwrapping NON_NULL/LIST etc.
     function formatType(typeRef) {
       if (!typeRef) return "";
       const kind = typeRef.kind;
@@ -106,13 +84,12 @@
           }
           const anchor = typeName.toLowerCase();
           return `[${typeName}](#${anchor})`;
-        } else {
-          return "";
         }
+        return "";
       }
     }
 
-
+    // Generate markdown for a field.
     function markdownForField(field) {
       let s = `- **${field.name}**: ${formatType(field.type)}`;
       if (field.description) {
@@ -140,9 +117,7 @@
 
     function markdownForObjectType(typeObj) {
       let s = `#### ${typeObj.name}\n\n`;
-      if (typeObj.description) {
-        s += `${typeObj.description}\n\n`;
-      }
+      if (typeObj.description) s += `${typeObj.description}\n\n`;
       if (typeObj.fields) {
         s += "Fields:\n";
         typeObj.fields.forEach(field => {
@@ -155,9 +130,7 @@
     
     function markdownForInputObjectType(typeObj) {
       let s = `#### ${typeObj.name}\n\n`;
-      if (typeObj.description) {
-        s += `${typeObj.description}\n\n`;
-      }
+      if (typeObj.description) s += `${typeObj.description}\n\n`;
       if (typeObj.inputFields) {
         s += "Input Fields:\n";
         typeObj.inputFields.forEach(field => {
@@ -170,12 +143,11 @@
     
     function markdownForScalarType(typeObj) {
       let s = `#### ${typeObj.name}\n\n`;
-      if (typeObj.description) {
-        s += `${typeObj.description}\n\n`;
-      }
+      if (typeObj.description) s += `${typeObj.description}\n\n`;
       return s;
     }
 
+    // Unwrap nested types to get the named type.
     function getNamedType(typeRef) {
       while (typeRef && typeRef.ofType) {
         typeRef = typeRef.ofType;
@@ -256,10 +228,22 @@
       }
     }
 
+    // Helper: recursively check if a type (or its nested ofType) is NON_NULL.
+    function isMandatory(typeRef) {
+      if (!typeRef) return false;
+      if (typeRef.kind === "NON_NULL") return true;
+      return typeRef.ofType ? isMandatory(typeRef.ofType) : false;
+    }
+
+    // Returns true if any argument of the field is mandatory.
+    function hasMandatoryArgs(field) {
+      return field.args && field.args.some(arg => isMandatory(arg.type));
+    }
+
+    // Updated fragment generator: for fields within a fragment,
+    // if the field's fragment would be the same as the current fragment, output just "field { id }".
     function generateSelectionSetWithFragments(typeRef, typesByName, fragments, depth = 0, maxDepth = 2, indentLevel = 1, indentStr = "  ") {
       const base = getNamedType(typeRef);
-      
-      // Handle UNION types: generate inline fragments for every possible member.
       if (base.kind === "UNION") {
         let possibleTypes = base.possibleTypes;
         if (!possibleTypes) {
@@ -298,22 +282,29 @@
           // Always include __typename first.
           fragmentLines.push(indentStr.repeat(indentLevel) + "__typename");
           typeDef.fields.forEach(f => {
-            const fType = f.type;
-            const fNamed = getNamedType(fType);
-            const fragName = getFragmentName(fNamed.name);
-            const currentFrag = getFragmentName(typeName);
-            if (["OBJECT", "UNION"].includes(fNamed.kind)) {
-              if (fragName === currentFrag) {
-                fragmentLines.push(indentStr.repeat(indentLevel) + `${f.name} { id }`);
-              } else if (depth + 1 < maxDepth) {
-                generateSelectionSetWithFragments(fType, typesByName, fragments, depth + 1, maxDepth, indentLevel + 1, indentStr);
-                fragmentLines.push(indentStr.repeat(indentLevel) + `${f.name} { ...${fragName} }`);
-              } else {
-                fragmentLines.push(indentStr.repeat(indentLevel) + `${f.name} { id }`);
-              }
+            let line = indentStr.repeat(indentLevel);
+            // Check if field has arguments and mandatory ones should be commented.
+            if (f.args && hasMandatoryArgs(f)) {
+              line += "# " + f.name;
             } else {
-              fragmentLines.push(indentStr.repeat(indentLevel) + f.name);
+              const fNamed = getNamedType(f.type);
+              const fragName = getFragmentName(fNamed.name || "");
+              const currentFrag = getFragmentName(typeName);
+              // If the field's fragment would be the same as the current fragment, output field { id }.
+              if (["OBJECT", "UNION"].includes(fNamed.kind)) {
+                if (fragName === currentFrag) {
+                  line += `${f.name} { id }`;
+                } else if (depth + 1 < maxDepth) {
+                  const subSelection = generateSelectionSetWithFragments(f.type, typesByName, fragments, depth + 1, maxDepth, indentLevel + 1, indentStr);
+                  line += `${f.name} ${subSelection}`;
+                } else {
+                  line += `${f.name} { id }`;
+                }
+              } else {
+                line += f.name;
+              }
             }
+            fragmentLines.push(line);
           });
           fragmentBody = "{\n" + fragmentLines.join("\n") + "\n" + indentStr.repeat(indentLevel - 1) + "}";
         }
@@ -323,8 +314,9 @@
       return "{\n" + indentStr + `...${getFragmentName(typeName)}\n}`;
     }
 
+    // Generate Query/Mutation example usage.
+    // Top-level examples use the field name in the header.
     function generateQueryExample(field, typesByName, operationType = "query", maxDepth = 2) {
-      // For mutations, use a higher recursion depth.
       if (operationType === "mutation") {
         maxDepth = 3;
       }
@@ -343,19 +335,13 @@
         if (!selectionSet.trim().startsWith("{")) {
           selectionSet = "{\n    " + selectionSet.trim() + "\n  }";
         }
-      } else {
-        selectionSet = "";
       }
       if (operationType === "mutation" && !selectionSet) {
         selectionSet = "{ __typename, id }";
       }
       let lines = [];
-      lines.push(`${operationType} Example${varDefsStr} {`);
-      if (selectionSet) {
-        lines.push(`  ${field.name}${fieldArgs} ${selectionSet}`);
-      } else {
-        lines.push(`  ${field.name}${fieldArgs}`);
-      }
+      lines.push(`${operationType} ${field.name}${varDefsStr} {`);
+      lines.push(`  ${field.name}${fieldArgs} ${selectionSet}`);
       lines.push("}");
       let query = lines.join("\n");
       if (Object.keys(fragments).length > 0) {
@@ -368,160 +354,119 @@
     }
 
     function generateMarkdownFromSchema2(introspection) {
-    const schemaData = introspection.__schema;
-    const types = schemaData.types;
-    const typesByName = {};
-    for (const t of types) {
-      if (t.name.startsWith("__")) continue;
-      typesByName[t.name] = t;
-    }
-    
-    const queryTypeName = schemaData.queryType ? schemaData.queryType.name : null;
-    const mutationTypeName = schemaData.mutationType ? schemaData.mutationType.name : null;
-    
-    let queryType = null;
-    let mutationType = null;
-    const scalars = [];
-    const inputs = [];
-    const objects = [];
-    
-    for (const t of types) {
-      if (t.name.startsWith("__")) continue;
-      if (t.name === queryTypeName) {
-        queryType = t;
-      } else if (t.name === mutationTypeName) {
-        mutationType = t;
-      } else if (t.kind === "SCALAR") {
-        scalars.push(t);
-      } else if (t.kind === "INPUT_OBJECT") {
-        inputs.push(t);
-      } else if (t.kind === "OBJECT") {
-        objects.push(t);
+      const schemaData = introspection.__schema;
+      const types = schemaData.types;
+      const typesByName = {};
+      for (const t of types) {
+        if (t.name.startsWith("__")) continue;
+        typesByName[t.name] = t;
       }
-    }
-    
-    let markdown = "# GraphQL Schema Documentation\n\n";
-    markdown += "## Query a Mutation\n\n";
-    
-    if (queryType) {
-      markdown += `### Query: ${queryType.name}\n\n`;
-      if (queryType.description) {
-        markdown += `${queryType.description}\n\n`;
-      }
-      if (queryType.fields) {
-        markdown += "#### Fields\n\n";
-        for (const field of queryType.fields) {
-          markdown += markdownForField(field) + "\n\n";
-          const example = generateQueryExample(field, typesByName, "query");
-          markdown += "Example usage:\n\n```graphql\n" + example + "\n```\n\n";
+      
+      const queryTypeName = schemaData.queryType ? schemaData.queryType.name : null;
+      const mutationTypeName = schemaData.mutationType ? schemaData.mutationType.name : null;
+      
+      let markdown = "# GraphQL Schema Documentation\n\n";
+      markdown += "## Query and Mutation\n\n";
+      
+      if (typesByName[queryTypeName]) {
+        let queryType = typesByName[queryTypeName];
+        markdown += `### Query: ${queryType.name}\n\n`;
+        if (queryType.description) {
+          markdown += `${queryType.description}\n\n`;
+        }
+        if (queryType.fields) {
+          markdown += "#### Fields\n\n";
+          queryType.fields.forEach(field => {
+            markdown += markdownForField(field) + "\n\n";
+            const example = generateQueryExample(field, typesByName, "query");
+            markdown += "Example usage:\n\n```graphql\n" + example + "\n```\n\n";
+          });
         }
       }
-      markdown += "\n";
-    }
-    
-    if (mutationType) {
-      markdown += `### Mutation: ${mutationType.name}\n\n`;
-      if (mutationType.description) {
-        markdown += `${mutationType.description}\n\n`;
-      }
-      if (mutationType.fields) {
-        markdown += "#### Fields\n\n";
-        for (const field of mutationType.fields) {
-          markdown += markdownForField(field) + "\n\n";
-          const example = generateQueryExample(field, typesByName, "mutation");
-          markdown += "Example usage:\n\n```graphql\n" + example + "\n```\n\n";
+      
+      if (typesByName[mutationTypeName]) {
+        let mutationType = typesByName[mutationTypeName];
+        markdown += `### Mutation: ${mutationType.name}\n\n`;
+        if (mutationType.description) {
+          markdown += `${mutationType.description}\n\n`;
+        }
+        if (mutationType.fields) {
+          markdown += "#### Fields\n\n";
+          mutationType.fields.forEach(field => {
+            markdown += markdownForField(field) + "\n\n";
+            const example = generateQueryExample(field, typesByName, "mutation");
+            markdown += "Example usage:\n\n```graphql\n" + example + "\n```\n\n";
+          });
         }
       }
-      markdown += "\n";
+      
+      markdown += "## Scalars\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "SCALAR") {
+          markdown += markdownForScalarType(t);
+        }
+      });
+      
+      markdown += "## Input Types\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "INPUT_OBJECT") {
+          markdown += markdownForInputObjectType(t);
+        }
+      });
+      
+      // Regular object types (non Query/Mutation) are documented without examples.
+      markdown += "## Regular Types\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "OBJECT" && t.name !== queryTypeName && t.name !== mutationTypeName) {
+          markdown += markdownForObjectType(t);
+        }
+      });
+      
+      return markdown;
     }
-    
-    markdown += "## Scalars\n\n";
-    for (const scalar of scalars) {
-      markdown += markdownForScalarType(scalar);
-    }
-    
-    markdown += "## Input Types\n\n";
-    for (const inputObj of inputs) {
-      markdown += markdownForInputObjectType(inputObj);
-    }
-    
-    markdown += "## Regular Types\n\n";
-    for (const obj of objects) {
-      if (obj.name === queryTypeName || obj.name === mutationTypeName) continue;
-      markdown += markdownForObjectType(obj);
-    }
-    
-    return markdown;
-  }
-
 
     function wrapH4Sections(md) {
       md.core.ruler.after('block', 'wrap_h4_sections', function (state) {
-          let tokens = state.tokens;
-          let newTokens = [];
-          let sectionTokens = [];
-          let inSection = false;
-
-          for (let i = 0; i < tokens.length; i++) {
+        let tokens = state.tokens;
+        let newTokens = [];
+        let inSection = false;
+        for (let i = 0; i < tokens.length; i++) {
           let token = tokens[i];
-          // When we hit an H4, start a new section
           if (token.type === 'heading_open' && token.tag === 'h4') {
-              // if we were in a section, close the previous section container
-              if (inSection) {
+            if (inSection) {
               newTokens.push(new state.Token('container_close', 'div', -1));
               inSection = false;
-              }
-              // push the H4 tokens normally
-              newTokens.push(token);
-              // Next token is the inline content of the heading, then heading_close
-              newTokens.push(tokens[i + 1]);
-              newTokens.push(tokens[i + 2]);
-              i += 2;
-              // Now start a container for the following tokens until next heading
-              let containerOpen = new state.Token('container_open', 'div', 1);
-              containerOpen.block = true;
-              containerOpen.attrSet('class', 'h4-section');
-              newTokens.push(containerOpen);
-              inSection = true;
-          } else if (
-              inSection &&
-              token.type === 'heading_open' &&
-              // if it's a heading of level 4 or higher, close the container
-              (parseInt(token.tag.slice(1)) <= 4)
-          ) {
-              newTokens.push(new state.Token('container_close', 'div', -1));
-              inSection = false;
-              newTokens.push(token);
+            }
+            newTokens.push(token);
+            newTokens.push(tokens[i + 1]);
+            newTokens.push(tokens[i + 2]);
+            i += 2;
+            let containerOpen = new state.Token('container_open', 'div', 1);
+            containerOpen.block = true;
+            containerOpen.attrSet('class', 'h4-section');
+            newTokens.push(containerOpen);
+            inSection = true;
+          } else if (inSection && token.type === 'heading_open' && (parseInt(token.tag.slice(1)) <= 4)) {
+            newTokens.push(new state.Token('container_close', 'div', -1));
+            inSection = false;
+            newTokens.push(token);
           } else {
-              newTokens.push(token);
+            newTokens.push(token);
           }
-          }
-          // close any open container at the end
-          if (inSection) {
+        }
+        if (inSection) {
           newTokens.push(new state.Token('container_close', 'div', -1));
-          }
-          state.tokens = newTokens;
+        }
+        state.tokens = newTokens;
       });
-      }
+    }
 
-    // Initialize markdown-it with the markdown-it-anchor plugin.
-    var md = window.markdownit().use(window.markdownItAnchor, {
-      slugify: function(s) {
-        return s.trim().toLowerCase().replace(/\s+/g, '-');
-      }
-    })
-    .use(wrapH4Sections, {}); // now every content after an h4 until the next heading of level 4 or higher is wrapped in a <div class="h4-section">    
-    
-    // Function to add "Copy" buttons to all code blocks.
     function addCopyButtons() {
       document.querySelectorAll('pre code').forEach((codeBlock) => {
-        // Create the button element.
         var button = document.createElement('button');
         button.innerText = 'Copy';
         button.classList.add('copy-btn');
-        // Make sure the parent pre element is relatively positioned.
         codeBlock.parentElement.style.position = 'relative';
-        // Add click event to copy the text.
         button.addEventListener('click', () => {
           navigator.clipboard.writeText(codeBlock.innerText).then(() => {
             button.innerText = 'Copied!';
@@ -532,12 +477,10 @@
             console.error('Failed to copy!', err);
           });
         });
-        // Append the button to the pre element.
         codeBlock.parentElement.appendChild(button);
       });
     }
-    
-    // Read the "md" query parameter to determine the Markdown URI. Defaults to "/md".
+
     const urlParams = new URLSearchParams(window.location.search);
     const markdownUri = urlParams.get('md') || '/md';
     
@@ -549,6 +492,7 @@ query IntrospectionQuery {
     types {
       name
       description
+      kind
       fields {
         name
         description
@@ -605,7 +549,6 @@ query IntrospectionQuery {
           }
         }
       }
-      kind
       possibleTypes {
         name
         kind
@@ -614,30 +557,32 @@ query IntrospectionQuery {
   }
 }
 `;
-
-  fetch('/gql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: introspectionQuery })
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok: ' + response.statusText);
-    }
-    return response.json();
-  })
-  .then(data => {
-    // Generate markdown text from introspection result using our JS version of generateMarkdownFromSchema2
-    const markdownText = generateMarkdownFromSchema2(data.data);
-    // Render the markdown into HTML.
-    document.getElementById('content').innerHTML = md.render(markdownText);
-    // Add copy buttons to any code blocks.
-    addCopyButtons();
-  })
-  .catch(error => {
-    document.getElementById('content').innerHTML = 'Error loading markdown: ' + error;
-  });
-
+    
+    fetch('/gql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: introspectionQuery })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok: ' + response.statusText);
+      }
+      return response.json();
+    })
+    .then(data => {
+      const markdownText = generateMarkdownFromSchema2(data.data);
+      document.getElementById('content').innerHTML = md.render(markdownText);
+      addCopyButtons();
+    })
+    .catch(error => {
+      document.getElementById('content').innerHTML = 'Error loading markdown: ' + error;
+    });
+    
+    var md = window.markdownit().use(window.markdownItAnchor, {
+      slugify: function(s) {
+        return s.trim().toLowerCase().replace(/\s+/g, '-');
+      }
+    }).use(wrapH4Sections, {});
   </script>
 </body>
 </html>

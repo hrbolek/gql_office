@@ -33,14 +33,15 @@ def UUIDColumn(**kwargs):
 # je-li treba, muzete definovat modely obsahujici jen id polozku, na ktere se budete odkazovat
 #
 
+IDType = uuid.UUID
 
 class BaseModel(MappedAsDataclass, DeclarativeBase):
-    id: Mapped[uuid.UUID] = UUIDColumn(index=True, primary_key=True, default_factory=uuid.uuid4)
+    id: Mapped[IDType] = UUIDColumn(index=True, primary_key=True, default_factory=uuid.uuid4)
 
     created: Mapped[datetime.datetime] = mapped_column(default=None, nullable=True, server_default=sqlalchemy.sql.func.now(), comment="date time of creation")
     lastchange: Mapped[datetime.datetime] = mapped_column(default=None, nullable=True, server_default=sqlalchemy.sql.func.now(), comment="date time stamp")
 
-    createdby_id: Mapped[uuid.UUID] = UUIDFKey(ForeignKey("users.id"), comment="id of user who created this entity")
-    changedby_id: Mapped[uuid.UUID] = UUIDFKey(ForeignKey("users.id"), comment="id of user who changed this entity")
-    rbacobject_id: Mapped[uuid.UUID] = UUIDFKey(comment="id rbacobject")
+    createdby_id: Mapped[IDType] = UUIDFKey(ForeignKey("users.id"), comment="id of user who created this entity")
+    changedby_id: Mapped[IDType] = UUIDFKey(ForeignKey("users.id"), comment="id of user who changed this entity")
+    rbacobject_id: Mapped[IDType] = UUIDFKey(comment="id rbacobject")
 ###

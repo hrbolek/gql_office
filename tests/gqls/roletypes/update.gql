@@ -1,0 +1,31 @@
+mutation RoleTypeUpdate($id: UUID!, $lastchange: DateTime!, $name: String) {
+  result: roleTypeUpdate(roleType: {id: $id, lastchange: $lastchange, name: $name}) {
+    ...RoleType
+    ...Error
+  }
+}
+
+
+fragment Error on RoleTypeGQLModelUpdateError {
+  __typename
+  failed
+  input
+  msg
+  Entity {
+    ...RoleType
+  }
+}
+
+
+fragment RoleType on RoleTypeGQLModel {
+	__typename
+  id
+  lastchange
+  name
+  nameEn
+  
+  created
+  createdby { id email }
+  changedby { id email }
+}
+

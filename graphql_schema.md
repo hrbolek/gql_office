@@ -629,7 +629,7 @@ fragment DigitalFormSection on DigitalFormSectionGQLModel {
     parent { id }
   }
 
-fragment DigitalFormSubmission on DigitalFormSubmissionGQLModel {
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
     __typename
     id
     lastchange
@@ -669,7 +669,7 @@ fragment DigitalForm on DigitalFormGQLModel {
   typeId
   type { ...DocumentType }
   sections { ...DigitalFormSection }
-  submissions { ...DigitalFormSubmission }
+  submissions { ...DigitalSubmission }
 }
 ```
 
@@ -748,7 +748,7 @@ fragment DigitalFormSection on DigitalFormSectionGQLModel {
     parent { id }
   }
 
-fragment DigitalFormSubmission on DigitalFormSubmissionGQLModel {
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
     __typename
     id
     lastchange
@@ -788,7 +788,7 @@ fragment DigitalForm on DigitalFormGQLModel {
   typeId
   type { ...DocumentType }
   sections { ...DigitalFormSection }
-  submissions { ...DigitalFormSubmission }
+  submissions { ...DigitalSubmission }
 }
 ```
 
@@ -1484,13 +1484,13 @@ Input Fields:
 - **id**: [UuidFilter](#uuidfilter) – Filter method
 - **parent_id**: [UuidFilter](#uuidfilter) – Filter method
 
-#### DigitalFieldSubmissionInputFilter
+#### DigitalSubmissionFieldInputFilter
 
-Operators definition on DigitalFieldSubmissionInputFilter
+Operators definition on DigitalSubmissionFieldInputFilter
 
 Input Fields:
-- **_or**: [[DigitalFieldSubmissionInputFilterOr](#digitalfieldsubmissioninputfilteror)!] – Filter method
-- **_and**: [[DigitalFieldSubmissionInputFilterAnd](#digitalfieldsubmissioninputfilterand)!] – Filter method
+- **_or**: [[DigitalSubmissionFieldInputFilterOr](#DigitalSubmissionFieldinputfilteror)!] – Filter method
+- **_and**: [[DigitalSubmissionFieldInputFilterAnd](#DigitalSubmissionFieldinputfilterand)!] – Filter method
 - **name**: [StrFilter](#strfilter) – Filter method
 - **name_en**: [StrFilter](#strfilter) – Filter method
 - **description**: [StrFilter](#strfilter) – Filter method
@@ -1499,12 +1499,12 @@ Input Fields:
 - **field_id**: [UuidFilter](#uuidfilter) – Filter method
 - **submission_id**: [UuidFilter](#uuidfilter) – Filter method
 
-#### DigitalFieldSubmissionInputFilterOr
+#### DigitalSubmissionFieldInputFilterOr
 
-Or operator definition on DigitalFieldSubmissionInputFilter
+Or operator definition on DigitalSubmissionFieldInputFilter
 
 Input Fields:
-- **_and**: [[DigitalFieldSubmissionInputFilterAnd](#digitalfieldsubmissioninputfilterand)!] – Filter method
+- **_and**: [[DigitalSubmissionFieldInputFilterAnd](#DigitalSubmissionFieldinputfilterand)!] – Filter method
 - **name**: [StrFilter](#strfilter) – Filter method
 - **name_en**: [StrFilter](#strfilter) – Filter method
 - **description**: [StrFilter](#strfilter) – Filter method
@@ -1513,12 +1513,12 @@ Input Fields:
 - **field_id**: [UuidFilter](#uuidfilter) – Filter method
 - **submission_id**: [UuidFilter](#uuidfilter) – Filter method
 
-#### DigitalFieldSubmissionInputFilterAnd
+#### DigitalSubmissionFieldInputFilterAnd
 
-And operator definition on DigitalFieldSubmissionInputFilter
+And operator definition on DigitalSubmissionFieldInputFilter
 
 Input Fields:
-- **_or**: [[DigitalFieldSubmissionInputFilterOr](#digitalfieldsubmissioninputfilteror)!] – Filter method
+- **_or**: [[DigitalSubmissionFieldInputFilterOr](#DigitalSubmissionFieldinputfilteror)!] – Filter method
 - **name**: [StrFilter](#strfilter) – Filter method
 - **name_en**: [StrFilter](#strfilter) – Filter method
 - **description**: [StrFilter](#strfilter) – Filter method
@@ -1527,37 +1527,37 @@ Input Fields:
 - **field_id**: [UuidFilter](#uuidfilter) – Filter method
 - **submission_id**: [UuidFilter](#uuidfilter) – Filter method
 
-#### DigitalFormSubmissionInputFilter
+#### DigitalSubmissionInputFilter
 
-Operators definition on DigitalFormSubmissionInputFilter
+Operators definition on DigitalSubmissionInputFilter
 
 Input Fields:
-- **_or**: [[DigitalFormSubmissionInputFilterOr](#digitalformsubmissioninputfilteror)!] – Filter method
-- **_and**: [[DigitalFormSubmissionInputFilterAnd](#digitalformsubmissioninputfilterand)!] – Filter method
+- **_or**: [[DigitalSubmissionInputFilterOr](#DigitalSubmissioninputfilteror)!] – Filter method
+- **_and**: [[DigitalSubmissionInputFilterAnd](#DigitalSubmissioninputfilterand)!] – Filter method
 - **name**: [StrFilter](#strfilter) – Filter method
 - **name_en**: [StrFilter](#strfilter) – Filter method
 - **description**: [StrFilter](#strfilter) – Filter method
 - **id**: [UuidFilter](#uuidfilter) – Filter method
 - **parent_id**: [UuidFilter](#uuidfilter) – Filter method
 
-#### DigitalFormSubmissionInputFilterOr
+#### DigitalSubmissionInputFilterOr
 
-Or operator definition on DigitalFormSubmissionInputFilter
+Or operator definition on DigitalSubmissionInputFilter
 
 Input Fields:
-- **_and**: [[DigitalFormSubmissionInputFilterAnd](#digitalformsubmissioninputfilterand)!] – Filter method
+- **_and**: [[DigitalSubmissionInputFilterAnd](#DigitalSubmissioninputfilterand)!] – Filter method
 - **name**: [StrFilter](#strfilter) – Filter method
 - **name_en**: [StrFilter](#strfilter) – Filter method
 - **description**: [StrFilter](#strfilter) – Filter method
 - **id**: [UuidFilter](#uuidfilter) – Filter method
 - **parent_id**: [UuidFilter](#uuidfilter) – Filter method
 
-#### DigitalFormSubmissionInputFilterAnd
+#### DigitalSubmissionInputFilterAnd
 
-And operator definition on DigitalFormSubmissionInputFilter
+And operator definition on DigitalSubmissionInputFilter
 
 Input Fields:
-- **_or**: [[DigitalFormSubmissionInputFilterOr](#digitalformsubmissioninputfilteror)!] – Filter method
+- **_or**: [[DigitalSubmissionInputFilterOr](#DigitalSubmissioninputfilteror)!] – Filter method
 - **name**: [StrFilter](#strfilter) – Filter method
 - **name_en**: [StrFilter](#strfilter) – Filter method
 - **description**: [StrFilter](#strfilter) – Filter method
@@ -1895,12 +1895,12 @@ Fields:
     - **limit**: Int
     - **orderby**: String
     - **where**: [DigitalFormSectionInputFilter](#digitalformsectioninputfilter)
-- **submissions**: [[DigitalFormSubmissionGQLModel](#digitalformsubmissiongqlmodel)!]! – Digital Document submissions
+- **submissions**: [[DigitalSubmissionGQLModel](#DigitalSubmissiongqlmodel)!]! – Digital Document submissions
   - **Arguments:**
     - **skip**: Int
     - **limit**: Int
     - **orderby**: String
-    - **where**: [DigitalFormSubmissionInputFilter](#digitalformsubmissioninputfilter)
+    - **where**: [DigitalSubmissionInputFilter](#DigitalSubmissioninputfilter)
 
 #### DigitalFormSectionGQLModel
 
@@ -1973,7 +1973,7 @@ Example: "price * quantity" where "price" and "quantity" reference other fields.
 - **backendFormula**: String – Specifies the backend payload constant(s).
 - **flattenFormula**: String – Specifies the operation on incomming data.
 
-#### DigitalFormSubmissionGQLModel
+#### DigitalSubmissionGQLModel
 
 Represents a submission of a digital form filled out by a user.
 Aggregates responses for all the fields defined in the form.
@@ -1995,14 +1995,14 @@ Fields:
 - **state**: [StateGQLModel](#stategqlmodel) – State
 - **typeId**: [UUID](#uuid) – Type id
 - **type**: [DocumentTypeGQLModel](#documenttypegqlmodel) – Type
-- **submittedFields**: [[DigitalFieldSubmissionGQLModel](#digitalfieldsubmissiongqlmodel)!]! – Digital Form Submission fields assigned by an administrator
+- **submittedFields**: [[DigitalSubmissionFieldGQLModel](#DigitalSubmissionFieldgqlmodel)!]! – Digital Form Submission fields assigned by an administrator
   - **Arguments:**
     - **skip**: Int
     - **limit**: Int
     - **orderby**: String
-    - **where**: [DigitalFieldSubmissionInputFilter](#digitalfieldsubmissioninputfilter)
+    - **where**: [DigitalSubmissionFieldInputFilter](#DigitalSubmissionFieldinputfilter)
 
-#### DigitalFieldSubmissionGQLModel
+#### DigitalSubmissionFieldGQLModel
 
 Represents a response for a specific form field within a submission.
 Links the user's provided value with the corresponding form field.
@@ -2021,7 +2021,7 @@ Fields:
 - **fieldId**: [UUID](#uuid) – Digital Field id
 - **submissionId**: [UUID](#uuid) – Digital Form Submission id
 - **field**: [DigitalFormFieldGQLModel](#digitalformfieldgqlmodel) – Digital Field
-- **submission**: [DigitalFormSubmissionGQLModel](#digitalformsubmissiongqlmodel) – Digital Form Submission
+- **submission**: [DigitalSubmissionGQLModel](#DigitalSubmissiongqlmodel) – Digital Form Submission
 - **stateId**: [UUID](#uuid) – State id
 - **state**: [StateGQLModel](#stategqlmodel) – State
 

@@ -49,12 +49,12 @@ class BaseGQLModel:
         default=None,
         permission_classes=[OnlyForAuthentized]
         )
-    lastchange: typing.Optional[datetime.date] = strawberry.field(
+    lastchange: typing.Optional[datetime.datetime] = strawberry.field(
         description="timestamp", 
         default=None,
         permission_classes=[OnlyForAuthentized]
         )
-    created: typing.Optional[datetime.date] = strawberry.field(
+    created: typing.Optional[datetime.datetime] = strawberry.field(
         description="date & time of unit born", 
         default=None,
         permission_classes=[OnlyForAuthentized]

@@ -18,7 +18,7 @@ from .EventGQLModel import EventGQLModel
 from .StateGQLModel import StateGQLModel
 
 
-from .DocumentGQLModel import DocumentGQLModel
+from .DocumentGQLModel import DocumentInterfaceGQLModel
 
 
 
@@ -28,7 +28,7 @@ from .mutation import Mutation
 schema = strawberry.federation.Schema(
     query=Query, 
     mutation=Mutation, 
-    types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentGQLModel, StateGQLModel), 
+    types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentInterfaceGQLModel, StateGQLModel), 
     extensions=[]
 )
 

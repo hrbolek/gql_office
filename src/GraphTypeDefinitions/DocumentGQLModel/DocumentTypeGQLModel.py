@@ -28,9 +28,7 @@ from uoishelpers.resolvers import (
 
 from ..BaseGQLModel import BaseGQLModel, IDType
 
-@strawberry.input(
-    description="""Input type for filtering DocumentTypeGQLModel"""
-)
+@createInputs
 @dataclasses.dataclass
 class DocumentTypeInputFilter:
     name: str
@@ -38,7 +36,7 @@ class DocumentTypeInputFilter:
     id: IDType
 
 @strawberry.federation.type(
-    description="""Entity representing a Document type"""
+    keys=["id"], description="""Entity representing a Document type"""
 )
 class DocumentTypeGQLModel(BaseGQLModel):
     @classmethod
@@ -180,7 +178,7 @@ class DocumentTypeMutation:
             SimpleInsertPermission[DocumentTypeGQLModel](roles=["administrátor"])
         ]
     )
-    async def facility_type_insert(
+    async def document_type_insert(
         self,
         info: strawberry.types.Info,
         facility: DocumentTypeInsertGQLModel
@@ -193,7 +191,7 @@ class DocumentTypeMutation:
             SimpleUpdatePermission[DocumentTypeGQLModel](roles=["administrátor"])
         ]
     )
-    async def facility_type_update(
+    async def document_type_update(
         self,
         info: strawberry.types.Info,
         facility: DocumentTypeUpdateGQLModel
@@ -206,7 +204,7 @@ class DocumentTypeMutation:
             SimpleDeletePermission[DocumentTypeGQLModel](roles=["administrátor"])
         ]
     )
-    async def facility_type_delete(
+    async def document_type_delete(
         self,
         info: strawberry.types.Info,
         facility: DocumentTypeDeleteGQLModel

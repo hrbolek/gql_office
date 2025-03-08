@@ -42,7 +42,7 @@ class EventTypeInputFilter:
 
 
 @strawberry.federation.type(
-    description="""Entity representing a Event Type"""
+    keys=["id"], description="""Entity representing a Event Type"""
 )
 class EventTypeGQLModel(BaseGQLModel):
 
@@ -158,29 +158,29 @@ class EventTypeMutation:
             SimpleInsertPermission[EventTypeGQLModel](roles=["administrátor"])
         ]
     )
-    async def event_insert(self, info: strawberry.types.Info, event_type: EventTypeInsertGQLModel) -> typing.Union[EventTypeGQLModel, InsertError[EventTypeGQLModel]]:
+    async def event_type_insert(self, info: strawberry.types.Info, event_type: EventTypeInsertGQLModel) -> typing.Union[EventTypeGQLModel, InsertError[EventTypeGQLModel]]:
         result = await Insert[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result
     
     @strawberry.mutation(
-        description="standard insert operation",
+        description="standard update operation",
         permission_classes=[
             OnlyForAuthentized,
             SimpleUpdatePermission[EventTypeGQLModel](roles=["administrátor"])
         ]
     )
-    async def event_update(self, info: strawberry.types.Info, event_type: EventTypeUpdateGQLModel) -> typing.Union[EventTypeGQLModel, UpdateError[EventTypeGQLModel]]:
+    async def event_type_update(self, info: strawberry.types.Info, event_type: EventTypeUpdateGQLModel) -> typing.Union[EventTypeGQLModel, UpdateError[EventTypeGQLModel]]:
         result = await UpdateError[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result
 
 
     @strawberry.mutation(
-        description="standard insert operation",
+        description="standard delete operation",
         permission_classes=[
             OnlyForAuthentized,
             SimpleDeletePermission[EventTypeGQLModel](roles=["administrátor"])
         ]
     )
-    async def event_delete(self, info: strawberry.types.Info, event_type: EventTypeDeleteGQLModel) -> typing.Optional[DeleteError[EventTypeGQLModel]]:
+    async def event_type_delete(self, info: strawberry.types.Info, event_type: EventTypeDeleteGQLModel) -> typing.Optional[DeleteError[EventTypeGQLModel]]:
         result = await Delete[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result        

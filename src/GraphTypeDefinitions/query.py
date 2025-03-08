@@ -5,11 +5,12 @@ from .FacilityGQLModel import (
     FacilityQuery,
     FacilityTypeQuery
 )
-from .DocumentGQLModel import ElectronicDocumentGQLModel, DocumentQuery
+from .DocumentGQLModel import ElectronicDocumentGQLModel, ElectronicDocumentQuery
 from .DocumentGQLModel import (
     DigitalDocumentGQLModel, DigitalFormQuery,
     DigitalFormSectionGQLModel, DigitalFormSectionQuery, 
-    DigitalFormSubmissionQuery, DigitalFormSubmissionMutation
+    DigitalSubmissionQuery, DigitalSubmissionMutation,
+    DocumentQuery
 )
 
 from .EventGQLModel import (
@@ -27,11 +28,12 @@ class Query(
     FacilityQuery, 
     FacilityTypeQuery,
 
-    DocumentQuery, 
+    ElectronicDocumentQuery, 
     DigitalFormQuery,
     DigitalFormSectionQuery,
 
-    DigitalFormSubmissionQuery
+    DigitalSubmissionQuery,
+    DocumentQuery
 ):
 
     pass

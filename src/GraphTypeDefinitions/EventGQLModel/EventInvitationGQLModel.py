@@ -43,7 +43,7 @@ class EventInvitationInputFilter:
     state_id: IDType
 
 @strawberry.federation.type(
-    description="""Entity representing a Invitation to an Event and also presence of a user, invitation state and presence is managed by state"""
+    keys=["id"], description="""Entity representing a Invitation to an Event and also presence of a user, invitation state and presence is managed by state"""
 )
 class EventInvitationGQLModel(BaseGQLModel):
 
@@ -155,6 +155,8 @@ class EventInvitationUpdateGQLModel:
         default=None
     )
 
+    changedby_id: strawberry.Private[IDType] = None
+
 @strawberry.input(
     description="""EventInvitation delete mutation"""
 )
@@ -182,6 +184,7 @@ class EventInvitationMutation:
         info: strawberry.types.Info,
         invitation: EventInvitationInsertGQLModel
     ) -> typing.Union[EventInvitationGQLModel, InsertError[EventInvitationGQLModel]]:
+        # TODO check if invitation already exists and reject to invite that user again
         return await Insert[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)
     
     @strawberry.field(
