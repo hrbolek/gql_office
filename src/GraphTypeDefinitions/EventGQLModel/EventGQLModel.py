@@ -239,27 +239,35 @@ class EventQuery:
 class EventInsertGQLModel:
     name: typing.Optional[str] = strawberry.field(
         description="""Event name assigned by an administrator""",
+        default=None
     )
     name_en: typing.Optional[str] = strawberry.field(
         description="""Event eng name assigned by an administrator""",
+        default=None
     )
     description: typing.Optional[str] = strawberry.field(
         description="""Event description""",
+        default=None
     )
     start_date: typing.Optional[datetime.datetime] = strawberry.field(
         description="""Event start date""",
+        default=None
     )
     end_date: typing.Optional[datetime.datetime] = strawberry.field(
         description="""Event end date""",
+        default=None
     )
     parent_id: typing.Optional[IDType] = strawberry.field(
         description="""Event parent id""",
+        default=None
     )
     id: typing.Optional[IDType] = strawberry.field(
         description="""Event id""",
+        default=None
     )
     rbacobject_id: typing.Optional[IDType] = strawberry.field(
         description="""Event rbacobject id""",
+        default=None
     )
     createdby_id: strawberry.Private[IDType] = None
 
@@ -270,23 +278,32 @@ class EventUpdateGQLModel:
     id: IDType = strawberry.field(
         description="""Event id""",
     )
+    lastchange: datetime.datetime = strawberry.field(
+        description="timestamp"
+    )
     name: typing.Optional[str] = strawberry.field(
         description="""Event name assigned by an administrator""",
+        default=None
     )
     name_en: typing.Optional[str] = strawberry.field(
         description="""Event eng name assigned by an administrator""",
+        default=None
     )
     description: typing.Optional[str] = strawberry.field(
         description="""Event description""",
+        default=None
     )
-    start_date: typing.Optional[datetime.datetime] = strawberry.field(
+    startdate: typing.Optional[datetime.datetime] = strawberry.field(
         description="""Event start date""",
+        default=None
     )
-    end_date: typing.Optional[datetime.datetime] = strawberry.field(
+    enddate: typing.Optional[datetime.datetime] = strawberry.field(
         description="""Event end date""",
+        default=None
     )
     parent_id: typing.Optional[IDType] = strawberry.field(
         description="""Event parent id""",
+        default=None
     )
     changedby_id: strawberry.Private[IDType] = None
 

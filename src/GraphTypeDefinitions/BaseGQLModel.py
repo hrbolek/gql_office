@@ -81,7 +81,7 @@ class BaseGQLModel:
         )
     async def createdby(self) -> typing.Optional["UserGQLModel"]:
         from .UserGQLModel import UserGQLModel
-        return None if self.changedby_id is None else UserGQLModel(id=self.createdby_id)
+        return None if self.createdby_id is None else UserGQLModel(id=self.createdby_id)
 
     @strawberry.field(
         description="who created this entity",

@@ -118,11 +118,13 @@ class FacilityTypeInsertGQLModel:
         description="""FacilityType eng name""",
         default=None
     )
-    parent_id: IDType = strawberry.field(
-        description="""FacilityType master id"""
+    parent_id: typing.Optional[IDType] = strawberry.field(
+        description="""FacilityType master id""",
+        default=None
     )
-    id: IDType = strawberry.field(
-        description="""FacilityType id client generated"""
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""FacilityType id client generated""",
+        default=None
     )
     createdby_id: strawberry.Private[IDType] = None
 

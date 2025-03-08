@@ -1,14 +1,109 @@
-
-mutation ($id: UUID, $facilitytype_id: UUID, $name: String!, $valid: Boolean, $master_facility_id: UUID) {
-  result: facilityInsert(
-    facility: {id: $id, name: $name, facilitytypeId: $facilitytype_id, valid: $valid, masterFacilityId: $master_facility_id}
-  ) {
-    id
-    msg
-    result: facility {
-      id
-      name
-      lastchange
-    }
-  }
+mutation facilityInsert($name: String!, $facilitytypeId: UUID, $id: UUID, $nameEn: String, $label: String, $address: String, $valid: Boolean, $capacity: Int, $geometry: String, $geolocation: String, $groupId: UUID, $masterFacilityId: UUID, $rbacobjectId: UUID) {
+  facilityInsert(facility: {name: $name, facilitytypeId: $facilitytypeId, id: $id, nameEn: $nameEn, label: $label, address: $address, valid: $valid, capacity: $capacity, geometry: $geometry, geolocation: $geolocation, groupId: $groupId, masterFacilityId: $masterFacilityId, rbacobjectId: $rbacobjectId}) {
+  ... on FacilityGQLModel { ...Facility }
+  ... on InsertError { ...InsertError }
 }
+}
+
+fragment User on UserGQLModel {
+      __typename
+      id
+    }
+
+fragment RBACObject on RBACObjectGQLModel {
+      __typename
+      id
+    }
+
+fragment EventFacilityReservation on EventFacilityReservationGQLModel {
+      __typename
+      id
+      lastchange
+      created
+      createdbyId
+      changedbyId
+      rbacobjectId
+      createdby { id }
+      changedby { id }
+      rbacobject { id }
+      eventId
+      event { id }
+      facilityId
+      facility { id }
+      stateId
+      state { id }
+    }
+
+fragment FacilityType on FacilityTypeGQLModel {
+      __typename
+      id
+      lastchange
+      created
+      createdbyId
+      changedbyId
+      rbacobjectId
+      createdby { id }
+      changedby { id }
+      rbacobject { id }
+      name
+      nameEn
+      parent { id }
+      parentId
+      children { id }
+    }
+
+fragment Group on GroupGQLModel {
+      __typename
+      id
+    }
+
+fragment Facility on FacilityGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby {
+  ...User
+}
+    changedby {
+  ...User
+}
+    rbacobject {
+  ...RBACObject
+}
+    name
+    nameEn
+    label
+    startdate
+    enddate
+    address
+    valid
+    capacity
+    geometry
+    geolocation
+    reservations {
+  ...EventFacilityReservation
+}
+    groupId
+    facilitytypeId
+    masterFacilityId
+    type {
+  ...FacilityType
+}
+    masterFacility { id }
+    masterFacilities { id }
+    subFacilities { id }
+    group {
+  ...Group
+}
+  }
+
+fragment InsertError on InsertError {
+    __typename
+    msg
+    failed
+    input
+  }

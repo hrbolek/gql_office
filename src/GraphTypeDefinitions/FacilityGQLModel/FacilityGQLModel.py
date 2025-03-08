@@ -179,6 +179,7 @@ class FacilityGQLModel(BaseGQLModel):
     )
 
     master_facilities: typing.List["FacilityGQLModel"] = strawberry.field(
+        default_factory=list,
         description="""Facilities above this""",
         permission_classes=[
             OnlyForAuthentized
@@ -255,7 +256,7 @@ class FacilityInsertGQLModel:
 @strawberry.input(description="Input definition for facility update")
 class FacilityUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
     name: typing.Optional[str] = strawberry.field(description="name of the type", default=None)
     name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default="")
     label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default="")
@@ -269,7 +270,7 @@ class FacilityUpdateGQLModel:
 @strawberry.input(description="Input definition for facility delete")
 class FacilityDeleteGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
 @strawberry.federation.type(
     description="""Facility mutations"""

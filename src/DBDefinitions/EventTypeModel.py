@@ -21,10 +21,10 @@ from .BaseModel import BaseModel, UUIDColumn, UUIDFKey, IDType
 class EventTypeModel(BaseModel):
     __tablename__ = "eventtypes"
 
-    name: Mapped[str] = mapped_column(default=None, comment="aka lecture, laboratory, ...")
-    name_en: Mapped[str] = mapped_column(default=None, comment="aka lecture, laboratory, ...")
+    name: Mapped[str] = mapped_column(default=None, nullable=True, comment="aka lecture, laboratory, ...")
+    name_en: Mapped[str] = mapped_column(default=None, nullable=True, comment="aka lecture, laboratory, ...")
 
-    parent_id = Column(ForeignKey("eventtypes.id"), index=True, comment="aka academic, admnistrative, ...")
+    parent_id = Column(ForeignKey("eventtypes.id"), index=True, nullable=True, comment="aka academic, admnistrative, ...")
 
 
     events = relationship("EventModel", back_populates="type")

@@ -159,7 +159,7 @@ class SubmissionSectionInsertGQLModel:
 @strawberry.input(description="Input definition for SubmissionSection update")
 class SubmissionSectionUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
     name: typing.Optional[str] = strawberry.field(description="name of the section, must start with Capitalized lettere", default=None)
     name_en: typing.Optional[str] = strawberry.field(description="eng name ", default=None)
     changedby_id: strawberry.Private[IDType]
@@ -167,7 +167,7 @@ class SubmissionSectionUpdateGQLModel:
 @strawberry.input(description="Input definition for SubmissionSection delete")
 class SubmissionSectionDeleteGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
 @strawberry.federation.type(description="")
 class SubmissionSectionMutation:
@@ -230,7 +230,7 @@ class SubmissionSectionMutation:
         ]
     )
     async def submission_section_update(self, info: strawberry.types.Info, submission_section: SubmissionSectionUpdateGQLModel) -> typing.Union[DigitalSubmissionSectionGQLModel, UpdateError[DigitalSubmissionSectionGQLModel]]:
-        result = await UpdateError[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=submission_section)
+        result = await Update[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=submission_section)
         return result
 
 

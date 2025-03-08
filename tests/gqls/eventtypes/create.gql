@@ -1,23 +1,81 @@
-mutation ($id: UUID!, $name: String!, $name_en: String) {
-  result: eventTypeInsert(
-    eventType: {id: $id, name: $name, nameEn: $name_en}
-  ) {
-    id
-    msg
-    result: eventType {
-      ...EventType
-    }
-  }
+mutation eventTypeInsert($name: String!, $nameEn: String, $parentId: UUID, $id: UUID) {
+  eventTypeInsert(eventType: {name: $name, nameEn: $nameEn, parentId: $parentId, id: $id}) {
+  ... on EventTypeGQLModel { ...EventType }
+  ... on InsertError { ...InsertError }
+}
 }
 
+fragment User on UserGQLModel {
+      __typename
+      id
+    }
+
+fragment RBACObject on RBACObjectGQLModel {
+      __typename
+      id
+    }
+
+fragment Event on EventGQLModel {
+      __typename
+      id
+      lastchange
+      created
+      createdbyId
+      changedbyId
+      rbacobjectId
+      createdby { id }
+      changedby { id }
+      rbacobject { id }
+      name
+      nameEn
+      description
+      startdate
+      enddate
+      duration_raw
+      place
+      facilityId
+      facility { id }
+      reservations { id }
+      mastereventId
+      parent { id }
+      children { id }
+      typeId
+      type { id }
+      invitations { id }
+      # duration
+    }
 
 fragment EventType on EventTypeGQLModel {
-  __typename
-  lastchange
-  id
-  name
-  
-  created
-  createdby { id }
-  changedby { id } 
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby {
+  ...User
 }
+    changedby {
+  ...User
+}
+    rbacobject {
+  ...RBACObject
+}
+    name
+    nameEn
+    description
+    parentId
+    parent { id }
+    children { id }
+    events {
+  ...Event
+}
+  }
+
+fragment InsertError on InsertError {
+    __typename
+    msg
+    failed
+    input
+  }

@@ -132,14 +132,14 @@ class EventFacilityReservationInsertGQLModel:
 @strawberry.input(description="Input definition for EventFacilityReservation update")
 class EventFacilityReservationUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
     state_id: typing.Optional[IDType] = strawberry.field(description="reservation state")
     changedby_id: strawberry.Private[IDType]
 
 @strawberry.input(description="Input definition for EventFacilityReservation delete")
 class EventFacilityReservationDeleteGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
 @strawberry.federation.type(description="")
 class EventFacilityReservationMutation:
@@ -163,7 +163,7 @@ class EventFacilityReservationMutation:
         ]
     )
     async def event_update(self, info: strawberry.types.Info, event_type: EventFacilityReservationUpdateGQLModel) -> typing.Union[EventFacilityReservationGQLModel, UpdateError[EventFacilityReservationGQLModel]]:
-        result = await UpdateError[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
+        result = await Update[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result
 
 

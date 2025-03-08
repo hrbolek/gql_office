@@ -1,7 +1,6 @@
-mutation facilityUpdate($id: UUID!, $lastchange: DateTime!, $name: String, $nameEn: String, $label: String, $address: String, $valid: Boolean, $capacity: Int, $geometry: String, $geolocation: String) {
-  facilityUpdate(facility: {id: $id, lastchange: $lastchange, name: $name, nameEn: $nameEn, label: $label, address: $address, valid: $valid, capacity: $capacity, geometry: $geometry, geolocation: $geolocation}) {
-  ... on FacilityGQLModel { ...Facility }
-  ... on FacilityGQLModelUpdateError { ...Error }
+mutation facilityDelete($id: UUID!, $lastchange: DateTime!) {
+  facilityDelete(facility: {id: $id, lastchange: $lastchange}) {
+  ...FacilityGQLModelDeleteError
 }
 }
 
@@ -101,12 +100,12 @@ fragment Facility on FacilityGQLModel {
 }
   }
 
-fragment Error on FacilityGQLModelUpdateError {
-    __typename
-    Entity {
+fragment FacilityGQLModelDeleteError on FacilityGQLModelDeleteError {
+  __typename
+  Entity {
   ...Facility
 }
-    msg
-    failed
-    input
-  }
+  msg
+  failed
+  input
+}

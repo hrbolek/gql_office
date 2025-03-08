@@ -134,20 +134,20 @@ class EventTypeInsertGQLModel:
     name_en: typing.Optional[str] = strawberry.field(description="eng name of the type", default=None)
     parent_id: typing.Optional[IDType] = strawberry.field(description="for which type this type belongs", default=None)
     id: typing.Optional[IDType] = strawberry.field(description="client generated primary key", default=None)
-    createdby_id: strawberry.Private[IDType]
+    createdby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for EventType update")
 class EventTypeUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
     name: typing.Optional[str] = strawberry.field(description="name of the type", default=None)
     name_en: typing.Optional[str] = strawberry.field(description="eng name of the type", default=None)
-    changedby_id: strawberry.Private[IDType]
+    changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for EventType delete")
 class EventTypeDeleteGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
 @strawberry.federation.type(description="")
 class EventTypeMutation:
@@ -171,7 +171,7 @@ class EventTypeMutation:
         ]
     )
     async def event_type_update(self, info: strawberry.types.Info, event_type: EventTypeUpdateGQLModel) -> typing.Union[EventTypeGQLModel, UpdateError[EventTypeGQLModel]]:
-        result = await UpdateError[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
+        result = await Update[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result
 
 

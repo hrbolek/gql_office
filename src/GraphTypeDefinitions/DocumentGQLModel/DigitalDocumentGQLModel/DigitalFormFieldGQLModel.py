@@ -190,13 +190,13 @@ class DigitalFormFieldInsertGQLModel:
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldUpdateGQLModel:
     id: IDType = strawberry.field(description="primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
     type_id: typing.Optional[IDType] = strawberry.field(description="type id of the field", default=None)
     
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldDeleteGQLModel:
     id: IDType = strawberry.field(description="primary key")
-    lastchange: IDType = strawberry.field(description="timestamp for concurrent update")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
 
 async def digital_form_field_insert_internal(self, info: strawberry.types.Info, form_field: DigitalFormFieldInsertGQLModel):
