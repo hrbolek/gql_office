@@ -254,7 +254,7 @@ def createByIdTest2(tableName, queryName=None, variables=None, expectedJson=None
         if _variables == {}:
             queryReadPage = getQuery(tableName=tableName, queryName="readp")
             pageJson = await SchemaExecutorDemo(query=queryReadPage, variable_values={})
-
+            assert "errors" not in pageJson, f"got errors {pageJson['errors']}\n{pageJson}"
             logging.info(f"deriving variables from response to page query {pageJson}")
             pageData = pageJson.get("data", None)
             assert pageData is not None, f"during query {tableName}_by_id got page result with no data {pageJson}"

@@ -1,0 +1,90 @@
+mutation digitalFormSectionDelete($id: UUID!, $lastchange: DateTime!) {
+  digitalFormSectionDelete(digitalFormSection: {id: $id, lastchange: $lastchange}) {
+  ...DigitalFormSectionGQLModelDeleteError
+}
+}
+
+fragment User on UserGQLModel {
+    __typename
+    id
+    }
+
+fragment RBACObject on RBACObjectGQLModel {
+    __typename
+    id
+    }
+
+fragment DigitalFormField on DigitalFormFieldGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    name
+    label
+    labelEn
+    description
+    formSectionId
+    formSection { __typename }
+    formId
+    form { __typename }
+    required
+    order
+    computed
+    formula
+    typeId
+    backendFormula
+    flattenFormula
+    }
+
+fragment DigitalFormSection on DigitalFormSectionGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby {
+  ...User
+}
+  changedby {
+  ...User
+}
+  rbacobject {
+  ...RBACObject
+}
+  name
+  path
+  label
+  labelEn
+  description
+  parentId
+  sections { __typename }
+  fields {
+  ...DigitalFormField
+}
+  order
+  repatableMin
+  repatableMax
+  repeatable
+  parent {
+        ... on DigitalFormSectionGQLModel { __typename id } # ... on DigitalFormSectionGQLModel { ...DigitalFormSection }
+        ... on DigitalFormGQLModel { __typename id } # ... on DigitalFormGQLModel { ...DigitalForm }
+      }
+  }
+
+fragment DigitalFormSectionGQLModelDeleteError on DigitalFormSectionGQLModelDeleteError {
+__typename
+Entity {
+  ...DigitalFormSection
+}
+msg
+failed
+input
+}

@@ -183,15 +183,79 @@ class DigitalFormFieldQuery:
 
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldInsertGQLModel:
-    type_id: IDType = strawberry.field(description="type id of the field")
-    form_section_id: IDType = strawberry.field(description="section id where the field is placed")
-    id: typing.Optional[IDType] = strawberry.field(description="client side generated id", default=None)
+    # type_id: IDType = strawberry.field(description="type id of the field")
+    form_id: IDType = strawberry.field(
+        description="form id where the field is placed"
+    )
+    form_section_id: typing.Optional[IDType] = strawberry.field(
+        description="section id where the field is placed",
+        default=None
+    )
+    id: typing.Optional[IDType] = strawberry.field(
+        description="client side generated id", 
+        default=None
+    )
+    name: typing.Optional[str] = strawberry.field(
+        description="variable name", 
+        default=None
+    )
+    label: typing.Optional[str] = strawberry.field(
+        description="label - visual description", 
+        default=None
+    )
+    label_en: typing.Optional[str] = strawberry.field(
+        description="label - visual description", 
+        default=None
+    )
+    description: typing.Optional[str] = strawberry.field(
+        description="description - visual placeholder", 
+        default=None
+    )
+    required: typing.Optional[bool] = strawberry.field(
+        description="", 
+        default=None
+    )
+    order: typing.Optional[int] = strawberry.field(
+        description="", 
+        default=None
+    )
+    computed: typing.Optional[int] = strawberry.field(
+        description="", 
+        default=None
+    )
     
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldUpdateGQLModel:
     id: IDType = strawberry.field(description="primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
-    type_id: typing.Optional[IDType] = strawberry.field(description="type id of the field", default=None)
+    name: typing.Optional[str] = strawberry.field(
+        description="variable name", 
+        default=None
+    )
+    label: typing.Optional[str] = strawberry.field(
+        description="label - visual description", 
+        default=None
+    )
+    label_en: typing.Optional[str] = strawberry.field(
+        description="label - visual description", 
+        default=None
+    )
+    description: typing.Optional[str] = strawberry.field(
+        description="description - visual placeholder", 
+        default=None
+    )
+    required: typing.Optional[bool] = strawberry.field(
+        description="", 
+        default=None
+    )
+    order: typing.Optional[int] = strawberry.field(
+        description="", 
+        default=None
+    )
+    computed: typing.Optional[int] = strawberry.field(
+        description="", 
+        default=None
+    )
     
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldDeleteGQLModel:

@@ -60,7 +60,7 @@ class DigitalFormGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=VectorResolver["DigitalFormSectionGQLModel"](fkey_field_name="document_id", whereType=DigitalFormSectionInputFilter)
+        resolver=VectorResolver["DigitalFormSectionGQLModel"](fkey_field_name="form_id", whereType=DigitalFormSectionInputFilter)
     )
 
     submissions: typing.List["DigitalSubmissionGQLModel"] = strawberry.field(
@@ -68,7 +68,7 @@ class DigitalFormGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=VectorResolver["DigitalSubmissionGQLModel"](fkey_field_name="document_id", whereType=DigitalSubmissionInputFilter)
+        resolver=VectorResolver["DigitalSubmissionGQLModel"](fkey_field_name="form_id", whereType=DigitalSubmissionInputFilter)
     )
 
 @strawberry.type(
@@ -105,8 +105,9 @@ class DigitalFormInsertGQLModel:
         default=None
     )
 
-    id: IDType = strawberry.field(
-        description="""DigitalForm id client generated"""
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""DigitalForm id client generated""",
+        default=None
     )
 
     from .DigitalFormSectionGQLModel import DigitalFormSectionInsertGQLModel

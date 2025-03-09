@@ -296,11 +296,23 @@
           if (!fragments[possibleName]) {
             generateSelectionSetWithFragments(possible, typesByName, fragments, depth + 1, maxDepth, indentLevel + 1, indentStr);
           }
-          const inlineFragment = `... on ${possibleName} { ...${getFragmentName(possibleName)} }`;
-          unionLines.push(indentStr.repeat(indentLevel) + inlineFragment);
+          const fragName = getFragmentName(base.name || "");
+          const currentFrag = getFragmentName(possibleName);
+
+          let inlineFragment = `... on ${possibleName} { ...${getFragmentName(possibleName)} }`;
+
+          console.log(currentFrag, fragName)
+          // console.log(base?.name, possibleName)
+          if (`${typeRef.name}` != 'null') {
+          // if (base?.name == possibleName) {
+            inlineFragment = `... on ${possibleName} { __typename id } # ${inlineFragment}`;
+          }
+          // inlineFragment = `... on ${possibleName} { __typename }`;
+
+          unionLines.push(indentStr.repeat(indentLevel + 1) + inlineFragment);
         });
         if (unionLines.length > 0) {
-          const unionBlock = "{\n" + unionLines.join("\n") + "\n" + indentStr.repeat(indentLevel - 1) + "}";
+          const unionBlock = "{\n" + unionLines.join("\n") + "\n" + indentStr.repeat(indentLevel) + "}";
           return unionBlock;
         } else {
           return "";
@@ -319,9 +331,9 @@
           fragmentBody = "{ __typename, id }";
         } else {
           let fragmentLines = [];
-          fragmentLines.push(indentStr.repeat(indentLevel) + "__typename");
+          fragmentLines.push(indentStr.repeat(indentLevel - 1) + "__typename");
           typeDef.fields.forEach(f => {
-            let line = indentStr.repeat(indentLevel);
+            let line = indentStr.repeat(indentLevel - 1);
             if (f.args && hasMandatoryArgs(f)) {
               line += "# " + f.name;
             } else {
@@ -330,12 +342,13 @@
               const currentFrag = getFragmentName(typeName);
               if (["OBJECT", "UNION"].includes(fNamed.kind)) {
                 if (fragName === currentFrag) {
-                  line += `${f.name} { id }`;
+                  line += `${f.name} { __typename }`;
                 } else if (depth + 1 < maxDepth) {
                   const subSelection = generateSelectionSetWithFragments(f.type, typesByName, fragments, depth + 1, maxDepth, indentLevel + 1, indentStr);
                   line += `${f.name} ${subSelection}`;
+                  // line += `${f.name} { __typename }`;
                 } else {
-                  line += `${f.name} { id }`;
+                  line += `${f.name} { __typename }`;
                 }
               } else {
                 line += f.name;

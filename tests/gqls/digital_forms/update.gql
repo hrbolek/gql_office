@@ -1,0 +1,137 @@
+mutation digitalFormUpdate($id: UUID!, $lastchange: DateTime!, $name: String, $nameEn: String) {
+  digitalFormUpdate(digitalForm: {id: $id, lastchange: $lastchange, name: $name, nameEn: $nameEn}) {
+  ... on DigitalFormGQLModel { ...DigitalForm }
+  ... on DigitalFormGQLModelUpdateError { ...Error }
+}
+}
+
+fragment User on UserGQLModel {
+      __typename
+      id
+    }
+
+fragment RBACObject on RBACObjectGQLModel {
+      __typename
+      id
+    }
+
+fragment State on StateGQLModel {
+      __typename
+      id
+    }
+
+fragment DocumentType on DocumentTypeGQLModel {
+      __typename
+      id
+      lastchange
+      created
+      createdbyId
+      changedbyId
+      rbacobjectId
+      createdby { __typename }
+      changedby { __typename }
+      rbacobject { __typename }
+      name
+      nameEn
+      description
+      parentId
+      parent { __typename }
+      children { __typename }
+    }
+
+fragment DigitalFormSection on DigitalFormSectionGQLModel {
+      __typename
+      id
+      lastchange
+      created
+      createdbyId
+      changedbyId
+      rbacobjectId
+      createdby { __typename }
+      changedby { __typename }
+      rbacobject { __typename }
+      name
+      path
+      label
+      labelEn
+      description
+      parentId
+      sections { __typename }
+      fields { __typename }
+      order
+      repatableMin
+      repatableMax
+      repeatable
+      parent { __typename }
+    }
+
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
+      __typename
+      id
+      lastchange
+      created
+      createdbyId
+      changedbyId
+      rbacobjectId
+      createdby { __typename }
+      changedby { __typename }
+      rbacobject { __typename }
+      name
+      nameEn
+      description
+      stateId
+      state { __typename }
+      parentId
+      typeId
+      type { __typename }
+      submittedSections { __typename }
+      submittedFields { __typename }
+      submittedSectionsAll { __typename }
+    }
+
+fragment DigitalForm on DigitalFormGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby {
+  ...User
+}
+    changedby {
+  ...User
+}
+    rbacobject {
+  ...RBACObject
+}
+    name
+    nameEn
+    description
+    stateId
+    state {
+  ...State
+}
+    parentId
+    typeId
+    type {
+  ...DocumentType
+}
+    sections {
+  ...DigitalFormSection
+}
+    submissions {
+  ...DigitalSubmission
+}
+  }
+
+fragment Error on DigitalFormGQLModelUpdateError {
+    __typename
+    Entity {
+  ...DigitalForm
+}
+    msg
+    failed
+    input
+  }
