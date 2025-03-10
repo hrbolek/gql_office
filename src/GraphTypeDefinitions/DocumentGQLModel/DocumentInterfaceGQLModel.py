@@ -48,14 +48,16 @@ class DocumentInterfaceGQLModel:
         description="""Document name""",
         permission_classes=[
             OnlyForAuthentized
-        ]
+        ],
+        default=None
     )
 
     name_en: typing.Optional[str] = strawberry.field(
         description="""Document eng name""",
         permission_classes=[
             OnlyForAuthentized
-        ]
+        ],
+        default=None
     )
 
     description: typing.Optional[str] = strawberry.field(   
@@ -63,13 +65,15 @@ class DocumentInterfaceGQLModel:
         permission_classes=[
             OnlyForAuthentized
         ],
+        default=None
     )
 
     state_id: typing.Optional[IDType] = strawberry.field(
         description="""State id""",
         permission_classes=[
             OnlyForAuthentized
-        ]
+        ],
+        default=None
     )
 
     state: typing.Optional["StateGQLModel"] = strawberry.field(
@@ -84,14 +88,16 @@ class DocumentInterfaceGQLModel:
         description="""id of the parent document""",
         permission_classes=[
             OnlyForAuthentized
-        ]
+        ],
+        default=None
     )
 
     type_id: typing.Optional[IDType] = strawberry.field(  
         description="""Type id""",
         permission_classes=[
             OnlyForAuthentized
-        ]
+        ],
+        default=None
     )
 
     type_: typing.Optional["DocumentTypeGQLModel"] = strawberry.field(

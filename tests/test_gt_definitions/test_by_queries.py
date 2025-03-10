@@ -7,14 +7,33 @@ from .gt_utils import (
     createTest2
 )
 
+
+test_digital_submission_by_id = createByIdTest2(tableName="digital_submissions")
+test_digital_submission_page = createPageTest2(tableName="digital_submissions")
+
+
 test_digital_form_section_by_id = createByIdTest2(tableName="digital_form_sections")
 test_digital_form_section_page = createPageTest2(tableName="digital_form_sections")
 test_digital_form_section_insert = createInsertTest2(
     tableName="digital_form_sections", 
     variables={
-        "id": "aae16f75-e76e-43a7-b0bc-556f0f6dd29d",
         "name": "new section",
-        "formId": "ff9b7547-8f90-46dc-894e-ad0341a48bf8"
+        "formId": "ff9b7547-8f90-46dc-894e-ad0341a48bf8",
+        "sections": [
+            {
+                "formId": "ff9b7547-8f90-46dc-894e-ad0341a48bf8",
+                "name": "inner section",
+                "fields": [
+                    {
+                        "formId": "ff9b7547-8f90-46dc-894e-ad0341a48bf8",
+                        "name": "inner field",
+                        "label": "",
+                        "labelEn": "",
+                        "description": "desc"
+                    }
+                ]
+            }
+        ]
     })
 
 test_digital_form_section_update = createUpdateTest2(

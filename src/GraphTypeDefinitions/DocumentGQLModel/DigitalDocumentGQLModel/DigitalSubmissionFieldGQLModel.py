@@ -52,7 +52,7 @@ Links the user's provided value with the corresponding submission field."""
 class DigitalSubmissionFieldGQLModel(BaseGQLModel):
     @classmethod
     def getLoader(cls, info: strawberry.types.Info):
-        return getLoadersFromInfo(info).DigitalFieldResponseModel
+        return getLoadersFromInfo(info).DigitalSubmissionFieldModel
 
     path: typing.Optional[str] = strawberry.field(
         description="aka materialized path",

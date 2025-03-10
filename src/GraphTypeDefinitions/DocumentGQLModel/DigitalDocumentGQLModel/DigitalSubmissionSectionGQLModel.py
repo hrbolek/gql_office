@@ -49,7 +49,7 @@ class DigitalSubmissionSectionGQLModel(BaseGQLModel):
 
     @classmethod
     def getLoader(cls, info: strawberry.types.Info):
-        return getLoadersFromInfo(info).SubmissionSectionModel
+        return getLoadersFromInfo(info).DigitalSubmissionSectionModel
 
     path: typing.Optional[str] = strawberry.field(
         description="aka materialized path",

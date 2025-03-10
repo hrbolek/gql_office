@@ -72,6 +72,27 @@
     .btn-group-custom button:hover {
       opacity: 1;
     }
+
+    @media print {
+      /* Hide the sidebar during printing */
+      #sidebar {
+        display: none;
+      }
+
+      /* Make the content area take full width and adjust styling for print */
+      #content {
+        width: 100%;
+        border: none;
+        padding: 0;
+        height: auto;
+        overflow: visible;
+      }
+
+      /* Optionally hide other elements not needed in print view */
+      .btn-group-custom {
+        display: none;
+      }
+    }    
   </style>
 </head>
 <body data-bs-spy="scroll" data-bs-target="#sidebar" data-bs-offset="20">
@@ -146,15 +167,26 @@
         return typeRef.name || "";
       }
     }
+    function typeCore(typeRef) {
+      if (!typeRef) return "";
+      if (typeRef.kind === "NON_NULL") {
+        return typeCore(typeRef.ofType);
+      } else if (typeRef.kind === "LIST") {
+        return typeCore(typeRef.ofType);
+      } else {
+        return typeRef.name || "";
+      }
+    }
     function markdownForField(field) {
-      let s = `- **${field.name}**: ${formatType(field.type)}`;
+      let s = `- **${field.name}**: [${formatType(field.type)}](#${typeCore(field.type).toLowerCase()})`;
+      // s += `# ${JSON.stringify(field.type)}\n\n`
       if (field.description) {
         s += ` – ${field.description}`;
       }
       if (field.args && field.args.length > 0) {
         s += "\n  - **Arguments:**";
         field.args.forEach(arg => {
-          s += `\n    - **${arg.name}**: ${formatType(arg.type)}`;
+          s += `\n    - **${arg.name}**: [${formatType(arg.type)}](#${typeCore(arg.type).toLowerCase()})`;
           if (arg.description) {
             s += ` – ${arg.description}`;
           }
@@ -163,9 +195,22 @@
       return s;
     }
     function markdownForInputField(field) {
-      let s = `- **${field.name}**: ${formatType(field.type)}`;
+      let s = `- **${field.name}**: [${formatType(field.type)}](#${typeCore(field.type).toLowerCase()})`;
       if (field.description) {
         s += ` – ${field.description}`;
+      }
+      return s;
+    }
+    function markdownForUnion(typeObj) {
+      let s = `#### ${typeObj.name}\n\n`;
+      
+      if (typeObj.description) s += `${typeObj.description}\n\n`;
+      if (typeObj.possibleTypes) {
+        s += "Possible types:\n\n";
+        typeObj.possibleTypes.forEach(pType => {
+          s += `- [${pType.name}](#${pType.name.toLowerCase()}) \n`;
+        });
+        s += "\n";
       }
       return s;
     }
@@ -212,6 +257,7 @@
       } else if (kind === "LIST") {
         return "[" + variableTypeString(typeRef.ofType) + "]";
       } else {
+        // return `[${typeRef.name}](#${typeRef.name.toLowerCase()})` || "";
         return typeRef.name || "";
       }
     }
@@ -459,6 +505,12 @@
       Object.values(typesByName).forEach(t => {
         if (t.kind === "OBJECT" && t.name !== queryTypeName && t.name !== mutationTypeName) {
           markdown += markdownForObjectType(t);
+        }
+      });
+      markdown += "## Unions\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "UNION" && t.name !== queryTypeName && t.name !== mutationTypeName) {
+          markdown += markdownForUnion(t);
         }
       });
       return markdown;

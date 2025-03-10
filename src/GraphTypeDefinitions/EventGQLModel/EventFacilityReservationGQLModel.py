@@ -77,7 +77,7 @@ class EventFacilityReservationGQLModel(BaseGQLModel):
     )
 
     facility: typing.Optional[FacilityGQLModel] = strawberry.field(
-        description="event linked to this reservation",
+        description="facility linked to this reservation",
         permission_classes=[
             OnlyForAuthentized
         ],
@@ -85,7 +85,7 @@ class EventFacilityReservationGQLModel(BaseGQLModel):
     )
 
     state_id: typing.Optional[IDType] = strawberry.field(
-        description="""state of reservatio""",
+        description="""state of reservation""",
         permission_classes=[
             OnlyForAuthentized
         ]

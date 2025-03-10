@@ -1,0 +1,129 @@
+mutation digitalFormSubmissionInsert($name: String, $nameEn: String, $parentId: UUID!, $id: UUID!) {
+  digitalFormSubmissionInsert(digitalFormSubmission: {name: $name, nameEn: $nameEn, parentId: $parentId, id: $id}) {
+    ... on DigitalSubmissionGQLModel { ...DigitalSubmission }
+    ... on InsertError { ...InsertError }
+  }
+}
+
+fragment User on UserGQLModel {
+    __typename
+    id
+    }
+
+fragment RBACObject on RBACObjectGQLModel {
+    __typename
+    id
+    }
+
+fragment State on StateGQLModel {
+    __typename
+    id
+    }
+
+fragment DocumentType on DocumentTypeGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    name
+    nameEn
+    description
+    parentId
+    parent { __typename }
+    children { __typename }
+    }
+
+fragment DigitalSubmissionSection on DigitalSubmissionSectionGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    index
+    sectionId
+    submissionId
+    section { __typename }
+    submission { __typename }
+    fields { __typename }
+    sections { __typename }
+    }
+
+fragment DigitalSubmissionField on DigitalSubmissionFieldGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    value
+    fieldId
+    sectionId
+    field { __typename }
+    section { __typename }
+    stateId
+    state { __typename }
+    }
+
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby {
+  ...User
+}
+  changedby {
+  ...User
+}
+  rbacobject {
+  ...RBACObject
+}
+  name
+  nameEn
+  description
+  stateId
+  state {
+  ...State
+}
+  parentId
+  typeId
+  type {
+  ...DocumentType
+}
+  submittedSections {
+  ...DigitalSubmissionSection
+}
+  submittedFields {
+  ...DigitalSubmissionField
+}
+  submittedSectionsAll {
+  ...DigitalSubmissionSection
+}
+  }
+
+fragment InsertError on InsertError {
+  __typename
+  msg
+  failed
+  input
+  }

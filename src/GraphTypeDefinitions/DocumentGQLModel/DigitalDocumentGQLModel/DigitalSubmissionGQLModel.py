@@ -32,6 +32,7 @@ from ..DocumentInterfaceGQLModel import DocumentInterfaceGQLModel
 DigitalSubmissionFieldGQLModel = typing.Annotated["DigitalSubmissionFieldGQLModel", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
 DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInputFilter", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
 DigitalSubmissionSectionGQLModel = typing.Annotated["DigitalSubmissionSectionGQLModel", strawberry.lazy(".DigitalSubmissionSectionGQLModel")]
+DigitalFormGQLModel = typing.Annotated["DigitalFormGQLModel", strawberry.lazy(".DigitalFormGQLModel")]
 
 @createInputs
 @dataclasses.dataclass
@@ -53,13 +54,53 @@ class DigitalSubmissionGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
         return getLoadersFromInfo(info).DigitalSubmissionModel
     
 
+    form_id: typing.Optional[IDType] = strawberry.field(
+        description="form which is associated to this submission",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        default=None
+    )
+
+    parent_id: typing.Optional[IDType] = strawberry.field(
+        description="this is id of section which owns this section (recursive tree)",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        default=None
+    )    
+
+    section_id: typing.Optional[IDType] = strawberry.field(
+        description="this is id of section which owns this section (recursive tree)",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        default=None
+    )    
+
+    form: typing.Optional[DigitalFormGQLModel] = strawberry.field(
+        description="form which is associated to this submission",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver[DigitalFormGQLModel](fkey_field_name="form_id")
+    )
+
+    parent: typing.Optional["DigitalSubmissionGQLModel"] = strawberry.field(
+        description="form which is associated to this submission",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver["DigitalSubmissionGQLModel"](fkey_field_name="section_id")
+    )
+
     @strawberry.field(
         description="all sumbitted sections on all levels, thanks to materialized path",
         permission_classes=[
             OnlyForAuthentized
         ]
     )
-    async def submitted_sections_all(self, info: strawberry.types.Info) -> typing.Optional[DigitalSubmissionSectionGQLModel]:
+    async def submitted_sections_all(self, info: strawberry.types.Info) -> typing.List[DigitalSubmissionSectionGQLModel]:
         return []
 
     submitted_sections: typing.List["DigitalSubmissionSectionGQLModel"] = strawberry.field(

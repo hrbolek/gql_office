@@ -84,7 +84,7 @@ class BaseGQLModel:
         return None if self.createdby_id is None else UserGQLModel(id=self.createdby_id)
 
     @strawberry.field(
-        description="who created this entity",
+        description="who changed this entity",
         permission_classes=[OnlyForAuthentized]
         )
     async def changedby(self) -> typing.Optional["UserGQLModel"]:
@@ -92,7 +92,7 @@ class BaseGQLModel:
         return None if self.changedby_id is None else UserGQLModel(id=self.changedby_id)
 
     @strawberry.field(
-        description="rbac holds relations of user",
+        description="rbac ruling object",
         permission_classes=[OnlyForAuthentized]
         )
     async def rbacobject(self) -> typing.Optional["RBACObjectGQLModel"]:
