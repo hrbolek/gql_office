@@ -456,6 +456,31 @@
       const queryTypeName = schemaData.queryType ? schemaData.queryType.name : null;
       const mutationTypeName = schemaData.mutationType ? schemaData.mutationType.name : null;
       let markdown = "# GraphQL Schema Documentation\n\n";
+      markdown += "## Regular Types\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "OBJECT" && t.name !== queryTypeName && t.name !== mutationTypeName) {
+          markdown += markdownForObjectType(t);
+        }
+      });
+      markdown += "## Unions\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "UNION" && t.name !== queryTypeName && t.name !== mutationTypeName) {
+          markdown += markdownForUnion(t);
+        }
+      });
+      markdown += "## Input Types\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "INPUT_OBJECT") {
+          markdown += markdownForInputObjectType(t);
+        }
+      });
+      markdown += "## Scalars\n\n";
+      Object.values(typesByName).forEach(t => {
+        if (t.kind === "SCALAR") {
+          markdown += markdownForScalarType(t);
+        }
+      });
+
       markdown += "## Query and Mutation\n\n";
       if (typesByName[queryTypeName]) {
         let queryType = typesByName[queryTypeName];
@@ -489,30 +514,6 @@
           });
         }
       }
-      markdown += "## Scalars\n\n";
-      Object.values(typesByName).forEach(t => {
-        if (t.kind === "SCALAR") {
-          markdown += markdownForScalarType(t);
-        }
-      });
-      markdown += "## Input Types\n\n";
-      Object.values(typesByName).forEach(t => {
-        if (t.kind === "INPUT_OBJECT") {
-          markdown += markdownForInputObjectType(t);
-        }
-      });
-      markdown += "## Regular Types\n\n";
-      Object.values(typesByName).forEach(t => {
-        if (t.kind === "OBJECT" && t.name !== queryTypeName && t.name !== mutationTypeName) {
-          markdown += markdownForObjectType(t);
-        }
-      });
-      markdown += "## Unions\n\n";
-      Object.values(typesByName).forEach(t => {
-        if (t.kind === "UNION" && t.name !== queryTypeName && t.name !== mutationTypeName) {
-          markdown += markdownForUnion(t);
-        }
-      });
       return markdown;
     }
     // --- Sidebar Generation ---
