@@ -33,3 +33,30 @@ class DigitalSubmissionFieldModel(BaseModel):
     section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submission_sections.id"), default=None, nullable=True)
     submission_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submissions.id"), default=None, nullable=True)
     state_id: Mapped[Optional[IDType]] = UUIDFKey(ForeignKey("states.id"), default=None, nullable=True)
+
+    form_field = relationship(
+        "DigitalFormFieldModel",
+        # back_populates="submission",
+        primaryjoin="DigitalSubmissionFieldModel.field_id==DigitalFormFieldModel.id",
+        # cascade="all, delete-orphan",
+        viewonly=True,
+        lazy="select"
+    )
+
+    submission_section = relationship(
+        "DigitalSubmissionSectionModel",
+        # back_populates="submission",
+        primaryjoin="DigitalSubmissionFieldModel.section_id==DigitalSubmissionSectionModel.id",
+        # cascade="all, delete-orphan",
+        viewonly=True,
+        lazy="select"
+    )    
+
+    submission = relationship(
+        "DigitalSubmissionModel",
+        # back_populates="submission",
+        primaryjoin="DigitalSubmissionFieldModel.submission_id==DigitalSubmissionModel.id",
+        # cascade="all, delete-orphan",
+        viewonly=True,
+        lazy="select"
+    )        

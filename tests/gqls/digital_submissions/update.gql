@@ -1,7 +1,7 @@
-mutation digitalFormSectionUpdate($id: UUID!, $lastchange: DateTime!, $name: String, $nameEn: String) {
-  digitalFormSectionUpdate(digitalFormSection: {id: $id, lastchange: $lastchange, name: $name, nameEn: $nameEn}) {
-    ... on DigitalFormSectionGQLModel { ...DigitalFormSection }
-    ... on DigitalFormSectionGQLModelUpdateError { ...Error }
+mutation digitalFormSubmissionUpdate($id: UUID!, $lastchange: DateTime!, $name: String, $nameEn: String) {
+  digitalFormSubmissionUpdate(digitalFormSubmission: {id: $id, lastchange: $lastchange, name: $name, nameEn: $nameEn}) {
+    ... on DigitalSubmissionGQLModel { ...DigitalSubmission }
+    ... on DigitalSubmissionGQLModelUpdateError { ...Error }
   }
 }
 
@@ -15,7 +15,7 @@ fragment RBACObject on RBACObjectGQLModel {
     id
     }
 
-fragment DigitalFormField on DigitalFormFieldGQLModel {
+fragment DigitalForm on DigitalFormGQLModel {
     __typename
     id
     lastchange
@@ -27,23 +27,60 @@ fragment DigitalFormField on DigitalFormFieldGQLModel {
     changedby { __typename }
     rbacobject { __typename }
     name
-    label
-    labelEn
+    nameEn
     description
-    formSectionId
-    formSection { __typename }
-    formId
-    form { __typename }
-    required
-    order
-    computed
-    formula
+    stateId
+    state { __typename }
+    parentId
     typeId
-    backendFormula
-    flattenFormula
+    type { __typename }
+    sections { __typename }
+    submissions { __typename }
     }
 
-fragment DigitalFormSection on DigitalFormSectionGQLModel {
+fragment DigitalSubmissionSection on DigitalSubmissionSectionGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    index
+    sectionId
+    submissionId
+    section { __typename }
+    submission { __typename }
+    fieldX { __typename }
+    childSections { __typename }
+    }
+
+fragment DigitalSubmissionField on DigitalSubmissionFieldGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    value
+    fieldId
+    sectionId
+    field { __typename }
+    section { __typename }
+    stateId
+    state { __typename }
+    }
+
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
   __typename
   id
   lastchange
@@ -61,29 +98,28 @@ fragment DigitalFormSection on DigitalFormSectionGQLModel {
   ...RBACObject
 }
   name
-  path
-  label
-  labelEn
-  description
+  nameEn
+  formId
   parentId
-  sections { __typename }
-  fields {
-  ...DigitalFormField
+  form {
+  ...DigitalForm
 }
-  order
-  repatableMin
-  repatableMax
-  repeatable
-  parent {
-        ... on DigitalFormSectionGQLModel { __typename id } # ... on DigitalFormSectionGQLModel { ...DigitalFormSection }
-        ... on DigitalFormGQLModel { __typename id } # ... on DigitalFormGQLModel { ...DigitalForm }
-      }
+  parent { __typename }
+  submittedSections {
+  ...DigitalSubmissionSection
+}
+  submittedFields {
+  ...DigitalSubmissionField
+}
+  submittedSectionsAll {
+  ...DigitalSubmissionSection
+}
   }
 
-fragment Error on DigitalFormSectionGQLModelUpdateError {
+fragment Error on DigitalSubmissionGQLModelUpdateError {
   __typename
   Entity {
-  ...DigitalFormSection
+  ...DigitalSubmission
 }
   msg
   failed

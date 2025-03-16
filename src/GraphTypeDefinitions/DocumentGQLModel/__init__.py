@@ -4,7 +4,11 @@ from .ElectronicDocumentGQLModel import ElectronicDocumentGQLModel, ElectronicDo
 from .DigitalDocumentGQLModel import (
     DigitalFormGQLModel, DigitalFormQuery, DigitalFormMutation,
     DigitalFormSectionGQLModel, DigitalFormSectionQuery, DigitalFormSectionMutation,
-    DigitalSubmissionQuery, DigitalSubmissionMutation
+    DigitalFormFieldQuery, DigitalFormFieldMutation,
+    
+    DigitalSubmissionQuery, DigitalSubmissionMutation,
+    SubmissionSectionQuery,
+    SubmissionFieldQuery
 )
 from .DocumentGQLModel import DocumentQuery
 

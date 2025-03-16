@@ -8,8 +8,34 @@ from .gt_utils import (
 )
 
 
-test_digital_submission_by_id = createByIdTest2(tableName="digital_submissions")
+
+test_digital_submission_insert = createInsertTest2(
+    tableName="digital_submissions",
+    variables={
+        "id": "978cc8c4-fceb-462a-a53a-e017eb82dc0a",
+        "name": "submission",
+        "formId": "ff9b7547-8f90-46dc-894e-ad0341a48bf8",
+        "sections": [
+            {
+                "id": "d9eeed6a-95ae-462b-8c47-006f932e79dc",
+                "formSectionId": "62206768-a165-465c-b870-bcd6c724dd0f",
+                "submissionId": "978cc8c4-fceb-462a-a53a-e017eb82dc0a",
+                "fields": [
+                    {
+                        "id": "5d21bc77-7667-4eb4-b98f-0a12cdfd9253",
+                        "submissionId": "978cc8c4-fceb-462a-a53a-e017eb82dc0a",
+                        "sectionId": "d9eeed6a-95ae-462b-8c47-006f932e79dc",
+                        "fieldId": "acef6079-6e4e-4a6d-b4a6-b733b1b266f2",
+                        "value": "new value"
+                    }
+                ]
+            }
+        ],
+    }
+)
+
 test_digital_submission_page = createPageTest2(tableName="digital_submissions")
+test_digital_submission_by_id = createByIdTest2(tableName="digital_submissions")
 
 
 test_digital_form_section_by_id = createByIdTest2(tableName="digital_form_sections")

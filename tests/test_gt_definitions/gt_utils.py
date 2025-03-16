@@ -262,6 +262,7 @@ def createByIdTest2(tableName, queryName=None, variables=None, expectedJson=None
             # firstKey = next(pageData.keys(), None)
             assert firstKey is not None, f"during query {tableName}_by_id got empty data {pageJson}"
             rows = pageData[firstKey]
+            assert len(rows) > 0, f"during query {tableName}_by_id got [] {pageJson}"
             row = rows[0]
             assert "id" in row, f"during query {tableName}_by_id got page result but rows have no ids {row}"
             _variables = row
@@ -294,7 +295,7 @@ def createTest2(tableName, queryName, variables=None, expectedJson=None):
             assert checkExpected(responseJson, _expectedJson), f"unexpected response \n{responseJson}\ninstead\n{_expectedJson}"
         else:
             assert "errors" not in responseJson, f"query for {query} with {_variables}, got error {responseJson}"
-            logging.debug(f"query for \n{query} with \n{_variables}, no tested response, got\n{responseJson}")
+            logging.info(f"query for \n{query} with \n{_variables}, no tested response, got\n{responseJson}")
         
     return result_test
 

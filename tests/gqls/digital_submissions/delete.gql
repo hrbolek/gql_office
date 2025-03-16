@@ -14,12 +14,7 @@ fragment RBACObject on RBACObjectGQLModel {
     id
     }
 
-fragment State on StateGQLModel {
-    __typename
-    id
-    }
-
-fragment DocumentType on DocumentTypeGQLModel {
+fragment DigitalForm on DigitalFormGQLModel {
     __typename
     id
     lastchange
@@ -33,9 +28,13 @@ fragment DocumentType on DocumentTypeGQLModel {
     name
     nameEn
     description
+    stateId
+    state { __typename }
     parentId
-    parent { __typename }
-    children { __typename }
+    typeId
+    type { __typename }
+    sections { __typename }
+    submissions { __typename }
     }
 
 fragment DigitalSubmissionSection on DigitalSubmissionSectionGQLModel {
@@ -55,8 +54,8 @@ fragment DigitalSubmissionSection on DigitalSubmissionSectionGQLModel {
     submissionId
     section { __typename }
     submission { __typename }
-    fields { __typename }
-    sections { __typename }
+    fieldX { __typename }
+    childSections { __typename }
     }
 
 fragment DigitalSubmissionField on DigitalSubmissionFieldGQLModel {
@@ -99,16 +98,12 @@ fragment DigitalSubmission on DigitalSubmissionGQLModel {
 }
   name
   nameEn
-  description
-  stateId
-  state {
-  ...State
-}
+  formId
   parentId
-  typeId
-  type {
-  ...DocumentType
+  form {
+  ...DigitalForm
 }
+  parent { __typename }
   submittedSections {
   ...DigitalSubmissionSection
 }

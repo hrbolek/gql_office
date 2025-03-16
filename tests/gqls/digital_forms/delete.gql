@@ -5,90 +5,21 @@ mutation digitalFormDelete($id: UUID!, $lastchange: DateTime!) {
 }
 
 fragment User on UserGQLModel {
-      __typename
-      id
+    __typename
+    id
     }
 
 fragment RBACObject on RBACObjectGQLModel {
-      __typename
-      id
+    __typename
+    id
     }
 
 fragment State on StateGQLModel {
-      __typename
-      id
+    __typename
+    id
     }
 
 fragment DocumentType on DocumentTypeGQLModel {
-      __typename
-      id
-      lastchange
-      created
-      createdbyId
-      changedbyId
-      rbacobjectId
-      createdby { __typename }
-      changedby { __typename }
-      rbacobject { __typename }
-      name
-      nameEn
-      description
-      parentId
-      parent { __typename }
-      children { __typename }
-    }
-
-fragment DigitalFormSection on DigitalFormSectionGQLModel {
-      __typename
-      id
-      lastchange
-      created
-      createdbyId
-      changedbyId
-      rbacobjectId
-      createdby { __typename }
-      changedby { __typename }
-      rbacobject { __typename }
-      name
-      path
-      label
-      labelEn
-      description
-      parentId
-      sections { __typename }
-      fields { __typename }
-      order
-      repatableMin
-      repatableMax
-      repeatable
-      parent { __typename }
-    }
-
-fragment DigitalSubmission on DigitalSubmissionGQLModel {
-      __typename
-      id
-      lastchange
-      created
-      createdbyId
-      changedbyId
-      rbacobjectId
-      createdby { __typename }
-      changedby { __typename }
-      rbacobject { __typename }
-      name
-      nameEn
-      description
-      stateId
-      state { __typename }
-      parentId
-      typeId
-      type { __typename }
-      submittedSections { __typename }
-      submittedFields { __typename }
-      submittedSectionsAll { __typename }
-    }
-
-fragment DigitalForm on DigitalFormGQLModel {
     __typename
     id
     lastchange
@@ -96,41 +27,106 @@ fragment DigitalForm on DigitalFormGQLModel {
     createdbyId
     changedbyId
     rbacobjectId
-    createdby {
-  ...User
-}
-    changedby {
-  ...User
-}
-    rbacobject {
-  ...RBACObject
-}
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
     name
     nameEn
     description
-    stateId
-    state {
+    parentId
+    parent { __typename }
+    children { __typename }
+    }
+
+fragment DigitalFormSection on DigitalFormSectionGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    name
+    path
+    label
+    labelEn
+    description
+    parentId
+    sections { __typename }
+    fields { __typename }
+    order
+    repatableMin
+    repatableMax
+    repeatable
+    parent { __typename }
+    }
+
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    formId
+    parentId
+    form { __typename }
+    parent { __typename }
+    submittedSections { __typename }
+    submittedFields { __typename }
+    submittedSectionsAll { __typename }
+    }
+
+fragment DigitalForm on DigitalFormGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby {
+  ...User
+}
+  changedby {
+  ...User
+}
+  rbacobject {
+  ...RBACObject
+}
+  name
+  nameEn
+  description
+  stateId
+  state {
   ...State
 }
-    parentId
-    typeId
-    type {
+  parentId
+  typeId
+  type {
   ...DocumentType
 }
-    sections {
+  sections {
   ...DigitalFormSection
 }
-    submissions {
+  submissions {
   ...DigitalSubmission
 }
   }
 
 fragment DigitalFormGQLModelDeleteError on DigitalFormGQLModelDeleteError {
-  __typename
-  Entity {
+__typename
+Entity {
   ...DigitalForm
 }
-  msg
-  failed
-  input
+msg
+failed
+input
 }

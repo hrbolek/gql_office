@@ -5,61 +5,81 @@ query digitalFormSubmissionPage($skip: Int, $limit: Int, $orderby: String, $wher
 }
 
 fragment User on UserGQLModel {
-  __typename
-  id
-  }
+    __typename
+    id
+    }
 
 fragment RBACObject on RBACObjectGQLModel {
-  __typename
-  id
-  }
+    __typename
+    id
+    }
 
-fragment State on StateGQLModel {
-  __typename
-  id
-  }
-
-fragment DocumentType on DocumentTypeGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby { __typename }
-  changedby { __typename }
-  rbacobject { __typename }
-  name
-  nameEn
-  description
-  parentId
-  parent { __typename }
-  children { __typename }
-  }
+fragment DigitalForm on DigitalFormGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    name
+    nameEn
+    description
+    stateId
+    state { __typename }
+    parentId
+    typeId
+    type { __typename }
+    sections { __typename }
+    submissions { __typename }
+    }
 
 fragment DigitalSubmissionSection on DigitalSubmissionSectionGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby { __typename }
-  changedby { __typename }
-  rbacobject { __typename }
-  path
-  index
-  sectionId
-  submissionId
-  section { __typename }
-  submission { __typename }
-  fields { __typename }
-  sections { __typename }
-  }
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    index
+    sectionId
+    submissionId
+    section { __typename }
+    submission { __typename }
+    fieldX { __typename }
+    childSections { __typename }
+    }
 
 fragment DigitalSubmissionField on DigitalSubmissionFieldGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    value
+    fieldId
+    sectionId
+    field { __typename }
+    section { __typename }
+    stateId
+    state { __typename }
+    }
+
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
   __typename
   id
   lastchange
@@ -67,55 +87,31 @@ fragment DigitalSubmissionField on DigitalSubmissionFieldGQLModel {
   createdbyId
   changedbyId
   rbacobjectId
-  createdby { __typename }
-  changedby { __typename }
-  rbacobject { __typename }
-  path
-  value
-  fieldId
-  sectionId
-  field { __typename }
-  section { __typename }
-  stateId
-  state { __typename }
-  }
-
-fragment DigitalSubmission on DigitalSubmissionGQLModel {
-__typename
-id
-lastchange
-created
-createdbyId
-changedbyId
-rbacobjectId
-createdby {
+  createdby {
   ...User
 }
-changedby {
+  changedby {
   ...User
 }
-rbacobject {
+  rbacobject {
   ...RBACObject
 }
-name
-nameEn
-description
-stateId
-state {
-  ...State
+  name
+  nameEn
+  formId
+  parentId
+  form {
+  ...DigitalForm
 }
-parentId
-typeId
-type {
-  ...DocumentType
-}
-submittedSections {
+  parent { __typename }
+  submittedSections {
   ...DigitalSubmissionSection
 }
-submittedFields {
+  submittedFields {
   ...DigitalSubmissionField
 }
-submittedSectionsAll {
+  submittedSectionsAll {
   ...DigitalSubmissionSection
 }
-}
+  }
+

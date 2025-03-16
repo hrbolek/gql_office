@@ -1,3 +1,4 @@
+import uuid
 import asyncio
 import dataclasses
 import datetime
@@ -34,28 +35,60 @@ DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInpu
 DigitalSubmissionSectionGQLModel = typing.Annotated["DigitalSubmissionSectionGQLModel", strawberry.lazy(".DigitalSubmissionSectionGQLModel")]
 DigitalFormGQLModel = typing.Annotated["DigitalFormGQLModel", strawberry.lazy(".DigitalFormGQLModel")]
 
+DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInputFilter", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
 @createInputs
 @dataclasses.dataclass
 class DigitalSubmissionInputFilter:
     name: str
     name_en: str
-    description: str
+    # description: str
     id: IDType
     parent_id: IDType
+
+    # parent: "DigitalSubmissionInputFilter"
+    # from .DigitalSubmissionFieldGQLModel import DigitalSubmissionFieldInputFilter
+    submitted_fields: DigitalSubmissionFieldInputFilter
+    from .DigitalSubmissionSectionGQLModel import DigitalSubmissionSectionInputFilter
+    submitted_sections: DigitalSubmissionSectionInputFilter
+    from .DigitalFormGQLModel import DigitalFormInputFilter
+    form: DigitalFormInputFilter
 
 
 @strawberry.federation.type(
     keys=["id"], description="""Represents a submission of a digital form filled out by a user.
 Aggregates responses for all the fields defined in the form."""
 )
-class DigitalSubmissionGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
+class DigitalSubmissionGQLModel(BaseGQLModel): #, DocumentInterfaceGQLModel
     @classmethod
     def getLoader(cls, info: strawberry.types.Info):
         return getLoadersFromInfo(info).DigitalSubmissionModel
     
+    name: typing.Optional[str] = strawberry.field(
+        description="name",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        default=None
+    )
+
+    name_en: typing.Optional[str] = strawberry.field(
+        description="name",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        default=None
+    )
+
+    state_id: typing.Optional[IDType] = strawberry.field(
+        description="state of the submission,",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        default=None
+    )
 
     form_id: typing.Optional[IDType] = strawberry.field(
-        description="form which is associated to this submission",
+        description="Form which is associated to this submission.",
         permission_classes=[
             OnlyForAuthentized
         ],
@@ -63,20 +96,20 @@ class DigitalSubmissionGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
     )
 
     parent_id: typing.Optional[IDType] = strawberry.field(
-        description="this is id of section which owns this section (recursive tree)",
+        description="This is id of submission which owns this submission (recursive tree). Submission can contain submissions.",
         permission_classes=[
             OnlyForAuthentized
         ],
         default=None
     )    
 
-    section_id: typing.Optional[IDType] = strawberry.field(
-        description="this is id of section which owns this section (recursive tree)",
-        permission_classes=[
-            OnlyForAuthentized
-        ],
-        default=None
-    )    
+    # section_id: typing.Optional[IDType] = strawberry.field(
+    #     description="this is id of section which owns this section (recursive tree)",
+    #     permission_classes=[
+    #         OnlyForAuthentized
+    #     ],
+    #     default=None
+    # )    
 
     form: typing.Optional[DigitalFormGQLModel] = strawberry.field(
         description="form which is associated to this submission",
@@ -87,11 +120,11 @@ class DigitalSubmissionGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
     )
 
     parent: typing.Optional["DigitalSubmissionGQLModel"] = strawberry.field(
-        description="form which is associated to this submission",
+        description="This is submission which owns this submission (recursive tree). Submission can contain submissions. It is like a folder",
         permission_classes=[
             OnlyForAuthentized
         ],
-        resolver=ScalarResolver["DigitalSubmissionGQLModel"](fkey_field_name="section_id")
+        resolver=ScalarResolver["DigitalSubmissionGQLModel"](fkey_field_name="parent_id")
     )
 
     @strawberry.field(
@@ -104,15 +137,32 @@ class DigitalSubmissionGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
         return []
 
     submitted_sections: typing.List["DigitalSubmissionSectionGQLModel"] = strawberry.field(
-        description="""Digital Form Submission fields assigned by an administrator""",
+        description="""Digital Submission sections.""",
         permission_classes=[
             OnlyForAuthentized
         ],
         resolver=VectorResolver["DigitalSubmissionSectionGQLModel"](fkey_field_name="submission_id", whereType=DigitalSubmissionFieldInputFilter)
     )
 
+    # @strawberry.field(
+    #     description="""Digital Submission sections.""",
+    #     permission_classes=[
+    #         OnlyForAuthentized
+    #     ],
+    # )
+    # async def submitted_sections(self, info: strawberry.types.Info) -> typing.List["DigitalSubmissionSectionGQLModel"]:
+    #     from .DigitalSubmissionSectionGQLModel import DigitalSubmissionSectionGQLModel
+    #     loader = DigitalSubmissionSectionGQLModel.getLoader(info)
+    #     rows = await loader.filter_by(submission_id=self.id)
+    #     # for row in rows:
+    #     #     print("submitted_sections", dir(row), flush=True)
+    #     #     print("submitted_sections", strawberry.asdict(row), flush=True)
+    #     # assert False
+    #     result = [DigitalSubmissionSectionGQLModel.from_dataclass(row) for row in rows]
+    #     return result
+
     submitted_fields: typing.List["DigitalSubmissionFieldGQLModel"] = strawberry.field(
-        description="""Digital Form Submission fields assigned by an administrator""",
+        description="""Digital Submission fields.""",
         permission_classes=[
             OnlyForAuthentized
         ],
@@ -145,6 +195,10 @@ class DigitalSubmissionQuery:
     description="""DigitalSubmission insert mutation"""
 )
 class DigitalSubmissionInsertGQLModel:
+    form_id: IDType = strawberry.field(
+        description="[form](#digitalformgqlmodel) for this submission"
+    )
+
     name: typing.Optional[str] = strawberry.field(
         description="""DigitalSubmission name""",
         default=None
@@ -153,11 +207,22 @@ class DigitalSubmissionInsertGQLModel:
         description="""DigitalSubmission eng name""",
         default=None
     )
-    parent_id: IDType = strawberry.field(
-        description="""DigitalSubmission master id"""
+    parent_id: typing.Optional[IDType] = strawberry.field(
+        description="""DigitalSubmission master id""",
+        default=None
     )
-    id: IDType = strawberry.field(
-        description="""DigitalSubmission id client generated"""
+
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""DigitalSubmission id client generated""",
+        default=None
+    )
+
+    from .DigitalSubmissionSectionGQLModel import SubmissionSectionInsertGQLModel
+
+    sections: typing.Optional[typing.List[SubmissionSectionInsertGQLModel]] = strawberry.field(
+        description="", 
+        # default_factory=list,
+        default=None
     )
 
 @strawberry.input(
@@ -191,6 +256,28 @@ class DigitalSubmissionDeleteGQLModel:
         description="""DigitalSubmission lastchange"""
     )
 
+from .DigitalSubmissionSectionGQLModel import section_into_dbmodel
+import logging
+async def digital_form_submission_insert_internal(
+    self,
+    info: strawberry.types.Info,
+    digital_form_submission: DigitalSubmissionInsertGQLModel
+) -> typing.Union[DigitalSubmissionGQLModel, InsertError[DigitalSubmissionGQLModel]]:
+
+    loader = DigitalSubmissionGQLModel.getLoader(info=info)
+    DBModel = loader.getModel()
+    # digital_form_submission.id = digital_form_submission.id if digital_form_submission.id is not None else uuid.uuid4()
+    # for section in (digital_form_submission.sections or []):
+    #     section.submission_id = digital_form_submission.id
+
+    sections = [section_into_dbmodel(self, info, section) for section in (digital_form_submission.sections or [])]
+    digital_form_submission_as_dict = strawberry.asdict(digital_form_submission)
+    del digital_form_submission_as_dict["sections"]
+    model = DBModel(**digital_form_submission_as_dict)
+    model.submitted_sections.extend(sections)
+
+    return await Insert[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=model)
+
 
 @strawberry.type(
     description="""DigitalSubmission mutation"""
@@ -207,7 +294,8 @@ class DigitalSubmissionMutation:
         info: strawberry.types.Info,
         digital_form_submission: DigitalSubmissionInsertGQLModel
     ) -> typing.Union[DigitalSubmissionGQLModel, InsertError[DigitalSubmissionGQLModel]]:
-        return await Insert[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)
+        return await digital_form_submission_insert_internal(self, info, digital_form_submission)
+        # return await Insert[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)
     
     @strawberry.mutation(
         description="""Update a DigitalSubmission""",

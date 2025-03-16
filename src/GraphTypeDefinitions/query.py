@@ -9,7 +9,10 @@ from .DocumentGQLModel import ElectronicDocumentGQLModel, ElectronicDocumentQuer
 from .DocumentGQLModel import (
     DigitalDocumentGQLModel, DigitalFormQuery,
     DigitalFormSectionGQLModel, DigitalFormSectionQuery, 
+    DigitalFormFieldQuery,
     DigitalSubmissionQuery, DigitalSubmissionMutation,
+    SubmissionSectionQuery,
+    SubmissionFieldQuery,
     DocumentQuery
 )
 
@@ -31,8 +34,13 @@ class Query(
     ElectronicDocumentQuery, 
     DigitalFormQuery,
     DigitalFormSectionQuery,
+    DigitalFormFieldQuery,
 
     DigitalSubmissionQuery,
+    
+    SubmissionSectionQuery,
+    SubmissionFieldQuery,
+
     DocumentQuery
 ):
 
