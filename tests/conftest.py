@@ -149,7 +149,7 @@ async def Context():
     monkeypatch.setenv("DEMODATA", "True")
 
     from src.DBFeeder import initDB
-    await initDB(asyncSessionMaker=async_session_maker, filename="./systemdata.rnd.json")
+    await initDB(asyncSessionMaker=async_session_maker, filename="./systemdata.json")
     # context
     from src.Dataloaders import createLoadersContext
     loadersContext = createLoadersContext(asyncSessionMaker=async_session_maker)

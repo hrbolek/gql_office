@@ -1,0 +1,22 @@
+
+mutation($id: UUID, $user_id: UUID!, $group_id: UUID!, $startdate: DateTime, $enddate: DateTime ) {
+  result: membershipInsert(membership: {id: $id, userId: $user_id, groupId: $group_id, startdate: $startdate, enddate: $enddate}) {
+    ...Membership
+    ...Error
+  }
+}
+
+fragment Error on InsertError {
+  __typename
+  failed
+  input
+  msg
+}
+
+
+fragment Membership on MembershipGQLModel {
+  __typename
+  id
+  lastchange
+  valid
+}

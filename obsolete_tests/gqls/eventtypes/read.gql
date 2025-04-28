@@ -1,0 +1,73 @@
+query eventTypeById($id: UUID!) {
+  eventTypeById(id: $id) {
+  ...EventType
+}
+}
+
+fragment User on UserGQLModel {
+    __typename
+    id
+  }
+
+fragment RBACObject on RBACObjectGQLModel {
+    __typename
+    id
+  }
+
+fragment Event on EventGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { id }
+    changedby { id }
+    rbacobject { id }
+    name
+    nameEn
+    description
+    startdate
+    enddate
+    duration_raw
+    place
+    facilityId
+    facility { id }
+    reservations { id }
+    mastereventId
+    parent { id }
+    children { id }
+    typeId
+    type { id }
+    invitations { id }
+    # duration
+  }
+
+fragment EventType on EventTypeGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby {
+  ...User
+}
+  changedby {
+  ...User
+}
+  rbacobject {
+  ...RBACObject
+}
+  name
+  nameEn
+  description
+  parentId
+  parent { id }
+  children { id }
+  events {
+  ...Event
+}
+}

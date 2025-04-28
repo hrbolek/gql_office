@@ -53,6 +53,7 @@ class EventInvitationGQLModel(BaseGQLModel):
 
     event_id: typing.Optional[IDType] = strawberry.field(
         description="""Event assigned to the invitation""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -60,6 +61,7 @@ class EventInvitationGQLModel(BaseGQLModel):
 
     user_id: typing.Optional[IDType] = strawberry.field( 
         description="""User assigned to the invitation""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -67,6 +69,7 @@ class EventInvitationGQLModel(BaseGQLModel):
 
     state_id: typing.Optional[IDType] = strawberry.field(
         description="""State assigned to the invitation""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized  
         ]
@@ -85,7 +88,7 @@ class EventInvitationGQLModel(BaseGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ],
-        
+        resolver=ScalarResolver[UserGQLModel](fkey_field_name="user_id")
     )
 
     state: typing.Optional[StateGQLModel] = strawberry.field(
@@ -93,7 +96,7 @@ class EventInvitationGQLModel(BaseGQLModel):
         permission_classes=[
             OnlyForAuthentized
         ],
-        
+        resolver=ScalarResolver[StateGQLModel](fkey_field_name="state_id")
     )
 
 @strawberry.type(description="")
@@ -121,12 +124,14 @@ class EventInvitationQuery:
     description="""EventInvitation insert mutation"""
 )
 class EventInvitationInsertGQLModel:
-    event_id: IDType = strawberry.field(
-        description="event id to which invitation is sent"
+    event_id: typing.Optional[IDType] = strawberry.field(
+        description="event id to which invitation is sent",
+        default=None,
     )
 
-    user_id: IDType = strawberry.field(
-        description="user id who receive invitation"
+    user_id: typing.Optional[IDType] = strawberry.field(
+        description="user id who receive invitation",
+        default=None,
     )
 
     state_id: typing.Optional[IDType] = strawberry.field(
@@ -135,7 +140,8 @@ class EventInvitationInsertGQLModel:
     )
 
     id: typing.Optional[IDType] = strawberry.field(
-        description="""client generated id"""
+        description="""client generated id""",
+        default=None,
     )
 
 @strawberry.input(
@@ -152,6 +158,16 @@ class EventInvitationUpdateGQLModel:
 
     state_id: typing.Optional[IDType] = strawberry.field(
         description="invitation kind and presence type",
+        default=None
+    )
+
+    user_id: typing.Optional[IDType] = strawberry.field(
+        description="user id who receive invitation",
+        default=None,
+    )
+
+    state_id: typing.Optional[IDType] = strawberry.field(
+        description="invitation kind",
         default=None
     )
 

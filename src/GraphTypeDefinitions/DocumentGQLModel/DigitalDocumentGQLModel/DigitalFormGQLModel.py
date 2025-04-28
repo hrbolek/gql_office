@@ -117,31 +117,32 @@ class DigitalFormInsertGQLModel:
     )
 
 async def digital_form_insert_internal(self, info: strawberry.types.Info, digital_form: DigitalFormInsertGQLModel):
-    from .DigitalFormSectionGQLModel import digital_form_section_insert_internal
+    from .DigitalFormSectionGQLModel import digital_form_section_insert_internal, from_SectionInputIntoSectionModel
     if digital_form.id is None:
         digital_form.id = uuid.uuid4()
-
+    # sections = digital_form.sections
+    digital_form.sections = [from_SectionInputIntoSectionModel(info, section) for section in digital_form.sections]
     master_result = await Insert[DigitalFormGQLModel].DoItSafeWay(info=info, entity=digital_form)
-    failed = getattr(master_result, "failed", False)
-    if failed:
-        msg_error = getattr(master_result, "msg", "")
-        return InsertError[DigitalFormGQLModel](msg=msg_error, _input=digital_form)
+    # failed = getattr(master_result, "failed", False)
+    # if failed:
+    #     msg_error = getattr(master_result, "msg", "")
+    #     return InsertError[DigitalFormGQLModel](msg=msg_error, _input=digital_form)
 
-    for section in digital_form.sections:
-        if section.id is None:
-            section.id = uuid.uuid4()
-        section.parent_id = digital_form.id
+    # for section in sections:
+    #     if section.id is None:
+    #         section.id = uuid.uuid4()
+    #     section.parent_id = digital_form.id
 
-    msg_error = None
-    for section in digital_form.sections:
-        result = await digital_form_section_insert_internal(self, info=info, digital_form_section=section)
-        failed = getattr(result, "failed", False)
-        if failed:
-            msg_error = getattr(result, "msg", "")
-        break
+    # msg_error = None
+    # for section in digital_form.sections:
+    #     result = await digital_form_section_insert_internal(self, info=info, digital_form_section=section)
+    #     failed = getattr(result, "failed", False)
+    #     if failed:
+    #         msg_error = getattr(result, "msg", "")
+    #     break
 
-    if msg_error:
-        return InsertError[DigitalFormGQLModel](msg=msg_error, _input=digital_form)
+    # if msg_error:
+    #     return InsertError[DigitalFormGQLModel](msg=msg_error, _input=digital_form)
     return master_result
 
 

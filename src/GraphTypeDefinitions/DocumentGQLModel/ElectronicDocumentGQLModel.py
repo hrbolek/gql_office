@@ -29,6 +29,7 @@ from uoishelpers.resolvers import (
 from ..BaseGQLModel import BaseGQLModel, IDType
 
 DocumentTypeGQLModel = typing.Annotated["DocumentTypeGQLModel", strawberry.lazy(".DocumentTypeGQLModel")]
+StateGQLModel = typing.Annotated["StateGQLModel", strawberry.lazy("..StateGQLModel")]
 
 @createInputs
 @dataclasses.dataclass
@@ -129,6 +130,21 @@ class ElectronicDocumentGQLModel(BaseGQLModel):
         resolver=ScalarResolver["DocumentTypeGQLModel"](fkey_field_name="type_id")
     )
 
+    state_id: typing.Optional[IDType] = strawberry.field(
+        description="""State of the document """,
+        permission_classes=[
+            OnlyForAuthentized
+        ]
+    )
+
+    state: typing.Optional["StateGQLModel"] = strawberry.field(
+        name="type",
+        description="""Document type""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver["StateGQLModel"](fkey_field_name="state_id")
+    )
 
 @strawberry.interface(
     description="""Queries for Document"""
@@ -156,27 +172,35 @@ class ElectronicDocumentQuery:
 class ElectronicDocumentInsertGQLModel:
     id: typing.Optional[IDType] = strawberry.field(
         description="""Document id""",
+        default=None,
     )
     name: typing.Optional[str] = strawberry.field(
         description="""Document name""",
+        default=None,
     )
     name_en: typing.Optional[str] = strawberry.field(
         description="""Document eng name""",
+        default=None,
     )
     description: typing.Optional[str] = strawberry.field(
         description="""Document description""",
+        default=None,
     )
     content: typing.Optional[str] = strawberry.field(
         description="""Document content""",
+        default=None,
     )
     mimetype: typing.Optional[str] = strawberry.field(
         description="""Document mimetype""",
+        default=None,
     )
     parent_id: typing.Optional[IDType] = strawberry.field(
         description="""Document parent id""",
+        default=None,
     )
     group_id: typing.Optional[IDType] = strawberry.field(
         description="""Document group id""",
+        default=None,
     )
 
 @strawberry.input(
@@ -186,26 +210,36 @@ class ElectronicDocumentUpdateGQLModel:
     id: IDType = strawberry.field(
         description="""Document id""",
     )
+    lastchange: datetime.datetime = strawberry.field(
+        description="""timestamp""",
+    )
     name: typing.Optional[str] = strawberry.field(
         description="""Document name""",
+        default=None,
     )
     name_en: typing.Optional[str] = strawberry.field(
         description="""Document eng name""",
+        default=None,
     )
     description: typing.Optional[str] = strawberry.field(
         description="""Document description""",
+        default=None,
     )
     content: typing.Optional[str] = strawberry.field(
         description="""Document content""",
+        default=None,
     )
     mimetype: typing.Optional[str] = strawberry.field(
         description="""Document mimetype""",
+        default=None,
     )
     parent_id: typing.Optional[IDType] = strawberry.field(
         description="""Document parent id""",
+        default=None,
     )
     group_id: typing.Optional[IDType] = strawberry.field(
         description="""Document group id""",
+        default=None,
     )
 
 
@@ -232,9 +266,11 @@ class DocumentMutation:
         ]
     )
     async def document_insert(
+        self,
+        info: strawberry.types.Info,
         document: ElectronicDocumentInsertGQLModel
     ) -> typing.Union[ElectronicDocumentGQLModel, InsertError]:
-        return await Insert[ElectronicDocumentGQLModel].DoItSafeWay(document)
+        return await Insert[ElectronicDocumentGQLModel].DoItSafeWay(info=info, entity=document)
 
     @strawberry.mutation(
         description="""Update a Document""",
@@ -243,9 +279,11 @@ class DocumentMutation:
         ]
     )
     async def document_update(
+        self,
+        info: strawberry.types.Info,
         document: ElectronicDocumentUpdateGQLModel
     ) -> typing.Union[ElectronicDocumentGQLModel, UpdateError[ElectronicDocumentGQLModel]]:
-        return await Update[ElectronicDocumentGQLModel].DoItSafeWay(document)
+        return await Update[ElectronicDocumentGQLModel].DoItSafeWay(info=info, entity=document)
 
     @strawberry.mutation(
         description="""Delete a Document""",
@@ -254,7 +292,9 @@ class DocumentMutation:
         ]
     )
     async def document_delete(
+        self,
+        info: strawberry.types.Info,
         document: ElectronicDocumentDeleteGQLModel
     ) -> typing.Optional[DeleteError[ElectronicDocumentGQLModel]]:
-        return await Delete[ElectronicDocumentGQLModel].DoItSafeWay(document)
+        return await Delete[ElectronicDocumentGQLModel].DoItSafeWay(info=info, entity=document)
     

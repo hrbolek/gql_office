@@ -1,0 +1,29 @@
+mutation RoleCategoryUpdate($id: UUID!, $name: String!, $lastchange: DateTime!) {
+  result: roleCategoryUpdate(roleCategory: {id: $id, lastchange: $lastchange, name: $name}) {
+    ...RoleCategory
+    ...Error
+  }
+}
+
+
+fragment Error on RoleCategoryGQLModelUpdateError {
+  __typename
+  failed
+  input
+  msg
+  Entity {
+    ...RoleCategory
+  }
+}
+
+fragment RoleCategory on RoleCategoryGQLModel {
+	__typename
+  id
+  lastchange
+  name
+  nameEn
+  
+  created
+  createdby { id email }
+  changedby { id email }
+}

@@ -1,0 +1,29 @@
+mutation stateInsert($id: UUID, $name: String!, $statemachine_id: UUID!) {
+  result: stateInsert(state: {id: $id, name: $name, statemachineId: $statemachine_id}) {
+    ...State
+    ...Error
+  }
+}
+
+fragment Error on InsertError {
+  __typename
+  failed
+  input
+  msg
+}
+
+fragment State on StateGQLModel {
+  __typename
+  id
+  name
+  
+  lastchange
+  created
+  createdby {
+    id
+  }
+  changedby {
+    id
+  }
+  statemachine { id name }
+}

@@ -56,13 +56,13 @@ class DigitalFormSectionModel(BaseModel):
         lazy="select"
     )
 
-    @property
-    def parent(self) -> Optional[object]:
-        """
-        Returns the parent for this section.
-        This property attempts to load a parent DigitalFormSectionModel first;
-        if not found, you could extend this to attempt loading a DigitalFormModel.
-        """
-        # If parent_section relationship is set by backref, return it.
-        # Otherwise, custom logic (e.g. querying DigitalFormModel) could be added.
-        return self.parent_section  # May be None if not set.
+    # @property
+    # def parent(self) -> Optional[object]:
+    #     """
+    #     Returns the parent for this section.
+    #     This property attempts to load a parent DigitalFormSectionModel first;
+    #     if not found, you could extend this to attempt loading a DigitalFormModel.
+    #     """
+    #     # If parent_section relationship is set by backref, return it.
+    #     # Otherwise, custom logic (e.g. querying DigitalFormModel) could be added.
+    #     return self.parent_section  # May be None if not set.

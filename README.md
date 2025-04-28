@@ -33,6 +33,8 @@ uvicorn main:app --env-file environment.txt --port 8001
 
 ```bash
 pytest --cov-report term-missing --cov=src --log-cli-level=INFO -x
+
+pytest tests --cov-report term-missing --cov=src --log-cli-level=INFO -x
 ```
 
 ## Some prompts for chatgpt
@@ -113,3 +115,7 @@ class StateTransitionModel(BaseModel):
     target_id = Column(ForeignKey("states.id"), index=True, nullable=False)
     statemachine_id = Column(ForeignKey("statemachines.id"), index=True, nullable=False)
 ```
+
+1dfe7e1b-a3b3-42b7-86e7-928cc52d0de2
+ed2a1eb3-e06a-414a-b875-c86f69e1af1a
+0188fc7f-e1c2-4377-a3d4-ac1ed6f4e70c

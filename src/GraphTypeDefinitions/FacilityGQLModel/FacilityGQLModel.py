@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 import dataclasses
 import datetime
 import typing
@@ -237,7 +238,7 @@ class FacilityQuery:
 class FacilityInsertGQLModel:
     name: str = strawberry.field(description="name of the new facility")
     facilitytype_id: typing.Optional[IDType] = strawberry.field(description="facility type", default=None)
-    id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default=None)
+    id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default_factory=uuid.uuid4)
 
     name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default="")
     label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default="")
@@ -258,13 +259,13 @@ class FacilityUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
     name: typing.Optional[str] = strawberry.field(description="name of the type", default=None)
-    name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default="")
-    label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default="")
-    address: typing.Optional[str] = strawberry.field(description="postal address", default="")
+    name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default=None)
+    label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default=None)
+    address: typing.Optional[str] = strawberry.field(description="postal address", default=None)
     valid: typing.Optional[bool] = strawberry.field(description="if facility exists", default=True)
     capacity: typing.Optional[int] = strawberry.field(description="facility capacity", default=0)
-    geometry: typing.Optional[str] = strawberry.field(description="SVG overlay for leaflet", default="")
-    geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default="")
+    geometry: typing.Optional[str] = strawberry.field(description="SVG overlay for leaflet", default=None)
+    geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default=None)
     changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for facility delete")
@@ -304,11 +305,11 @@ class FacilityMutation:
     async def facility_delete(self, info: strawberry.types.Info, facility: FacilityDeleteGQLModel) -> typing.Optional[DeleteError[FacilityGQLModel]]:
         return await Delete[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
-    @strawberry.field(
-        description="Move a facility",
-        permission_classes=[
-            SimpleUpdatePermission[FacilityGQLModel](roles=["administrátor"])
-        ]
-    )
-    async def facility_move(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
-        return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
+    # @strawberry.field(
+    #     description="Move a facility",
+    #     permission_classes=[
+    #         SimpleUpdatePermission[FacilityGQLModel](roles=["administrátor"])
+    #     ]
+    # )
+    # async def facility_move(self, info: strawberry.types.Info, facility: FacilityUpdateGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
+    #     return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)

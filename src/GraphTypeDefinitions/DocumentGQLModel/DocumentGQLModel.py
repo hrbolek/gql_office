@@ -82,39 +82,39 @@ class DocumentGQLModel(BaseGQLModel, DocumentInterfaceGQLModel):
     def resolve_reference(cls, info: strawberry.types.Info, id: IDType, **otherdata):
         return cls.load_with_loader(info=info, id=id)
 
-    @strawberry.field(description="sub documents")
-    async def children(self, 
-        info: strawberry.types.Info, 
-        # skip: typing.Optional[int]=0,
-        # limit: typing.Optional[int]=0
-    ) -> typing.Optional["DocumentGQLModel"]:
-        id = (self.as_digital or self.as_electronic).id
-        loaders = (DigitalSubmissionGQLModel.getLoader(info=info), ElectronicDocumentGQLModel.getLoader(info=info))
-        futures = (loader.filter_by(parent_id=id) for loader in loaders)
-        [c1, c2] = await asyncio.gather(*futures)
-        result = [
-            DocumentGQLModel(
-                name=one.name,
-                name_en=one.name_en,
-                description=one.description,
-                state_id=one.state_id,
-                type_id=one.type_id,
-                parent_id=one.parent_id,
-                as_digital=one
-            ) for one in c1
-        ]
-        result.extend((
-            DocumentGQLModel(
-                name=one.name,
-                name_en=one.name_en,
-                description=one.description,
-                state_id=one.state_id,
-                type_id=one.type_id,
-                parent_id=one.parent_id,
-                as_electronic=one
-            ) for one in c2
-        ))
-        return result
+    # @strawberry.field(description="sub documents")
+    # async def children(self, 
+    #     info: strawberry.types.Info, 
+    #     # skip: typing.Optional[int]=0,
+    #     # limit: typing.Optional[int]=0
+    # ) -> typing.List["DocumentGQLModel"]:
+    #     id = (self.as_digital or self.as_electronic).id
+    #     loaders = (DigitalSubmissionGQLModel.getLoader(info=info), ElectronicDocumentGQLModel.getLoader(info=info))
+    #     futures = (loader.filter_by(parent_id=id) for loader in loaders)
+    #     [c1, c2] = await asyncio.gather(*futures)
+    #     result = [
+    #         DocumentGQLModel(
+    #             name=one.name,
+    #             name_en=one.name_en,
+    #             description=one.description,
+    #             state_id=one.state_id,
+    #             type_id=one.type_id,
+    #             parent_id=one.parent_id,
+    #             as_digital=one
+    #         ) for one in c1
+    #     ]
+    #     result.extend((
+    #         DocumentGQLModel(
+    #             name=one.name,
+    #             name_en=one.name_en,
+    #             description=one.description,
+    #             state_id=one.state_id,
+    #             type_id=one.type_id,
+    #             parent_id=one.parent_id,
+    #             as_electronic=one
+    #         ) for one in c2
+    #     ))
+    #     return result
 
     @strawberry.field(description="master document")
     async def parent(self, 

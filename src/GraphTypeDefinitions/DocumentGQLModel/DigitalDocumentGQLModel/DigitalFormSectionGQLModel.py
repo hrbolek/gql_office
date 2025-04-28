@@ -198,12 +198,17 @@ class DigitalFormSectionQuery:
     description="""DigitalFormSection insert mutation"""
 )
 class DigitalFormSectionInsertGQLModel:
+
     name: typing.Optional[str] = strawberry.field(
         description="""DigitalFormSection name""",
         default=None
     )
-    name_en: typing.Optional[str] = strawberry.field(
-        description="""DigitalFormSection eng name""",
+    label: typing.Optional[str] = strawberry.field(
+        description="""DigitalFormSection label""",
+        default=None
+    )
+    label_en: typing.Optional[str] = strawberry.field(
+        description="""DigitalFormSection eng label""",
         default=None
     )
 
@@ -212,13 +217,15 @@ class DigitalFormSectionInsertGQLModel:
         default=None
     )
     
-    form_id: IDType = strawberry.field(
-        description="""DigitalFormSection master id"""
+    form_id: typing.Optional[IDType] = strawberry.field(
+        description="""DigitalFormSection master id""",
+        default=None
     )
 
     id: typing.Optional[IDType] = strawberry.field(
         description="""DigitalFormSection id client generated""",
-        default=None
+        # default=None,
+        default_factory=uuid.uuid4
     )
 
     from .DigitalFormFieldGQLModel import DigitalFormFieldInsertGQLModel
@@ -234,6 +241,31 @@ class DigitalFormSectionInsertGQLModel:
 
     path: strawberry.Private[str] = None
 
+def from_FieldInputIntoFieldModel(info: strawberry.types.Info, field):
+    from .DigitalFormFieldGQLModel import DigitalFormFieldGQLModel
+    FieldLoader = DigitalFormFieldGQLModel.getLoader(info=info)
+    FieldDBModel = FieldLoader.getModel()
+
+    result = {**strawberry.asdict(field)}
+    return FieldDBModel(**result)
+
+def from_SectionInputIntoSectionModel(info: strawberry.types.Info, section: DigitalFormSectionInsertGQLModel) -> DigitalFormSectionGQLModel:
+    from .DigitalFormFieldGQLModel import DigitalFormFieldGQLModel
+    SectionLoader = DigitalFormSectionGQLModel.getLoader(info=info)
+    SectionDBModel = SectionLoader.getModel()
+    # FieldLoader = DigitalFormFieldGQLModel.getLoader(info=info)
+    # FieldDBModel = FieldLoader.getModel()
+    if section.id is None:
+        section.id = uuid.uuid4()
+    result = {**strawberry.asdict(section)}
+    sections = result.pop("sections", None)
+    fields = result.pop("fields", None)
+    if sections:
+        result["sections"] = [from_SectionInputIntoSectionModel(info, section) for section in sections]
+    if fields:
+        result["fields"] = [from_FieldInputIntoFieldModel(info, field) for field in fields]
+    return SectionDBModel(**result)
+    
 async def digital_form_section_insert_internal(
         self,
         info: strawberry.types.Info,
@@ -249,41 +281,41 @@ async def digital_form_section_insert_internal(
         sections = digital_form_section.sections
         fields = digital_form_section.fields
         
-        digital_form_section.sections = []
-        digital_form_section.fields = []
+        digital_form_section.sections = [from_SectionInputIntoSectionModel(info=info, section=section) for section in sections]
+        digital_form_section.fields = [from_FieldInputIntoFieldModel(info=info, field=field) for field in fields]
 
         masterresult = await Insert[DigitalFormSectionGQLModel].DoItSafeWay(info=info, entity=digital_form_section)
-        failed = getattr(masterresult, "failed", False)
-        if failed:
-            error_msg = getattr(masterresult, "msg", None)
-            return InsertError[DigitalFormSectionGQLModel](msg=error_msg, _input=digital_form_section)
+        # failed = getattr(masterresult, "failed", False)
+        # if failed:
+        #     error_msg = getattr(masterresult, "msg", None)
+        #     return InsertError[DigitalFormSectionGQLModel](msg=error_msg, _input=digital_form_section)
 
-        for form_field in fields:
-            if form_field.id is None:
-                form_field.id = uuid.uuid4()
-            form_field.form_section_id = digital_form_section.id
+        # for form_field in fields:
+        #     if form_field.id is None:
+        #         form_field.id = uuid.uuid4()
+        #     form_field.form_section_id = digital_form_section.id
 
-        for form_field in fields:
-            form_field.form_id = digital_form_section.form_id
-            form_field.form_section_id = digital_form_section.id
-            result = await digital_form_field_insert_internal(self, info=info, form_field=form_field)
-            failed = getattr(result, "failed", False)
-            if failed:
-                error_msg = getattr(result, "msg", None)
-                break
+        # for form_field in fields:
+        #     form_field.form_id = digital_form_section.form_id
+        #     form_field.form_section_id = digital_form_section.id
+        #     result = await digital_form_field_insert_internal(self, info=info, form_field=form_field)
+        #     failed = getattr(result, "failed", False)
+        #     if failed:
+        #         error_msg = getattr(result, "msg", None)
+        #         break
 
-        for form_section in sections:
-            if form_section.id is None:
-                form_section.id = uuid.uuid4()
+        # for form_section in sections:
+        #     if form_section.id is None:
+        #         form_section.id = uuid.uuid4()
             
-            result = await digital_form_section_insert_internal(self, info=info, digital_form_section=form_section)
-            failed = getattr(result, "failed", False)
-            if failed:
-                error_msg = getattr(result, "msg", None)
-                break
+        #     result = await digital_form_section_insert_internal(self, info=info, digital_form_section=form_section)
+        #     failed = getattr(result, "failed", False)
+        #     if failed:
+        #         error_msg = getattr(result, "msg", None)
+        #         break
 
-        if error_msg:
-            return InsertError[DigitalFormSectionGQLModel](msg=error_msg, _input=digital_form_section)
+        # if error_msg:
+        #     return InsertError[DigitalFormSectionGQLModel](msg=error_msg, _input=digital_form_section)
         
         return masterresult
 
@@ -335,9 +367,9 @@ class DigitalFormSectionMutation:
         digital_form_section: DigitalFormSectionInsertGQLModel
     ) -> typing.Union[DigitalFormSectionGQLModel, InsertError[DigitalFormSectionGQLModel]]:
         from .DigitalFormGQLModel import DigitalFormGQLModel
-        if digital_form_section.id is None:
-            # missing id, create it here
-            digital_form_section.id = uuid.uuid4()        
+        # if digital_form_section.id is None:
+        #     # missing id, create it here
+        #     digital_form_section.id = uuid.uuid4()        
 
         # loaders = (DigitalFormGQLModel.getLoader(info=info), DigitalFormSectionGQLModel.getLoader(info=info))
         futures = (
@@ -347,7 +379,7 @@ class DigitalFormSectionMutation:
         # futures = (loader.load(digital_form_section.parent_id) for loader in loaders)
         [parent_form, parent_section] = await asyncio.gather(*futures)
 
-        path = f"{parent_form.id}" if parent_form else parent_section.path
+        path = f"{parent_form.id}" if parent_form else (parent_section.path if parent_section else "")
         digital_form_section.path = path + f".{digital_form_section.id}"
 
         return await digital_form_section_insert_internal(self=self, info=info, digital_form_section=digital_form_section)

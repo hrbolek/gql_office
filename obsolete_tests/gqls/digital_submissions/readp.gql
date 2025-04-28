@@ -1,0 +1,117 @@
+query digitalFormSubmissionPage($skip: Int, $limit: Int, $orderby: String, $where: DigitalSubmissionInputFilter) {
+  digitalFormSubmissionPage(skip: $skip, limit: $limit, orderby: $orderby, where: $where) {
+  ...DigitalSubmission
+}
+}
+
+fragment User on UserGQLModel {
+    __typename
+    id
+    }
+
+fragment RBACObject on RBACObjectGQLModel {
+    __typename
+    id
+    }
+
+fragment DigitalForm on DigitalFormGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    name
+    nameEn
+    description
+    stateId
+    state { __typename }
+    parentId
+    typeId
+    type { __typename }
+    sections { __typename }
+    submissions { __typename }
+    }
+
+fragment DigitalSubmissionSection on DigitalSubmissionSectionGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    index
+    sectionId
+    submissionId
+    section { __typename }
+    submission { __typename }
+    fieldX { __typename }
+    childSections { __typename }
+    }
+
+fragment DigitalSubmissionField on DigitalSubmissionFieldGQLModel {
+    __typename
+    id
+    lastchange
+    created
+    createdbyId
+    changedbyId
+    rbacobjectId
+    createdby { __typename }
+    changedby { __typename }
+    rbacobject { __typename }
+    path
+    value
+    fieldId
+    sectionId
+    field { __typename }
+    section { __typename }
+    stateId
+    state { __typename }
+    }
+
+fragment DigitalSubmission on DigitalSubmissionGQLModel {
+  __typename
+  id
+  lastchange
+  created
+  createdbyId
+  changedbyId
+  rbacobjectId
+  createdby {
+  ...User
+}
+  changedby {
+  ...User
+}
+  rbacobject {
+  ...RBACObject
+}
+  name
+  nameEn
+  formId
+  parentId
+  form {
+  ...DigitalForm
+}
+  parent { __typename }
+  submittedSections {
+  ...DigitalSubmissionSection
+}
+  submittedFields {
+  ...DigitalSubmissionField
+}
+  submittedSectionsAll {
+  ...DigitalSubmissionSection
+}
+  }
+

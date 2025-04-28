@@ -1,0 +1,37 @@
+mutation RoleUpdate($id: UUID!, $lastchange: DateTime!, $startdate: DateTime, $enddate: DateTime) {
+  result: roleUpdate(
+    role: {id: $id, lastchange: $lastchange, startdate: $startdate, enddate: $enddate}
+  ) {
+    ...Role
+    ...Error
+  }
+}
+
+
+fragment Error on RoleGQLModelUpdateError {
+  __typename
+  failed
+  input
+  msg
+  Entity {
+    ...Role
+  }
+}
+
+
+fragment Role on RoleGQLModel {
+  __typename
+  id
+  roletype { id name }
+  
+  lastchange
+  created
+  createdby {
+    id
+    email
+  }
+  changedby {
+    id
+    email
+  }
+}

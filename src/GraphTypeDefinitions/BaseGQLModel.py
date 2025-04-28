@@ -44,7 +44,7 @@ class BaseGQLModel:
     def resolve_reference(cls, info: strawberry.types.Info, id: uuid.UUID, **otherdata):
         return cls.load_with_loader(info=info, id=id)
        
-    id: typing.Optional[IDType] = strawberry.field(
+    id: IDType = strawberry.field(
         description="primary key", 
         default=None,
         permission_classes=[OnlyForAuthentized]

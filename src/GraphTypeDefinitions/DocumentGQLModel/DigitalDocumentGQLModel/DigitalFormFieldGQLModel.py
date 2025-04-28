@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 import dataclasses
 import datetime
 import typing
@@ -184,8 +185,10 @@ class DigitalFormFieldQuery:
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldInsertGQLModel:
     # type_id: IDType = strawberry.field(description="type id of the field")
-    form_id: IDType = strawberry.field(
-        description="form id where the field is placed"
+    
+    form_id: typing.Optional[IDType] = strawberry.field(
+        description="form id where the field is placed",
+        default=None
     )
     form_section_id: typing.Optional[IDType] = strawberry.field(
         description="section id where the field is placed",
@@ -193,7 +196,8 @@ class DigitalFormFieldInsertGQLModel:
     )
     id: typing.Optional[IDType] = strawberry.field(
         description="client side generated id", 
-        default=None
+        # default=None
+        default_factory=uuid.uuid4
     )
     name: typing.Optional[str] = strawberry.field(
         description="variable name", 
@@ -213,11 +217,11 @@ class DigitalFormFieldInsertGQLModel:
     )
     required: typing.Optional[bool] = strawberry.field(
         description="", 
-        default=None
+        default=False
     )
     order: typing.Optional[int] = strawberry.field(
         description="", 
-        default=None
+        default=0
     )
     computed: typing.Optional[int] = strawberry.field(
         description="", 
