@@ -38,7 +38,7 @@ timedelta = strawberry.scalar(
 )
 
 
-
+from .BaseGQLModel import Relation
 from .query import Query
 from .mutation import Mutation
 schema = strawberry.federation.Schema(
@@ -47,7 +47,8 @@ schema = strawberry.federation.Schema(
     types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentInterfaceGQLModel, StateGQLModel), 
     scalar_overrides={datetime.timedelta: timedelta._scalar_definition},
 
-    extensions=[]
+    extensions=[],
+    schema_directives=[Relation]
 )
 
 from uoishelpers.schema import WhoAmIExtension, ProfilingExtension, PrometheusExtension

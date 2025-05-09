@@ -27,7 +27,7 @@ from uoishelpers.resolvers import (
     ScalarResolver
 )
 
-from ..BaseGQLModel import BaseGQLModel, IDType
+from ..BaseGQLModel import BaseGQLModel, IDType, Relation
 from .TimeUnit import TimeUnit
 
 EventTypeGQLModel = typing.Annotated["EventTypeGQLModel", strawberry.lazy(".EventTypeGQLModel")]
@@ -145,7 +145,8 @@ class EventGQLModel(BaseGQLModel):
         description="place where the event will happen",
         permission_classes=[
             OnlyForAuthentized
-        ]
+        ],
+        directives=[Relation(to="FacilityGQLModel")]
     )
 
     facility: typing.Optional[FacilityGQLModel] = strawberry.field(
@@ -193,6 +194,7 @@ class EventGQLModel(BaseGQLModel):
 
     type_id: typing.Optional[IDType] = strawberry.field(
         description="""Event type id""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
