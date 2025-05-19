@@ -29,7 +29,7 @@ from uoishelpers.resolvers import (
 )
 
 from ..BaseGQLModel import BaseGQLModel, IDType
-from ..TreeGQLModel import create_tree_parents_resolver, create_tree_parent_updater
+# from ..TreeGQLModel import create_tree_parents_resolver, create_tree_parent_updater
 
 FacilityTypeGQLModel = typing.Annotated["FacilityTypeGQLModel", strawberry.lazy(".FacilityTypeGQLModel")]
 GroupGQLModel = typing.Annotated["GroupGQLModel", strawberry.lazy("..GroupGQLModel")]

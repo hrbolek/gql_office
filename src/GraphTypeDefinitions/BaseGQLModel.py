@@ -45,6 +45,7 @@ class BaseGQLModel:
     @classmethod
     def from_dataclass(cls, db_row):
         db_row_dict = dataclasses.asdict(db_row)
+        print(f"from_dataclass: {db_row_dict}")
         instance = cls(**db_row_dict)
         return instance
 

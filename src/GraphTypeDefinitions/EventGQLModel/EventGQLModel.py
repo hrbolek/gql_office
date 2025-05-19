@@ -14,6 +14,7 @@ from uoishelpers.gqlpermissions import (
 from uoishelpers.resolvers import (
     getLoadersFromInfo, 
     createInputs,
+    createInputs2,
 
     InsertError, 
     Insert, 
@@ -38,8 +39,10 @@ FacilityGQLModel = typing.Annotated["FacilityGQLModel", strawberry.lazy("..Facil
 EventFacilityReservationGQLModel = typing.Annotated["EventFacilityReservationGQLModel", strawberry.lazy(".EventFacilityReservationGQLModel")]
 EventFacilityReservationInputFilter = typing.Annotated["EventFacilityReservationInputFilter", strawberry.lazy(".EventFacilityReservationGQLModel")]
 
-@createInputs
-@dataclasses.dataclass
+
+# from ..TreeGQLModel import TreeGQLModel
+
+@createInputs2
 class EventInputFilter:
     name: str
     name_en: str
@@ -47,6 +50,10 @@ class EventInputFilter:
     start_date: datetime.datetime
     end_date: datetime.datetime
     id: IDType
+    type_id: IDType
+    
+    from .EventTypeGQLModel import EventTypeInputFilter
+    type_: EventTypeInputFilter = strawberry.field(name="type", description="Event type", default=None)
 
 
 @strawberry.federation.type(
@@ -73,6 +80,12 @@ class EventGQLModel(BaseGQLModel):
             OnlyForAuthentized
         ]
     )
+
+    # parent_id: typing.Optional[IDType] = strawberry.field(
+    #     description="Parent id",
+    #     default=None,
+    #     permission_classes=[OnlyForAuthentized]
+    # )
 
     description: typing.Optional[str] = strawberry.field(
         default=None,
@@ -173,24 +186,24 @@ class EventGQLModel(BaseGQLModel):
         ]
     )
 
-    parent: typing.Optional["EventGQLModel"] = strawberry.field(
-        description="""Event parent""",
-        permission_classes=[
-            OnlyForAuthentized
-        ],
-        metadata={
-            # "alchemy": lambda selectStatement, leftModel, rightModel: selectStatement.join(rightModel)
-        },
-        resolver=ScalarResolver["EventGQLModel"](fkey_field_name="masterevent_id")
-    )
+    # parent: typing.Optional["EventGQLModel"] = strawberry.field(
+    #     description="""Event parent""",
+    #     permission_classes=[
+    #         OnlyForAuthentized
+    #     ],
+    #     metadata={
+    #         # "alchemy": lambda selectStatement, leftModel, rightModel: selectStatement.join(rightModel)
+    #     },
+    #     resolver=ScalarResolver["EventGQLModel"](fkey_field_name="masterevent_id")
+    # )
 
-    children: typing.List["EventGQLModel"] = strawberry.field(
-        description="""Event children""",
-        permission_classes=[
-            OnlyForAuthentized
-        ],
-        resolver=VectorResolver["EventGQLModel"](fkey_field_name="masterevent_id", whereType=EventInputFilter)
-    )
+    # children: typing.List["EventGQLModel"] = strawberry.field(
+    #     description="""Event children""",
+    #     permission_classes=[
+    #         OnlyForAuthentized
+    #     ],
+    #     resolver=VectorResolver["EventGQLModel"](fkey_field_name="masterevent_id", whereType=EventInputFilter)
+    # )
 
     type_id: typing.Optional[IDType] = strawberry.field(
         description="""Event type id""",
