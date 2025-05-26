@@ -25,7 +25,14 @@ from src.DBDefinitions import (
 get_demodata = lambda :readJsonFile(jsonFileName="./systemdata.json")
 async def initDB(asyncSessionMaker, filename="./systemdata.json"):
 
-    isDemo = os.environ.get("DEMODATA", None) in ["True", "true"]
+    dbModels = [
+        EventTypeModel, 
+
+        DocumentTypeModel,
+        FacilityTypeModel,
+
+    ]
+    isDemo = os.environ.get("DEMODATA", None) in ["True", "true", True]
     if isDemo:
         print("Demo mode", flush=True)
         dbModels = [
@@ -49,16 +56,7 @@ async def initDB(asyncSessionMaker, filename="./systemdata.json"):
             EventFacilityReservationModel,
             EventInvitationModel    
         ]
-    else:
-
-        print("No Demo mode", flush=True)
-        dbModels = [
-            EventTypeModel, 
-
-            DocumentTypeModel,
-            FacilityTypeModel,
-
-        ]
+        
 
     jsonData = readJsonFile(filename)
     await ImportModels(asyncSessionMaker, dbModels, jsonData)

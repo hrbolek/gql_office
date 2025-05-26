@@ -130,7 +130,11 @@ class EventGQLModel(BaseGQLModel):
         ],
     )
     def _duration(self, unit: TimeUnit=TimeUnit.MINUTES) -> typing.Optional[float]:
-        duration = self.duration or (self.enddate - self.startdate)
+        duration = self.duration
+        if duration is None:
+            if self.startdate is None or self.enddate is None:
+                return None
+            duration = (self.enddate - self.startdate)
         result = duration.total_seconds()
         if unit == TimeUnit.SECONDS:
             return result
