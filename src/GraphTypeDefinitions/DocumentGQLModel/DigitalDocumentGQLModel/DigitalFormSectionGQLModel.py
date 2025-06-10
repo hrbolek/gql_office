@@ -5,6 +5,7 @@ import typing
 import strawberry
 import uuid
 
+import strawberry.types
 from uoishelpers.gqlpermissions import (
     OnlyForAuthentized,
     SimpleInsertPermission, 
@@ -14,6 +15,7 @@ from uoishelpers.gqlpermissions import (
 from uoishelpers.resolvers import (
     getLoadersFromInfo, 
     createInputs,
+    createInputs2,
 
     InsertError, 
     Insert, 
@@ -33,19 +35,18 @@ DigitalFormGQLModel = typing.Annotated["DigitalFormGQLModel", strawberry.lazy(".
 DigitalFormFieldGQLModel = typing.Annotated["DigitalFormFieldGQLModel", strawberry.lazy(".DigitalFormFieldGQLModel")]
 DigitalFormFieldInputFilter = typing.Annotated["DigitalFormFieldInputFilter", strawberry.lazy(".DigitalFormFieldGQLModel")]
 
-@createInputs
-@dataclasses.dataclass
+@createInputs2
 class DigitalFormSectionInputFilter:
-    id: IDType
-    label: str
-    name: str
-    label_en: str
-    description: str
+    id: IDType = strawberry.field(description="primary key")
+    label: str = strawberry.field(description="label for section")
+    name: str = strawberry.field(description="name of section")
+    label_en: str = strawberry.field(description="english label for section")
+    description: str = strawberry.field(description="description of section")
     parent_id: IDType
 
 @strawberry.federation.type(
     keys=["id"], description="""Represents a section (group) of a digital form.
-Supports nested sections and repetition.""")
+Supports nested sections and repetition. Contains fields definition""")
 class DigitalFormSectionGQLModel(BaseGQLModel):
     @classmethod
     def getLoader(cls, info: strawberry.types.Info):
@@ -193,11 +194,11 @@ class DigitalFormSectionQuery:
         resolver=PageResolver[DigitalFormSectionInputFilter](whereType=DigitalFormSectionInputFilter)
     )
 
-    
+from ...utils import InputModelMixin
 @strawberry.input(
     description="""DigitalFormSection insert mutation"""
 )
-class DigitalFormSectionInsertGQLModel:
+class DigitalFormSectionInsertGQLModel(InputModelMixin):
 
     name: typing.Optional[str] = strawberry.field(
         description="""DigitalFormSection name""",
@@ -224,8 +225,8 @@ class DigitalFormSectionInsertGQLModel:
 
     id: typing.Optional[IDType] = strawberry.field(
         description="""DigitalFormSection id client generated""",
-        # default=None,
-        default_factory=uuid.uuid4
+        default=None,
+        # default_factory=lambda: uuid.uuid4()
     )
 
     from .DigitalFormFieldGQLModel import DigitalFormFieldInsertGQLModel
@@ -240,6 +241,9 @@ class DigitalFormSectionInsertGQLModel:
     )
 
     path: strawberry.Private[str] = None
+    getLoader = DigitalFormSectionGQLModel.getLoader 
+
+    # from ...utils import intoModel
 
 def from_FieldInputIntoFieldModel(info: strawberry.types.Info, field):
     from .DigitalFormFieldGQLModel import DigitalFormFieldGQLModel
@@ -248,6 +252,7 @@ def from_FieldInputIntoFieldModel(info: strawberry.types.Info, field):
 
     result = {**strawberry.asdict(field)}
     return FieldDBModel(**result)
+
 
 def from_SectionInputIntoSectionModel(info: strawberry.types.Info, section: DigitalFormSectionInsertGQLModel) -> DigitalFormSectionGQLModel:
     from .DigitalFormFieldGQLModel import DigitalFormFieldGQLModel
@@ -366,23 +371,25 @@ class DigitalFormSectionMutation:
         info: strawberry.types.Info,
         digital_form_section: DigitalFormSectionInsertGQLModel
     ) -> typing.Union[DigitalFormSectionGQLModel, InsertError[DigitalFormSectionGQLModel]]:
-        from .DigitalFormGQLModel import DigitalFormGQLModel
-        # if digital_form_section.id is None:
-        #     # missing id, create it here
-        #     digital_form_section.id = uuid.uuid4()        
+        # from .DigitalFormGQLModel import DigitalFormGQLModel
+        # # if digital_form_section.id is None:
+        # #     # missing id, create it here
+        # #     digital_form_section.id = uuid.uuid4()        
 
-        # loaders = (DigitalFormGQLModel.getLoader(info=info), DigitalFormSectionGQLModel.getLoader(info=info))
-        futures = (
-            DigitalFormGQLModel.load_with_loader(info, digital_form_section.form_id), 
-            DigitalFormSectionGQLModel.load_with_loader(info, digital_form_section.section_id)
-        )
-        # futures = (loader.load(digital_form_section.parent_id) for loader in loaders)
-        [parent_form, parent_section] = await asyncio.gather(*futures)
+        # # loaders = (DigitalFormGQLModel.getLoader(info=info), DigitalFormSectionGQLModel.getLoader(info=info))
+        # futures = (
+        #     DigitalFormGQLModel.load_with_loader(info, digital_form_section.form_id), 
+        #     DigitalFormSectionGQLModel.load_with_loader(info, digital_form_section.section_id)
+        # )
+        # # futures = (loader.load(digital_form_section.parent_id) for loader in loaders)
+        # [parent_form, parent_section] = await asyncio.gather(*futures)
 
-        path = f"{parent_form.id}" if parent_form else (parent_section.path if parent_section else "")
-        digital_form_section.path = path + f".{digital_form_section.id}"
+        # path = f"{parent_form.id}" if parent_form else (parent_section.path if parent_section else "")
+        # digital_form_section.path = path + f".{digital_form_section.id}"
 
-        return await digital_form_section_insert_internal(self=self, info=info, digital_form_section=digital_form_section)
+        # # return await digital_form_section_insert_internal(self=self, info=info, digital_form_section=digital_form_section)
+        entitymodel = digital_form_section.intoModel(info=info)
+        return await Insert[DigitalFormSectionGQLModel].DoItSafeWay(info=info, entity=entitymodel)
     
     @strawberry.mutation(
         description="""Update a DigitalFormSection""",

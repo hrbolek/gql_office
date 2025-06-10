@@ -57,7 +57,7 @@ class DigitalSubmissionModel(BaseModel):
     )
 
     # Relationship to submitted sections; assumes DigitalSubmissionSectionModel has a column "submission_id"
-    submitted_sections = relationship(
+    sections = relationship(
         "DigitalSubmissionSectionModel",
         init=True,
         # back_populates="submission",
@@ -70,7 +70,7 @@ class DigitalSubmissionModel(BaseModel):
     )
 
     # Relationship to submitted fields; assumes DigitalSubmissionFieldModel has a column "submission_id"
-    submitted_fields = relationship(
+    fields = relationship(
         "DigitalSubmissionFieldModel",
         # back_populates="submission",
         primaryjoin="DigitalSubmissionFieldModel.submission_id==DigitalSubmissionModel.id",

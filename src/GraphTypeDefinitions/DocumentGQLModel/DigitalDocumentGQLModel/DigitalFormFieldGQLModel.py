@@ -14,7 +14,7 @@ from uoishelpers.gqlpermissions import (
 )    
 from uoishelpers.resolvers import (
     getLoadersFromInfo, 
-    createInputs,
+    createInputs2,
 
     InsertError, 
     Insert, 
@@ -33,14 +33,13 @@ from ...BaseGQLModel import BaseGQLModel, IDType
 DigitalFormSectionGQLModel = typing.Annotated["DigitalFormSectionGQLModel", strawberry.lazy(".DigitalFormSectionGQLModel")]
 DigitalFormGQLModel = typing.Annotated["DigitalFormGQLModel", strawberry.lazy(".DigitalFormGQLModel")]
 
-@createInputs
-@dataclasses.dataclass
+@createInputs2
 class DigitalFormFieldInputFilter:
-    name: str
-    name_en: str
-    description: str
-    id: IDType
-    parent_id: IDType
+    name: str = strawberry.field(description="name of the field")
+    name_en: str = strawberry.field(description="english name of the field")
+    description: str = strawberry.field(description="description of the field")
+    id: IDType = strawberry.field(description="primary key")
+    parent_id: IDType = strawberry.field(description="id of the field owner")
 
 
 @strawberry.federation.type(
@@ -182,9 +181,11 @@ class DigitalFormFieldQuery:
     )
     pass
 
+from ...utils import InputModelMixin
 @strawberry.input(description="DigitalFormField insert parameter description")
-class DigitalFormFieldInsertGQLModel:
+class DigitalFormFieldInsertGQLModel(InputModelMixin):
     # type_id: IDType = strawberry.field(description="type id of the field")
+    getLoader = DigitalFormFieldGQLModel.getLoader
     
     form_id: typing.Optional[IDType] = strawberry.field(
         description="form id where the field is placed",
@@ -196,8 +197,8 @@ class DigitalFormFieldInsertGQLModel:
     )
     id: typing.Optional[IDType] = strawberry.field(
         description="client side generated id", 
-        # default=None
-        default_factory=uuid.uuid4
+        default=None
+        # default_factory=uuid.uuid4
     )
     name: typing.Optional[str] = strawberry.field(
         description="variable name", 
@@ -285,7 +286,9 @@ class DigitalFormFieldMutation:
         info: strawberry.types.Info,
         form_field: DigitalFormFieldInsertGQLModel
     ) -> typing.Union[DigitalFormFieldGQLModel, InsertError[DigitalFormFieldGQLModel]]:
-        return await digital_form_field_insert_internal(self, info=info, form_field=form_field)
+        modelinstance = form_field.intoModel(info=info)
+        return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=modelinstance)
+        # return await digital_form_field_insert_internal(self, info=info, form_field=form_field)
     
     @strawberry.mutation(
         description="""Update a DigitalFormField""",

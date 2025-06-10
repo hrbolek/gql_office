@@ -150,16 +150,38 @@ class SubmissionFieldQuery:
         resolver=PageResolver[DigitalSubmissionFieldGQLModel](whereType=DigitalSubmissionFieldInputFilter)
     )
 
-
+from ...utils import InputModelMixin
 @strawberry.input(description="DigitalFormField insert parameter description")
-class DigitalSubmissionFieldInsertGQLModel:
-    field_id: IDType = strawberry.field(description="link to the form field")
-    section_id: IDType = strawberry.field(description="section id where the field is placed")
-    submission_id: IDType = strawberry.field(description="submission id where the field is placed")
-    id: typing.Optional[IDType] = strawberry.field(description="client side generated id", default=None)
-    value: typing.Optional[str] = strawberry.field(description="value of the field", default=None)
-    state_id: typing.Optional[IDType] = strawberry.field(description="client side generated id", default=None)
-    value: typing.Optional[str] = strawberry.field(description="field value", default=None)
+class DigitalSubmissionFieldInsertGQLModel(InputModelMixin):
+    getLoader = DigitalSubmissionFieldGQLModel.getLoader
+    field_id: typing.Optional[IDType] = strawberry.field(
+        description="link to the form field",
+        default=None
+        )
+    section_id: typing.Optional[IDType] = strawberry.field(
+        description="section id where the field is placed",
+        default=None
+        )
+    submission_id: typing.Optional[IDType] = strawberry.field(
+        description="submission id where the field is placed",
+        default=None
+        )
+    id: typing.Optional[IDType] = strawberry.field(
+        description="client side generated id", 
+        default=None
+        )
+    value: typing.Optional[str] = strawberry.field(
+        description="value of the field", 
+        default=None
+        )
+    state_id: typing.Optional[IDType] = strawberry.field(
+        description="client side generated id", 
+        default=None
+        )
+    value: typing.Optional[str] = strawberry.field(
+        description="field value", 
+        default=None
+        )
     path: strawberry.Private[str] = None
     
 @strawberry.input(description="DigitalSubmissionField update parameter description")

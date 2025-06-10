@@ -45,7 +45,7 @@ class DigitalSubmissionSectionModel(BaseModel):
     section = relationship(
         "DigitalSubmissionSectionModel",
         remote_side="DigitalSubmissionSectionModel.id",
-        back_populates="child_sections",
+        back_populates="sections",
         uselist=False
     )
 
@@ -72,7 +72,15 @@ class DigitalSubmissionSectionModel(BaseModel):
     #     )}
     # )
 
-    child_sections = relationship(
+    # Relationship to the submission owning this section.
+    submission = relationship(
+        "DigitalSubmissionModel",
+        # back_populates="sections",
+        viewonly=True,
+        uselist=False
+    )
+
+    sections = relationship(
         "DigitalSubmissionSectionModel",
         back_populates="section",
         cascade="save-update",
@@ -82,14 +90,6 @@ class DigitalSubmissionSectionModel(BaseModel):
         # You can also specify a default factory if needed,
         # but in many cases SQLAlchemy will automatically initialize collection attributes.
     )    
-
-    # Relationship to the submission owning this section.
-    submission = relationship(
-        "DigitalSubmissionModel",
-        # back_populates="sections",
-        viewonly=True,
-        uselist=False
-    )
 
     from .DigitalSubmissionFieldModel import DigitalSubmissionFieldModel
     # Relationship to the field (DigitalSubmissionFieldModel) associated with this section.

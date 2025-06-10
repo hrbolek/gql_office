@@ -136,7 +136,7 @@ class DigitalSubmissionGQLModel(BaseGQLModel): #, DocumentInterfaceGQLModel
     async def submitted_sections_all(self, info: strawberry.types.Info) -> typing.List[DigitalSubmissionSectionGQLModel]:
         return []
 
-    submitted_sections: typing.List["DigitalSubmissionSectionGQLModel"] = strawberry.field(
+    sections: typing.List["DigitalSubmissionSectionGQLModel"] = strawberry.field(
         description="""Digital Submission sections.""",
         permission_classes=[
             OnlyForAuthentized
@@ -161,14 +161,13 @@ class DigitalSubmissionGQLModel(BaseGQLModel): #, DocumentInterfaceGQLModel
     #     result = [DigitalSubmissionSectionGQLModel.from_dataclass(row) for row in rows]
     #     return result
 
-    submitted_fields: typing.List["DigitalSubmissionFieldGQLModel"] = strawberry.field(
+    fields: typing.List["DigitalSubmissionFieldGQLModel"] = strawberry.field(
         description="""Digital Submission fields.""",
         permission_classes=[
             OnlyForAuthentized
         ],
         resolver=VectorResolver["DigitalSubmissionFieldGQLModel"](fkey_field_name="submission_id", whereType=DigitalSubmissionFieldInputFilter)
     )
-
 
 @strawberry.interface(
     description=""""""
@@ -190,13 +189,16 @@ class DigitalSubmissionQuery:
         resolver=PageResolver[DigitalSubmissionInputFilter](whereType=DigitalSubmissionInputFilter)
     )
 
-    
+from ...utils import InputModelMixin
+
 @strawberry.input(
     description="""DigitalSubmission insert mutation"""
 )
-class DigitalSubmissionInsertGQLModel:
-    form_id: IDType = strawberry.field(
-        description="[form](#digitalformgqlmodel) for this submission"
+class DigitalSubmissionInsertGQLModel(InputModelMixin):
+    getLoader = DigitalSubmissionGQLModel.getLoader
+    form_id: typing.Optional[IDType] = strawberry.field(
+        description="[form](#digitalformgqlmodel) for this submission",
+        default=None
     )
 
     name: typing.Optional[str] = strawberry.field(
@@ -220,9 +222,15 @@ class DigitalSubmissionInsertGQLModel:
     from .DigitalSubmissionSectionGQLModel import SubmissionSectionInsertGQLModel
 
     sections: typing.Optional[typing.List[SubmissionSectionInsertGQLModel]] = strawberry.field(
-        description="", 
+        description="sctions which are part of this submission", 
         # default_factory=list,
-        default=None
+        default_factory=list
+    )
+
+    from .DigitalSubmissionFieldGQLModel import DigitalSubmissionFieldInsertGQLModel
+    fields: typing.Optional[typing.List[DigitalSubmissionFieldInsertGQLModel]] = strawberry.field(
+        description="",
+        default_factory=list
     )
 
 @strawberry.input(
@@ -294,7 +302,9 @@ class DigitalSubmissionMutation:
         info: strawberry.types.Info,
         digital_form_submission: DigitalSubmissionInsertGQLModel
     ) -> typing.Union[DigitalSubmissionGQLModel, InsertError[DigitalSubmissionGQLModel]]:
-        return await digital_form_submission_insert_internal(self, info, digital_form_submission)
+        modelinstance = digital_form_submission.intoModel(info=info)
+        return await Insert[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=modelinstance)
+        # return await digital_form_submission_insert_internal(self, info, digital_form_submission)
         # return await Insert[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)
     
     @strawberry.mutation(

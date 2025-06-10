@@ -13,7 +13,7 @@ from uoishelpers.gqlpermissions import (
 )    
 from uoishelpers.resolvers import (
     getLoadersFromInfo, 
-    createInputs,
+    createInputs2,
 
     InsertError, 
     Insert, 
@@ -35,14 +35,15 @@ DigitalFormSectionInputFilter = typing.Annotated["DigitalFormSectionInputFilter"
 DigitalSubmissionGQLModel = typing.Annotated["DigitalSubmissionGQLModel", strawberry.lazy(".DigitalSubmissionGQLModel")]
 DigitalSubmissionInputFilter = typing.Annotated["DigitalSubmissionInputFilter", strawberry.lazy(".DigitalSubmissionGQLModel")]
 
-@createInputs
-@dataclasses.dataclass
+@createInputs2
 class DigitalFormInputFilter:
-    name: str
-    name_en: str
-    description: str
-    id: IDType
-    parent_id: IDType
+    name: str = strawberry.field(description="name of the form")
+    name_en: str = strawberry.field(description="english name of the form")
+    description: str = strawberry.field(description="description, use case of the form")
+    id: IDType = strawberry.field(description="primary key")
+    parent_id: IDType = strawberry.field(description="parent of this form")
+
+    sections: DigitalFormSectionInputFilter = strawberry.field(description="filter based on sections")
 
 
 @strawberry.federation.type(
@@ -91,11 +92,13 @@ class DigitalFormQuery:
         resolver=PageResolver["DigitalFormGQLModel"](whereType=DigitalFormInputFilter)
     )
 
-    
+from ...utils import InputModelMixin
 @strawberry.input(
     description="""DigitalForm insert mutation input type, can contain whole structure"""
 )
-class DigitalFormInsertGQLModel:
+class DigitalFormInsertGQLModel(InputModelMixin):
+    getLoader = DigitalFormGQLModel.getLoader
+
     name: typing.Optional[str] = strawberry.field(
         description="""DigitalForm name""",
         default=None
@@ -108,6 +111,7 @@ class DigitalFormInsertGQLModel:
     id: typing.Optional[IDType] = strawberry.field(
         description="""DigitalForm id client generated""",
         default=None
+        # default_factory=uuid.uuid4
     )
 
     from .DigitalFormSectionGQLModel import DigitalFormSectionInsertGQLModel
@@ -193,7 +197,12 @@ class DigitalFormMutation:
         info: strawberry.types.Info,
         digital_form: DigitalFormInsertGQLModel
     ) -> typing.Union[DigitalFormGQLModel, InsertError[DigitalFormGQLModel]]:
-        return await digital_form_insert_internal(self, info=info, digital_form=digital_form)
+        modelinstance = digital_form.intoModel(info=info)
+        print(f"{strawberry.asdict(modelinstance)}")
+        for section in modelinstance.sections:
+            print(f"section: {strawberry.asdict(section)}")
+        return await Insert[DigitalFormGQLModel].DoItSafeWay(info=info, entity=modelinstance)
+        # return await digital_form_insert_internal(self, info=info, digital_form=digital_form)
     
     @strawberry.mutation(
         description="""Update a DigitalForm""",

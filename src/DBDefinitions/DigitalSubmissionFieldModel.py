@@ -43,7 +43,7 @@ class DigitalSubmissionFieldModel(BaseModel):
         lazy="select"
     )
 
-    submission_section = relationship(
+    section = relationship(
         "DigitalSubmissionSectionModel",
         # back_populates="submission",
         primaryjoin="DigitalSubmissionFieldModel.section_id==DigitalSubmissionSectionModel.id",
