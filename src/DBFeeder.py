@@ -19,7 +19,11 @@ from src.DBDefinitions import (
     FacilityModel,
     FacilityTypeModel,
     EventFacilityReservationModel,
-    EventInvitationModel    
+    EventInvitationModel,
+
+    RequestModel,
+    RequestTypeModel,
+    HistoryModel
 )
 
 get_demodata = lambda :readJsonFile(jsonFileName="./systemdata.json")
@@ -43,8 +47,8 @@ async def initDB(asyncSessionMaker, filename="./systemdata.json"):
             FacilityTypeModel,
 
             DigitalFormModel,
-            DigitalFormFieldModel,
             DigitalFormSectionModel,
+            DigitalFormFieldModel,
 
             DigitalSubmissionModel,
             DigitalSubmissionSectionModel,
@@ -54,7 +58,11 @@ async def initDB(asyncSessionMaker, filename="./systemdata.json"):
 
             FacilityModel,
             EventFacilityReservationModel,
-            EventInvitationModel    
+            EventInvitationModel,
+
+            RequestTypeModel,
+            RequestModel,
+            HistoryModel
         ]
         
 

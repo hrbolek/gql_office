@@ -128,6 +128,8 @@ class EventTypeQuery:
         resolver=PageResolver[EventTypeGQLModel](whereType=EventTypeInputFilter)
     )
 
+from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
+
 @strawberry.input(description="Input definition for EventType create")
 class EventTypeInsertGQLModel:
     name: str = strawberry.field(description="name of the type")

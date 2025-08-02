@@ -22,6 +22,8 @@ from .EventGQLModel import (
     EventInvitationQuery
 )
 
+from .RequestGQLModel import RequestQueries, RequestTypeQueries, HistoryQueries
+
 @strawberry.type(description="""Type for query root""")
 class Query(
     EventQuery, 
@@ -41,7 +43,11 @@ class Query(
     SubmissionSectionQuery,
     SubmissionFieldQuery,
 
-    DocumentQuery
+    DocumentQuery,
+
+    RequestQueries, 
+    RequestTypeQueries, 
+    HistoryQueries
 ):
 
     pass

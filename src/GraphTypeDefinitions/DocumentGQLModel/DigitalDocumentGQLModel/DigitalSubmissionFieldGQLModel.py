@@ -150,7 +150,8 @@ class SubmissionFieldQuery:
         resolver=PageResolver[DigitalSubmissionFieldGQLModel](whereType=DigitalSubmissionFieldInputFilter)
     )
 
-from ...utils import InputModelMixin
+from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
+
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalSubmissionFieldInsertGQLModel(InputModelMixin):
     getLoader = DigitalSubmissionFieldGQLModel.getLoader
@@ -183,6 +184,8 @@ class DigitalSubmissionFieldInsertGQLModel(InputModelMixin):
         default=None
         )
     path: strawberry.Private[str] = None
+    rbacobject_id: strawberry.Private[IDType] = None
+    createdby_id: strawberry.Private[IDType] = None
     
 @strawberry.input(description="DigitalSubmissionField update parameter description")
 class DigitalSubmissionFieldUpdateGQLModel:
@@ -196,19 +199,19 @@ class DigitalSubmissionFieldDeleteGQLModel:
     id: IDType = strawberry.field(description="primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
-def field_into_dbmodel(self, info: strawberry.types.Info, submission_field: DigitalSubmissionFieldInsertGQLModel):
-    loader = DigitalSubmissionFieldGQLModel.getLoader(info)
-    Model = loader.getModel()
-    submission_field_dict = strawberry.asdict(submission_field)
-    result = Model(**submission_field_dict)
-    return result
+# def field_into_dbmodel(self, info: strawberry.types.Info, submission_field: DigitalSubmissionFieldInsertGQLModel):
+#     loader = DigitalSubmissionFieldGQLModel.getLoader(info)
+#     Model = loader.getModel()
+#     submission_field_dict = strawberry.asdict(submission_field)
+#     result = Model(**submission_field_dict)
+#     return result
 
 
-async def digital_submission_field_insert_internal(self, info: strawberry.types.Info, submission_field: DigitalSubmissionFieldInsertGQLModel):
-    return await Insert[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)
+# async def digital_submission_field_insert_internal(self, info: strawberry.types.Info, submission_field: DigitalSubmissionFieldInsertGQLModel):
+#     return await Insert[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)
 
-@strawberry.type(
-    description=""
+@strawberry.interface(
+    description="Digital submission mutations"
 )
 class DigitalSubmissionFieldMutation:
     @strawberry.mutation(
@@ -220,9 +223,9 @@ class DigitalSubmissionFieldMutation:
     async def digital_submission_field_insert(
         self,
         info: strawberry.types.Info,
-        submission_field: DigitalSubmissionFieldInsertGQLModel
+        submission_field: typing.Annotated[DigitalSubmissionFieldInsertGQLModel, strawberry.argument(description="submission field attributes, to be inserted")]
     ) -> typing.Union[DigitalSubmissionFieldGQLModel, InsertError[DigitalSubmissionFieldGQLModel]]:
-        return await digital_submission_field_insert_internal(self, info=info, submission_field=submission_field)
+        return await Insert[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)
     
     @strawberry.mutation(
         description="""Update a DigitalSubmissionField""",
@@ -233,7 +236,7 @@ class DigitalSubmissionFieldMutation:
     async def digital_submission_field_update(
         self,
         info: strawberry.types.Info,
-        submission_field: DigitalSubmissionFieldUpdateGQLModel
+        submission_field: typing.Annotated[DigitalSubmissionFieldInsertGQLModel, strawberry.argument(description="submission field attributes, to be updated")]
     ) -> typing.Union[DigitalSubmissionFieldGQLModel, UpdateError[DigitalSubmissionFieldGQLModel]]:
         return await Update[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)
     
@@ -246,6 +249,6 @@ class DigitalSubmissionFieldMutation:
     async def digital_submission_field_delete(
         self,
         info: strawberry.types.Info,
-        submission_field: DigitalSubmissionFieldDeleteGQLModel
+        submission_field: typing.Annotated[DigitalSubmissionFieldDeleteGQLModel, strawberry.argument(description="id and lastchange of submission field, to be deleted")]
     ) -> typing.Optional[DeleteError[DigitalSubmissionFieldGQLModel]]:
         return await Delete[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)

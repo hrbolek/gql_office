@@ -24,9 +24,20 @@ from .BaseModel import BaseModel, UUIDColumn, UUIDFKey, IDType
 class DigitalFormSectionModel(BaseModel):
     __tablename__ = "digital_form_sections"
 
-    id: Mapped[IDType] = mapped_column(primary_key=True, default=None, nullable=True)
+    path_attribute_name = "path"
+    parent_attribute_name = "section"
+    parent_id_attribute_name = "section_id"
+    children_attribute_name = "sections"
+
+    # Materialized path technique
+    path: Mapped[str] = mapped_column(
+        index=True,
+        nullable=True,
+        default=None,
+        comment="Materialized path technique, not implemented"
+    )
+
     name: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
-    path: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
     label: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
     label_en: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
     description: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
@@ -41,10 +52,17 @@ class DigitalFormSectionModel(BaseModel):
     # Relationship: child sections (self-referential)
     sections = relationship(
         "DigitalFormSectionModel",
-        primaryjoin="DigitalFormSectionModel.section_id==DigitalFormSectionModel.id",
-        # backref="parent_section",
-        cascade="all, delete-orphan",
-        lazy="select"
+        back_populates="section",
+        uselist=True,
+        init=True,
+        cascade="save-update",
+    )
+
+    section = relationship(
+        "DigitalFormSectionModel",
+        remote_side="DigitalFormSectionModel.id",
+        back_populates="sections",
+        uselist=False
     )
 
     # Relationship: fields within this section.
@@ -52,8 +70,9 @@ class DigitalFormSectionModel(BaseModel):
         "DigitalFormFieldModel",
         primaryjoin="DigitalFormFieldModel.form_section_id==DigitalFormSectionModel.id",
         # backref="form_section",
-        cascade="all, delete-orphan",
-        lazy="select"
+        uselist=True,
+        init=True,
+        cascade="save-update",
     )
 
     # @property

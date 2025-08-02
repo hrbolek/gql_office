@@ -116,6 +116,13 @@ graphql_app = GraphQLRouter(
     context_getter=get_context
 )
 
+from uoishelpers.schema import SessionCommitExtensionFactory
+from src.Dataloaders import createLoadersContext
+schema.extensions.append(
+    SessionCommitExtensionFactory(session_maker_factory=RunOnceAndReturnSessionMaker, loaders_factory=createLoadersContext)
+)
+
+
 app.include_router(graphql_app, prefix="/gql")
 
 @app.get("/voyager", response_class=FileResponse)
@@ -137,6 +144,11 @@ async def graphiql():
 @app.get("/doc", response_class=FileResponse)
 async def graphiql():
     realpath = os.path.realpath("./liveschema.html")
+    return realpath
+
+@app.get("/ui", response_class=FileResponse)
+async def graphiql():
+    realpath = os.path.realpath("./livedata.html")
     return realpath
 
 @app.get("/test", response_class=FileResponse)

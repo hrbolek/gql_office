@@ -26,6 +26,11 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
 from ...BaseGQLModel import BaseGQLModel, IDType
 from ..DocumentInterfaceGQLModel import DocumentInterfaceGQLModel
@@ -92,7 +97,8 @@ class DigitalFormQuery:
         resolver=PageResolver["DigitalFormGQLModel"](whereType=DigitalFormInputFilter)
     )
 
-from ...utils import InputModelMixin
+from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
+
 @strawberry.input(
     description="""DigitalForm insert mutation input type, can contain whole structure"""
 )
@@ -120,34 +126,8 @@ class DigitalFormInsertGQLModel(InputModelMixin):
         default_factory=list
     )
 
-async def digital_form_insert_internal(self, info: strawberry.types.Info, digital_form: DigitalFormInsertGQLModel):
-    from .DigitalFormSectionGQLModel import digital_form_section_insert_internal, from_SectionInputIntoSectionModel
-    if digital_form.id is None:
-        digital_form.id = uuid.uuid4()
-    # sections = digital_form.sections
-    digital_form.sections = [from_SectionInputIntoSectionModel(info, section) for section in digital_form.sections]
-    master_result = await Insert[DigitalFormGQLModel].DoItSafeWay(info=info, entity=digital_form)
-    # failed = getattr(master_result, "failed", False)
-    # if failed:
-    #     msg_error = getattr(master_result, "msg", "")
-    #     return InsertError[DigitalFormGQLModel](msg=msg_error, _input=digital_form)
-
-    # for section in sections:
-    #     if section.id is None:
-    #         section.id = uuid.uuid4()
-    #     section.parent_id = digital_form.id
-
-    # msg_error = None
-    # for section in digital_form.sections:
-    #     result = await digital_form_section_insert_internal(self, info=info, digital_form_section=section)
-    #     failed = getattr(result, "failed", False)
-    #     if failed:
-    #         msg_error = getattr(result, "msg", "")
-    #     break
-
-    # if msg_error:
-    #     return InsertError[DigitalFormGQLModel](msg=msg_error, _input=digital_form)
-    return master_result
+    rbacobject_id: strawberry.Private[IDType] = None
+    createdby_id: strawberry.Private[IDType] = None
 
 
 @strawberry.input(
@@ -182,25 +162,33 @@ class DigitalFormDeleteGQLModel:
     )
 
 
-@strawberry.type(
-    description="""DigitalForm mutation"""
+@strawberry.interface(
+    description="""DigitalForm mutations"""
 )
 class DigitalFormMutation:
     @strawberry.mutation(
         description="""Insert a DigitalForm""",
         permission_classes=[
-            SimpleInsertPermission[DigitalFormGQLModel](roles=["administrátor"])
-        ]
+            # SimpleInsertPermission[DigitalFormGQLModel](roles=["administrátor"])
+            
+        ],
+        extensions=[
+            # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
+            UserAccessControlExtension[UpdateError, DigitalFormGQLModel](roles=["administrátor", "personalista"]),
+            UserRoleProviderExtension[UpdateError, DigitalFormGQLModel](),
+            RbacProviderExtension[UpdateError, DigitalFormGQLModel](),
+            LoadDataExtension[UpdateError, DigitalFormGQLModel]()
+        ],
     )
     async def digital_form_insert(
         self,
         info: strawberry.types.Info,
-        digital_form: DigitalFormInsertGQLModel
+        digital_form: typing.Annotated[DigitalFormInsertGQLModel, strawberry.argument (description="full structure of the form, including sections and fields")]
     ) -> typing.Union[DigitalFormGQLModel, InsertError[DigitalFormGQLModel]]:
         modelinstance = digital_form.intoModel(info=info)
-        print(f"{strawberry.asdict(modelinstance)}")
-        for section in modelinstance.sections:
-            print(f"section: {strawberry.asdict(section)}")
+        # print(f"{strawberry.asdict(modelinstance)}")
+        # for section in modelinstance.sections:
+        #     print(f"section: {strawberry.asdict(section)}")
         return await Insert[DigitalFormGQLModel].DoItSafeWay(info=info, entity=modelinstance)
         # return await digital_form_insert_internal(self, info=info, digital_form=digital_form)
     
@@ -213,7 +201,7 @@ class DigitalFormMutation:
     async def digital_form_update(
         self,
         info: strawberry.types.Info,
-        digital_form: DigitalFormUpdateGQLModel
+        digital_form: typing.Annotated[DigitalFormUpdateGQLModel, strawberry.argument (description="atributes of the form, which can be updated")]
     ) -> typing.Union[DigitalFormGQLModel, UpdateError[DigitalFormGQLModel]]:
         return await Update[DigitalFormGQLModel].DoItSafeWay(info=info, entity=digital_form)
     
@@ -226,6 +214,6 @@ class DigitalFormMutation:
     async def digital_form_delete(
         self,
         info: strawberry.types.Info,
-        digital_form: DigitalFormDeleteGQLModel
+        digital_form: typing.Annotated[DigitalFormDeleteGQLModel, strawberry.argument(description="id and lastchange of the form, which will be deleted")]
     ) -> typing.Optional[DeleteError[DigitalFormGQLModel]]:
         return await Delete[DigitalFormGQLModel].DoItSafeWay(info=info, entity=digital_form)

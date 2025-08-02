@@ -18,7 +18,9 @@ from .DocumentGQLModel import (
     DigitalSubmissionMutation
 )
 
-@strawberry.federation.type(extend=True)
+from .RequestGQLModel import RequestMutations, RequestTypeMutations, HistoryMutations
+
+@strawberry.type(description="root of mutations")
 class Mutation(
     EventMutation,
     EventTypeMutation,
@@ -30,7 +32,11 @@ class Mutation(
     DocumentMutation,
     DigitalFormMutation,
     DigitalFormSectionMutation,
-    DigitalSubmissionMutation
+    DigitalSubmissionMutation,
+
+    RequestMutations, 
+    RequestTypeMutations, 
+    HistoryMutations
     ):
 
     # from .FacilityGQLModel import (

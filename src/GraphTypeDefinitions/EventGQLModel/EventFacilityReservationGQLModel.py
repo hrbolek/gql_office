@@ -13,7 +13,7 @@ from uoishelpers.gqlpermissions import (
 )    
 from uoishelpers.resolvers import (
     getLoadersFromInfo, 
-    createInputs,
+    createInputs2,
 
     InsertError, 
     Insert, 
@@ -34,8 +34,7 @@ EventInputFilter = typing.Annotated["EventInputFilter", strawberry.lazy(".EventG
 FacilityGQLModel = typing.Annotated["FacilityGQLModel", strawberry.lazy("..FacilityGQLModel")]
 StateGQLModel = typing.Annotated["StateGQLModel", strawberry.lazy("..StateGQLModel")]
 
-@createInputs
-@dataclasses.dataclass
+@createInputs2
 class EventFacilityReservationInputFilter:
     id: IDType
     event_id: IDType
@@ -121,6 +120,8 @@ class EventFacilityReservationQuery:
         resolver=PageResolver[EventFacilityReservationGQLModel](whereType=EventFacilityReservationInputFilter)
     )
 
+from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
+
 @strawberry.input(description="Input definition for EventFacilityReservation create")
 class EventFacilityReservationInsertGQLModel:
     facility_id: IDType = strawberry.field(description="facility")
@@ -151,7 +152,7 @@ class EventFacilityReservationMutation:
             SimpleInsertPermission[EventFacilityReservationGQLModel](roles=["administrátor"])
         ]
     )
-    async def event_insert(self, info: strawberry.types.Info, event_type: EventFacilityReservationInsertGQLModel) -> typing.Union[EventFacilityReservationGQLModel, InsertError[EventFacilityReservationGQLModel]]:
+    async def event_facility_insert(self, info: strawberry.types.Info, event_type: EventFacilityReservationInsertGQLModel) -> typing.Union[EventFacilityReservationGQLModel, InsertError[EventFacilityReservationGQLModel]]:
         result = await Insert[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result
     
@@ -162,7 +163,7 @@ class EventFacilityReservationMutation:
             SimpleUpdatePermission[EventFacilityReservationGQLModel](roles=["administrátor"])
         ]
     )
-    async def event_update(self, info: strawberry.types.Info, event_type: EventFacilityReservationUpdateGQLModel) -> typing.Union[EventFacilityReservationGQLModel, UpdateError[EventFacilityReservationGQLModel]]:
+    async def event_facility_update(self, info: strawberry.types.Info, event_type: EventFacilityReservationUpdateGQLModel) -> typing.Union[EventFacilityReservationGQLModel, UpdateError[EventFacilityReservationGQLModel]]:
         result = await Update[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result
 
@@ -174,6 +175,6 @@ class EventFacilityReservationMutation:
             SimpleDeletePermission[EventFacilityReservationGQLModel](roles=["administrátor"])
         ]
     )
-    async def event_delete(self, info: strawberry.types.Info, event_type: EventFacilityReservationDeleteGQLModel) -> typing.Optional[DeleteError[EventFacilityReservationGQLModel]]:
+    async def event_facility_delete(self, info: strawberry.types.Info, event_type: EventFacilityReservationDeleteGQLModel) -> typing.Optional[DeleteError[EventFacilityReservationGQLModel]]:
         result = await Delete[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
         return result        

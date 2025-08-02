@@ -24,7 +24,19 @@ from .BaseModel import BaseModel, UUIDColumn, UUIDFKey, IDType
 class DigitalSubmissionSectionModel(BaseModel):
     __tablename__ = "digital_submission_sections"
 
-    path: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
+    path_attribute_name = "path"
+    parent_attribute_name = "section"
+    parent_id_attribute_name = "section_id"
+    children_attribute_name = "sections"
+
+    # Materialized path technique
+    path: Mapped[str] = mapped_column(
+        index=True,
+        nullable=True,
+        default=None,
+        comment="Materialized path technique"
+    )
+
     index: Mapped[Optional[int]] = mapped_column(Integer, default=None, nullable=True)
     # This column stores the parent section's id.
     section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submission_sections.id"), default=None, nullable=True)
@@ -75,7 +87,7 @@ class DigitalSubmissionSectionModel(BaseModel):
     # Relationship to the submission owning this section.
     submission = relationship(
         "DigitalSubmissionModel",
-        # back_populates="sections",
+        back_populates="sections",
         viewonly=True,
         uselist=False
     )
@@ -83,23 +95,23 @@ class DigitalSubmissionSectionModel(BaseModel):
     sections = relationship(
         "DigitalSubmissionSectionModel",
         back_populates="section",
+        uselist=True,
+        init=True,
         cascade="save-update",
-        # init=True,
-        lazy="noload",
-        collection_class=list
+        # lazy="noload",
+        # collection_class=list
         # You can also specify a default factory if needed,
         # but in many cases SQLAlchemy will automatically initialize collection attributes.
     )    
 
-    from .DigitalSubmissionFieldModel import DigitalSubmissionFieldModel
+    # from .DigitalSubmissionFieldModel import DigitalSubmissionFieldModel
     # Relationship to the field (DigitalSubmissionFieldModel) associated with this section.
     fields = relationship(
         "DigitalSubmissionFieldModel",
         # default_factory=list,
         init=True,
-        # back_populates="section",
+        back_populates="section",
         uselist=True,
-        collection_class=list,
         cascade="save-update",
         # viewonly=True
     )

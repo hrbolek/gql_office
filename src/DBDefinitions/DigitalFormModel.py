@@ -39,24 +39,28 @@ class DigitalFormModel(BaseModel):
         viewonly=True
     )
 
-    # Relationship to form sections.
-    # We assume that the DigitalFormSectionModel has a column named "document_id"
-    # that refers to this form's id.
     sections = relationship(
         "DigitalFormSectionModel",
         primaryjoin="DigitalFormModel.id==DigitalFormSectionModel.form_id",
         # back_populates="form",
-        cascade="all, delete-orphan",
-        lazy="select"
+        uselist=True,
+        init=True,
+        cascade="save-update",
     )
     
-    # Relationship to form submissions.
-    # We assume that the DigitalSubmissionModel has a column named "document_id"
-    # that refers to this form's id.
     submissions = relationship(
         "DigitalSubmissionModel",
         primaryjoin="DigitalFormModel.id==DigitalSubmissionModel.form_id",
+        uselist=True,
+        init=True,
         # back_populates="form",
-        cascade="all, delete-orphan",
-        lazy="select"
+        # cascade="all, delete-orphan",
+        # lazy="select"
+    )
+
+    fields = relationship(
+        "DigitalFormFieldModel",
+        primaryjoin="DigitalFormModel.id==DigitalFormFieldModel.form_id",
+        uselist=True,
+        init=True,
     )

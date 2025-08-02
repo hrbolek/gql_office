@@ -12,7 +12,8 @@ from uoishelpers.gqlpermissions import (
 )    
 from uoishelpers.resolvers import (
     getLoadersFromInfo, 
-    createInputs,
+    getUserFromInfo,
+    createInputs2,
 
     InsertError, 
     Insert, 
@@ -25,6 +26,12 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.RbacInsertProviderExtension import RbacInsertProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
 from ..BaseGQLModel import BaseGQLModel, IDType
 
@@ -34,8 +41,7 @@ EventInputFilter = typing.Annotated["EventInputFilter", strawberry.lazy(".EventG
 UserGQLModel = typing.Annotated["UserGQLModel", strawberry.lazy("..UserGQLModel")]
 StateGQLModel = typing.Annotated["StateGQLModel", strawberry.lazy("..StateGQLModel")]
 
-@createInputs
-@dataclasses.dataclass
+@createInputs2
 class EventInvitationInputFilter:
     id: IDType
     event_id: IDType
@@ -119,11 +125,12 @@ class EventInvitationQuery:
     )
 
 
-    
+from uoishelpers.resolvers import InputModelMixin
 @strawberry.input(
     description="""EventInvitation insert mutation"""
 )
-class EventInvitationInsertGQLModel:
+class EventInvitationInsertGQLModel(InputModelMixin):
+    getLoader = EventInvitationGQLModel.getLoader
     event_id: typing.Optional[IDType] = strawberry.field(
         description="event id to which invitation is sent",
         default=None,
@@ -161,15 +168,10 @@ class EventInvitationUpdateGQLModel:
         default=None
     )
 
-    user_id: typing.Optional[IDType] = strawberry.field(
-        description="user id who receive invitation",
-        default=None,
-    )
-
-    state_id: typing.Optional[IDType] = strawberry.field(
-        description="invitation kind",
-        default=None
-    )
+    # user_id: typing.Optional[IDType] = strawberry.field(
+    #     description="user id who receive invitation",
+    #     default=None,
+    # )
 
     changedby_id: strawberry.Private[IDType] = None
 
@@ -189,33 +191,110 @@ class EventInvitationDeleteGQLModel:
     description="""EventInvitation mutation"""
 )
 class EventInvitationMutation:
+    from .EventGQLModel import EventGQLModel
     @strawberry.field(
         description="""Insert a EventInvitation""",
         permission_classes=[
-            SimpleInsertPermission[EventInvitationGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+            # SimpleInsertPermission[EventGQLModel](roles=["administrátor"])
+        ],
+        extensions=[
+            # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
+            UserAccessControlExtension[InsertError, EventInvitationGQLModel](
+                roles=[
+                    "plánovací administrátor", 
+                    # "personalista"
+                ]
+            ),
+            UserRoleProviderExtension[InsertError, EventInvitationGQLModel](),
+            RbacProviderExtension[InsertError, EventInvitationGQLModel](),
+            LoadDataExtension[InsertError, EventInvitationGQLModel](
+                getLoader=EventGQLModel.getLoader,
+                primary_key_name="event_id"
+            )
+        ],
     )
     async def event_invitation_insert(
         self,
         info: strawberry.types.Info,
-        invitation: EventInvitationInsertGQLModel
+        invitation: EventInvitationInsertGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[EventInvitationGQLModel, InsertError[EventInvitationGQLModel]]:
         # TODO check if invitation already exists and reject to invite that user again
         return await Insert[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)
     
     @strawberry.field(
-        description="""Update a EventInvitation""",
+        description="""Allows invited user to accept or decline the invitation""",
         permission_classes=[
-            SimpleUpdatePermission[EventInvitationGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+            # SimpleInsertPermission[EventGQLModel](roles=["administrátor"])
+        ],
+        extensions=[
+            LoadDataExtension[UpdateError, EventInvitationGQLModel]()
+        ],
+    )
+    async def event_invitation_accept_decline(
+        self,
+        info: strawberry.types.Info,
+        invitation: EventInvitationUpdateGQLModel,
+        db_row: typing.Any,
+    ) -> typing.Union[EventInvitationGQLModel, UpdateError[EventInvitationGQLModel]]:
+        user = getUserFromInfo(info=info)
+        if user["id"] == db_row.user_id:
+            possible_values = set(
+                IDType('7d2ef223-b60e-4e6d-b7d5-5fdc1f8e2ec2'), # 'accepted'
+                IDType('d6a5e9e4-3e47-4c95-a4aa-b194dd2bc3a7'), # 'declined',  
+            )
+            if invitation.state_id in possible_values:
+                return await Update[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)
+        return UpdateError[EventInvitationGQLModel](
+            _entity=db_row,
+            msg="You are not authorized",
+            code="48f0a626-f31a-4429-9e53-819ca865786d",
+            location="event_invitation_accept_decline",
+            _input=invitation
+        )
+        
+
+    @strawberry.mutation(
+        description="""Update the EventInvitation, caller must be organizer of the event""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        extensions=[
+            LoadDataExtension[UpdateError, EventInvitationGQLModel]()
+        ],
     )
     async def event_invitation_update(
         self,
         info: strawberry.types.Info,
-        invitation: EventInvitationUpdateGQLModel
+        invitation: EventInvitationUpdateGQLModel,
+        db_row: typing.Any,
+        # rbacobject_id: IDType,
+        # user_roles: typing.List[dict],
     ) -> typing.Union[EventInvitationGQLModel, UpdateError[EventInvitationGQLModel]]:
-        return await Update[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)
-    
+        loader = EventInvitationGQLModel.getLoader(info=info)
+        event_invitations = await loader.filter_by(event_id=db_row.event_id)
+        user = getUserFromInfo(info=info)
+        user_id = user["id"]
+        organizer_id = IDType("3265a488-bbfa-4c59-946c-7a7b059ee4f0")
+        user_organizer_invitations = list(filter(
+            lambda row: row.user_id == user_id and row.state_id == organizer_id,
+            event_invitations
+        ))
+        if user_organizer_invitations:
+            return await Update[EventInvitationGQLModel].DoItSafeWay(info=info, entity=invitation)        
+        return UpdateError[EventInvitationGQLModel](
+            _entity=db_row,
+            msg="You are not organizer",
+            code="ae30e32b-94ec-4d59-9c1e-7eca3b75701e",
+            location="event_invitation_update",
+            _input=invitation
+        )
+
+
     @strawberry.field(
         description="""Delete a EventInvitation""",
         permission_classes=[

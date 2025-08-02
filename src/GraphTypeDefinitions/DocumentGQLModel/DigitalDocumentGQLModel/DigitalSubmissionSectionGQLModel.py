@@ -137,6 +137,14 @@ class DigitalSubmissionSectionGQLModel(BaseGQLModel):
         resolver=ScalarResolver["DigitalSubmissionSectionGQLModel"](fkey_field_name="section_id")
     )
 
+    form_section: typing.Optional[DigitalFormSectionGQLModel] = strawberry.field(
+        description="the meta info",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver[DigitalFormSectionGQLModel](fkey_field_name="form_section_id")
+    )
+
     submission: typing.Optional["DigitalSubmissionGQLModel"] = strawberry.field(
         description="""Submission, represents a full dataset which this section is member""",
         permission_classes=[
@@ -191,7 +199,8 @@ class SubmissionSectionQuery:
         resolver=PageResolver[DigitalSubmissionSectionGQLModel](whereType=DigitalSubmissionSectionInputFilter)
     )
 
-from ...utils import InputModelMixin
+from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
+
 @strawberry.input(description="Input definition for SubmissionSection create")
 class SubmissionSectionInsertGQLModel(InputModelMixin):
     getLoader = DigitalSubmissionSectionGQLModel.getLoader
@@ -215,9 +224,6 @@ class SubmissionSectionInsertGQLModel(InputModelMixin):
         default=None
         )
     
-    createdby_id: strawberry.Private[IDType] = None
-    path: strawberry.Private[str] = None
-
     sections: typing.Optional[typing.List["SubmissionSectionInsertGQLModel"]] = strawberry.field(
         description="Optional list of sub sections", 
         default_factory=list
@@ -228,6 +234,10 @@ class SubmissionSectionInsertGQLModel(InputModelMixin):
         description="Optional list of fields", 
         default_factory=list
     )
+
+    path: strawberry.Private[str] = None
+    rbacobject_id: strawberry.Private[IDType] = None
+    createdby_id: strawberry.Private[IDType] = None
 
 
 @strawberry.input(description="Input definition for SubmissionSection update")
@@ -246,81 +256,81 @@ class SubmissionSectionDeleteGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
-from .DigitalSubmissionFieldGQLModel import field_into_dbmodel
-import logging
-def section_into_dbmodel(self, info: strawberry.types.Info, submission_section: SubmissionSectionInsertGQLModel):
-    sectionLoader = DigitalSubmissionSectionGQLModel.getLoader(info=info)
-    sectionDbModel = sectionLoader.getModel()
-    sections = [section_into_dbmodel(self, info, section) for section in submission_section.child_sections]
-    fields = [field_into_dbmodel(self, info, field) for field in submission_section.fields]
+# from .DigitalSubmissionFieldGQLModel import field_into_dbmodel
+# import logging
+# def section_into_dbmodel(self, info: strawberry.types.Info, submission_section: SubmissionSectionInsertGQLModel):
+#     sectionLoader = DigitalSubmissionSectionGQLModel.getLoader(info=info)
+#     sectionDbModel = sectionLoader.getModel()
+#     sections = [section_into_dbmodel(self, info, section) for section in submission_section.child_sections]
+#     fields = [field_into_dbmodel(self, info, field) for field in submission_section.fields]
    
-    submission_section_dict = strawberry.asdict(submission_section)
-    del submission_section_dict["child_sections"]
-    del submission_section_dict["fields"]
-    # print("section_into_dbmodel", submission_section_dict, flush=True)
-    # result = sectionDbModel(**strawberry.asdict(submission_section))
-    result = sectionDbModel(**submission_section_dict)
-    result.child_sections.extend(sections)
-    result.fields.extend(fields)
-    print("section_into_dbmodel", result, flush=True)
-    print("section_into_dbmodel", strawberry.asdict(result), flush=True)
-    logging.info(f"result.child_sections = {result.child_sections}")
-    logging.info(f"result.fields = {result.fields}")
-    # assert False
-    # result.child_sections = sections
-    # result.fields = fields
-    return result
+#     submission_section_dict = strawberry.asdict(submission_section)
+#     del submission_section_dict["child_sections"]
+#     del submission_section_dict["fields"]
+#     # print("section_into_dbmodel", submission_section_dict, flush=True)
+#     # result = sectionDbModel(**strawberry.asdict(submission_section))
+#     result = sectionDbModel(**submission_section_dict)
+#     result.child_sections.extend(sections)
+#     result.fields.extend(fields)
+#     print("section_into_dbmodel", result, flush=True)
+#     print("section_into_dbmodel", strawberry.asdict(result), flush=True)
+#     logging.info(f"result.child_sections = {result.child_sections}")
+#     logging.info(f"result.fields = {result.fields}")
+#     # assert False
+#     # result.child_sections = sections
+#     # result.fields = fields
+#     return result
 
-async def submission_section_insert_iternal(self, info: strawberry.types.Info, submission_section: SubmissionSectionInsertGQLModel) -> typing.Union[DigitalSubmissionSectionGQLModel, InsertError[DigitalSubmissionSectionGQLModel]]:
-    modelinstance = submission_section.intoModel(info=info)
-    # model = section_into_dbmodel(submission_section)
-    return await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=modelinstance)
+# async def submission_section_insert_iternal(self, info: strawberry.types.Info, submission_section: SubmissionSectionInsertGQLModel) -> typing.Union[DigitalSubmissionSectionGQLModel, InsertError[DigitalSubmissionSectionGQLModel]]:
+#     modelinstance = submission_section.intoModel(info=info)
+#     # model = section_into_dbmodel(submission_section)
+#     return await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=modelinstance)
 
-    # from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
-    # from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
-    # subLoader = DigitalSubmissionGQLModel.getLoader(info=info)
-    # secLoader = DigitalSubmissionSectionGQLModel.getLoader(info=info)
-    # fsecLoader = DigitalFormSectionGQLModel.getLoader(info=info)
+#     # from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
+#     # from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
+#     # subLoader = DigitalSubmissionGQLModel.getLoader(info=info)
+#     # secLoader = DigitalSubmissionSectionGQLModel.getLoader(info=info)
+#     # fsecLoader = DigitalFormSectionGQLModel.getLoader(info=info)
 
-    # if submission_section.parent_id:
-    #     futures = (
-    #         fsecLoader.load(submission_section.form_section_id),
-    #         secLoader.filter_by(id=submission_section.parent_id),
-    #         secLoader.load(submission_section.parent_id)
-    #     )
-    #     [form_section, neibs, parent] = await asyncio.gather(*futures)
+#     # if submission_section.parent_id:
+#     #     futures = (
+#     #         fsecLoader.load(submission_section.form_section_id),
+#     #         secLoader.filter_by(id=submission_section.parent_id),
+#     #         secLoader.load(submission_section.parent_id)
+#     #     )
+#     #     [form_section, neibs, parent] = await asyncio.gather(*futures)
 
-    #     if (form_section.repatable_min < form_section.repatable_max):
-    #         # repeatable, index is mandatory
-    #         indexes = (neib.index for neib in neibs)
-    #         if len(indexes) + 1 >= form_section.repeatable_max:
-    #             return InsertError(msg="too much sections", _input=submission_section)
-    #         if submission_section.index in indexes:
-    #             return InsertError(msg="index already used", _input=submission_section)
-    #         if submission_section.index is None:
-    #             submission_section.index = max(indexes) + 1
-    #         if submission_section.index < 0:
-    #             return InsertError(msg="index has bad value", _input=submission_section)
-    #         submission_section.path = f"{parent.path}.{submission_section.index}"
-    #     else:
-    #         submission_section.path = f"{parent.path}.{form_section.name}"
-    #     if parent is None:
-    #         return InsertError(msg="parent does not exists", _input=submission_section)
+#     #     if (form_section.repatable_min < form_section.repatable_max):
+#     #         # repeatable, index is mandatory
+#     #         indexes = (neib.index for neib in neibs)
+#     #         if len(indexes) + 1 >= form_section.repeatable_max:
+#     #             return InsertError(msg="too much sections", _input=submission_section)
+#     #         if submission_section.index in indexes:
+#     #             return InsertError(msg="index already used", _input=submission_section)
+#     #         if submission_section.index is None:
+#     #             submission_section.index = max(indexes) + 1
+#     #         if submission_section.index < 0:
+#     #             return InsertError(msg="index has bad value", _input=submission_section)
+#     #         submission_section.path = f"{parent.path}.{submission_section.index}"
+#     #     else:
+#     #         submission_section.path = f"{parent.path}.{form_section.name}"
+#     #     if parent is None:
+#     #         return InsertError(msg="parent does not exists", _input=submission_section)
         
-    # else:
-    #     futures = (
-    #         fsecLoader.load(submission_section.form_section_id),
-    #         secLoader.filter_by(form_section_id=submission_section.form_section_id)
-    #     )
-    #     [form_section, neibs] = await asyncio.gather(*futures)
-    #     pass
-    # futures = (subLoader.load(submission_section.submission_id), secLoader.load(submission_section.parent_id))
-    # result = await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=submission_section)
-    result = await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=model)
-    return result
+#     # else:
+#     #     futures = (
+#     #         fsecLoader.load(submission_section.form_section_id),
+#     #         secLoader.filter_by(form_section_id=submission_section.form_section_id)
+#     #     )
+#     #     [form_section, neibs] = await asyncio.gather(*futures)
+#     #     pass
+#     # futures = (subLoader.load(submission_section.submission_id), secLoader.load(submission_section.parent_id))
+#     # result = await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=submission_section)
+#     result = await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=model)
+#     return result
 
 
-@strawberry.federation.type(description="")
+@strawberry.interface(description="Submission secion mutations")
 class SubmissionSectionMutation:
 
     @strawberry.mutation(
@@ -331,46 +341,47 @@ class SubmissionSectionMutation:
         ]
     )
     async def submission_section_insert(self, info: strawberry.types.Info, submission_section: SubmissionSectionInsertGQLModel) -> typing.Union[DigitalSubmissionSectionGQLModel, InsertError[DigitalSubmissionSectionGQLModel]]:
-        from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
-        from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
-        subLoader = DigitalSubmissionGQLModel.getLoader(info=info)
-        secLoader = DigitalSubmissionSectionGQLModel.getLoader(info=info)
-        fsecLoader = DigitalFormSectionGQLModel.getLoader(info=info)
+        # from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
+        # from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
+        # subLoader = DigitalSubmissionGQLModel.getLoader(info=info)
+        # secLoader = DigitalSubmissionSectionGQLModel.getLoader(info=info)
+        # fsecLoader = DigitalFormSectionGQLModel.getLoader(info=info)
 
-        if submission_section.parent_id:
-            futures = (
-                fsecLoader.load(submission_section.form_section_id),
-                secLoader.filter_by(id=submission_section.parent_id),
-                secLoader.load(submission_section.parent_id)
-            )
-            [form_section, neibs, parent] = await asyncio.gather(*futures)
+        # if submission_section.parent_id:
+        #     futures = (
+        #         fsecLoader.load(submission_section.form_section_id),
+        #         secLoader.filter_by(id=submission_section.parent_id),
+        #         secLoader.load(submission_section.parent_id)
+        #     )
+        #     [form_section, neibs, parent] = await asyncio.gather(*futures)
 
-            if (form_section.repatable_min < form_section.repatable_max):
-                # repeatable, index is mandatory
-                indexes = (neib.index for neib in neibs)
-                if len(indexes) + 1 >= form_section.repeatable_max:
-                    return InsertError(msg="too much sections", _input=submission_section)
-                if submission_section.index in indexes:
-                    return InsertError(msg="index already used", _input=submission_section)
-                if submission_section.index is None:
-                    submission_section.index = max(indexes) + 1
-                if submission_section.index < 0:
-                    return InsertError(msg="index has bad value", _input=submission_section)
-                submission_section.path = f"{parent.path}.{submission_section.index}"
-            else:
-                submission_section.path = f"{parent.path}.{form_section.name}"
-            if parent is None:
-                return InsertError(msg="parent does not exists", _input=submission_section)
+        #     if (form_section.repatable_min < form_section.repatable_max):
+        #         # repeatable, index is mandatory
+        #         indexes = (neib.index for neib in neibs)
+        #         if len(indexes) + 1 >= form_section.repeatable_max:
+        #             return InsertError(msg="too much sections", _input=submission_section)
+        #         if submission_section.index in indexes:
+        #             return InsertError(msg="index already used", _input=submission_section)
+        #         if submission_section.index is None:
+        #             submission_section.index = max(indexes) + 1
+        #         if submission_section.index < 0:
+        #             return InsertError(msg="index has bad value", _input=submission_section)
+        #         submission_section.path = f"{parent.path}.{submission_section.index}"
+        #     else:
+        #         submission_section.path = f"{parent.path}.{form_section.name}"
+        #     if parent is None:
+        #         return InsertError(msg="parent does not exists", _input=submission_section)
             
-        else:
-            futures = (
-                fsecLoader.load(submission_section.form_section_id),
-                secLoader.filter_by(form_section_id=submission_section.form_section_id)
-            )
-            [form_section, neibs] = await asyncio.gather(*futures)
-            pass
+        # else:
+        #     futures = (
+        #         fsecLoader.load(submission_section.form_section_id),
+        #         secLoader.filter_by(form_section_id=submission_section.form_section_id)
+        #     )
+        #     [form_section, neibs] = await asyncio.gather(*futures)
+        #     pass
         futures = (subLoader.load(submission_section.submission_id), secLoader.load(submission_section.parent_id))
-        result = await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=submission_section)
+        modelinstance = submission_section.intoModel(info=info)
+        result = await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=modelinstance)
         return result
     
     @strawberry.mutation(

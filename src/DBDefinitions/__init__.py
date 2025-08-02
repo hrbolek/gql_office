@@ -31,6 +31,10 @@ from .FacilityTypeModel import FacilityTypeModel
 from .EventFacilityReservationModel import EventFacilityReservationModel
 from .EventInvitationModel import EventInvitationModel
 
+from .HistoryModel import HistoryModel
+from .RequestModel import RequestModel
+from .RequestTypeModel import RequestTypeModel
+
 async def startEngine(connectionstring, makeDrop=False, makeUp=True):
     """Provede nezbytne ukony a vrati asynchronni SessionMaker"""
     asyncEngine = create_async_engine(connectionstring)

@@ -27,6 +27,12 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.RbacInsertProviderExtension import RbacInsertProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
 from ..BaseGQLModel import BaseGQLModel, IDType, Relation
 from .TimeUnit import TimeUnit
@@ -51,6 +57,7 @@ class EventInputFilter:
     end_date: datetime.datetime
     id: IDType
     type_id: IDType
+    valid: bool
     
     from .EventTypeGQLModel import EventTypeInputFilter
     type_: EventTypeInputFilter = strawberry.field(name="type", description="Event type", default=None)
@@ -64,6 +71,13 @@ class EventGQLModel(BaseGQLModel):
     @classmethod
     def getLoader(cls, info: strawberry.types.Info):
         return getLoadersFromInfo(info).EventModel
+
+    path: typing.Optional[str] = strawberry.field(
+        description="""Materialized path representing the group's hierarchical location.  
+Materializovaná cesta reprezentující umístění skupiny v hierarchii.""",
+        default=None,
+        permission_classes=[OnlyForAuthentized]
+    )
 
     name: typing.Optional[str] = strawberry.field(
         default=None,
@@ -121,6 +135,11 @@ class EventGQLModel(BaseGQLModel):
         ]
     )
 
+    valid: typing.Optional[bool] = strawberry.field(
+        description="""If it intersects current date""",
+        permission_classes=[OnlyForAuthentized]
+    )
+
     @strawberry.field(
         name="duration",
         description="""Event duration, implicitly in minutes""",
@@ -159,7 +178,7 @@ class EventGQLModel(BaseGQLModel):
 
     facility_id: typing.Optional[IDType] = strawberry.field(
         default=None,
-        description="place where the event will happen",
+        description="place where the event will happen, defined by id",
         permission_classes=[
             OnlyForAuthentized
         ],
@@ -167,14 +186,14 @@ class EventGQLModel(BaseGQLModel):
     )
 
     facility: typing.Optional[FacilityGQLModel] = strawberry.field(
-        description="place where the event will happen",
+        description="place where the event will happen, defined by id",
         permission_classes=[
             OnlyForAuthentized
         ],
         resolver=ScalarResolver[FacilityGQLModel](fkey_field_name="facility_id")
     )
 
-    reservations: typing.List[EventFacilityReservationGQLModel] = strawberry.field(
+    facility_reservations: typing.List[EventFacilityReservationGQLModel] = strawberry.field(
         description="reservations for this event",
         permission_classes=[
             OnlyForAuthentized
@@ -201,13 +220,13 @@ class EventGQLModel(BaseGQLModel):
     #     resolver=ScalarResolver["EventGQLModel"](fkey_field_name="masterevent_id")
     # )
 
-    # children: typing.List["EventGQLModel"] = strawberry.field(
-    #     description="""Event children""",
-    #     permission_classes=[
-    #         OnlyForAuthentized
-    #     ],
-    #     resolver=VectorResolver["EventGQLModel"](fkey_field_name="masterevent_id", whereType=EventInputFilter)
-    # )
+    subevents: typing.List["EventGQLModel"] = strawberry.field(
+        description="""Event children""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=VectorResolver["EventGQLModel"](fkey_field_name="masterevent_id", whereType=EventInputFilter)
+    )
 
     type_id: typing.Optional[IDType] = strawberry.field(
         description="""Event type id""",
@@ -226,7 +245,7 @@ class EventGQLModel(BaseGQLModel):
         resolver=ScalarResolver["EventTypeGQLModel"](fkey_field_name="type_id")
     )
 
-    invitations: typing.List["EventInvitationGQLModel"] = strawberry.field(
+    user_invitations: typing.List["EventInvitationGQLModel"] = strawberry.field(
         description="""Event invitations""",
         permission_classes=[
             OnlyForAuthentized
@@ -252,10 +271,16 @@ class EventQuery:
         resolver=PageResolver[EventGQLModel](whereType=EventInputFilter)
     )
 
+from uoishelpers.resolvers import TreeInputStructureMixin, InputModelMixin
 @strawberry.input(
     description="""Input type for creating a Event"""
 )
-class EventInsertGQLModel:
+class EventInsertGQLModel(TreeInputStructureMixin):
+    getLoader = EventGQLModel.getLoader
+    masterevent_id: IDType = strawberry.field(
+        description="""Event parent id""",
+        # default=None
+    )
     name: typing.Optional[str] = strawberry.field(
         description="""Event name assigned by an administrator""",
         default=None
@@ -276,19 +301,141 @@ class EventInsertGQLModel:
         description="""Event end date""",
         default=None
     )
-    parent_id: typing.Optional[IDType] = strawberry.field(
-        description="""Event parent id""",
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""Event id""",
+        default=None
+    )
+    subevents: typing.Optional[typing.List["EventInsertGQLModel"]] = strawberry.field(
+        description="sub events",
+        default_factory=list
+    )
+
+
+    rbacobject_id: strawberry.Private[IDType] = None
+    createdby_id: strawberry.Private[IDType] = None
+
+
+@strawberry.input(
+    description="""Input type for creating a Plan"""
+)
+class EventPlanInsertGQLModel(TreeInputStructureMixin):
+    getLoader = EventGQLModel.getLoader
+    rbacobject_id: IDType = strawberry.field(
+        description="""id of the group the plan is for""",
+        # default=None
+    )
+    name: typing.Optional[str] = strawberry.field(
+        description="""Event name assigned by an administrator""",
+        default=None
+    )
+    name_en: typing.Optional[str] = strawberry.field(
+        description="""Event eng name assigned by an administrator""",
+        default=None
+    )
+    description: typing.Optional[str] = strawberry.field(
+        description="""Event description""",
+        default=None
+    )
+    start_date: typing.Optional[datetime.datetime] = strawberry.field(
+        description="""Plan start date""",
+        default=None
+    )
+    end_date: typing.Optional[datetime.datetime] = strawberry.field(
+        description="""Plan end date""",
+        default=None
+    )
+    masterevent_id: typing.Optional[IDType] = strawberry.field(
+        description="""Plan parent id""",
         default=None
     )
     id: typing.Optional[IDType] = strawberry.field(
         description="""Event id""",
         default=None
     )
-    rbacobject_id: typing.Optional[IDType] = strawberry.field(
-        description="""Event rbacobject id""",
+    subevents: typing.Optional[typing.List["EventInsertGQLModel"]] = strawberry.field(
+        description="sub events",
+        default_factory=list
+    )
+
+    
+    createdby_id: strawberry.Private[IDType] = None
+
+@strawberry.input(
+    description="Invitation model"
+)
+class EventInvitationInsertModel(InputModelMixin):
+    @staticmethod
+    def getLoader(info):
+        return getLoadersFromInfo(info).EventInvitationModel
+    
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""Event id""",
         default=None
     )
-    createdby_id: strawberry.Private[IDType] = None
+    user_id: IDType = strawberry.field(
+        description="""invited user""",
+    )
+    state_id: IDType = strawberry.field(
+        description="""invitation state""",
+    )
+    event_id: typing.Optional[IDType] = strawberry.field(
+        description="""event inviting to""",
+    )
+    createdby_id: strawberry.Private[IDType]
+    
+@strawberry.input(
+    description="Model for batch invitation to the event"
+)
+class EventEnsureUserInvitationsModel:
+    getLoader = EventGQLModel.getLoader
+    id: IDType = strawberry.field(
+        description="""Event id""",
+        # default=None
+    )
+    user_invitations: typing.Optional[typing.List[EventInvitationInsertModel]] = strawberry.field(
+        description="",
+        default_factory=list
+    )
+    
+    pass
+
+@strawberry.input(
+    description=""
+)
+class EventReservationInsertModel(InputModelMixin):
+    @staticmethod
+    def getLoader(info):
+        return getLoadersFromInfo(info).EventFacilityReservationModel
+    
+    facility_id: IDType = strawberry.field(
+        description="""reserved facility""",
+    )
+    state_id: IDType = strawberry.field(
+        description="""reservation state""",
+    )
+    event_id: typing.Optional[IDType] = strawberry.field(
+        description="""event related to facility reservation""",
+    )
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""Event id""",
+        default=None
+    )
+    createdby_id: strawberry.Private[IDType]
+
+@strawberry.input(
+    description=""
+)
+class EventEnsureFacilityReservationsModel():
+    getLoader = EventGQLModel.getLoader
+    id: typing.Optional[IDType] = strawberry.field(
+        description="""Event id""",
+        default=None
+    )
+    facility_reservations: typing.Optional[typing.List[EventReservationInsertModel]] = strawberry.field(
+        description="",
+        default_factory=list
+    )
+    pass
 
 @strawberry.input(
     description="""Input type for updating a Event"""
@@ -320,10 +467,10 @@ class EventUpdateGQLModel:
         description="""Event end date""",
         default=None
     )
-    parent_id: typing.Optional[IDType] = strawberry.field(
-        description="""Event parent id""",
-        default=None
-    )
+    # parent_id: typing.Optional[IDType] = strawberry.field(
+    #     description="""Event parent id""",
+    #     default=None
+    # )
     changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(
@@ -344,21 +491,83 @@ class EventMutation:
     @strawberry.mutation(
         description="""Insert a Event""",
         permission_classes=[
-            SimpleInsertPermission[EventGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+            # SimpleInsertPermission[EventGQLModel](roles=["administrátor"])
+        ],
+        extensions=[
+            # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
+            UserAccessControlExtension[UpdateError, EventGQLModel](
+                roles=[
+                    "plánovací administrátor", 
+                    # "personalista"
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, EventGQLModel](),
+            RbacProviderExtension[UpdateError, EventGQLModel](),
+            LoadDataExtension[UpdateError, EventGQLModel](
+                getLoader=EventGQLModel.getLoader,
+                primary_key_name="masterevent_id"
+            )
+        ],
     )
     async def event_insert(
         self,
         info: strawberry.Info,
-        event: EventInsertGQLModel
+        event: EventInsertGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[EventGQLModel, InsertError[EventGQLModel]]:
         return await Insert[EventGQLModel].DoItSafeWay(info=info, entity=event)
     
     @strawberry.mutation(
+        description="""Insert a plan, it could be connected to master plan, rbacobject_id is id of group the plan is for""",
+        permission_classes=[
+            OnlyForAuthentized
+            # SimpleInsertPermission[EventGQLModel](roles=["administrátor"])
+        ],
+        extensions=[
+            # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
+            UserAccessControlExtension[UpdateError, EventGQLModel](
+                roles=[
+                    "plánovací administrátor", 
+                    # "personalista"
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, EventGQLModel](),
+            RbacInsertProviderExtension[UpdateError, EventGQLModel](
+                rbac_key_name="rbacobject_id"
+            ),  
+        ],
+    )
+    async def event_create_plan(
+        self,
+        info: strawberry.Info,
+        event: EventPlanInsertGQLModel,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[EventGQLModel, InsertError[EventGQLModel]]:
+        return await Insert[EventGQLModel].DoItSafeWay(info=info, entity=event)
+    
+
+    @strawberry.mutation(
         description="""Update a Event""",
         permission_classes=[
-            SimpleUpdatePermission[EventGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+            # SimpleUpdatePermission[EventGQLModel](roles=["administrátor"])
+        ],
+        extensions=[
+            # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
+            UserAccessControlExtension[UpdateError, EventGQLModel](
+                roles=[
+                    "plánovací administrátor", 
+                    # "personalista"
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, EventGQLModel](),
+            RbacProviderExtension[UpdateError, EventGQLModel](),
+            LoadDataExtension[UpdateError, EventGQLModel]()
+        ],
     )
     async def event_update(
         self,
@@ -367,11 +576,69 @@ class EventMutation:
     ) -> typing.Union[EventGQLModel, UpdateError[EventGQLModel]]:
         return await Update[EventGQLModel].DoItSafeWay(info=info, entity=event)
     
+
+    @strawberry.mutation(
+        description="Accepts multiple invitations and if that invitations do not exist they are created",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserRoleProviderExtension[UpdateError, EventGQLModel](),
+            RbacProviderExtension[UpdateError, EventGQLModel](),
+            LoadDataExtension[UpdateError, EventGQLModel]()
+        ]
+    )
+    async def event_ensure_invitations(
+        self,
+        info: strawberry.Info,
+        event: EventEnsureUserInvitationsModel,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+        db_row: typing.Any
+    ) -> typing.Union[UpdateError[EventGQLModel], EventGQLModel]:
+        return EventGQLModel.from_dataclass(db_row)
+        pass
+
+    @strawberry.mutation(
+        description="Accepts multiple reservations and if that reservations do not exist they are created",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserRoleProviderExtension[UpdateError, EventGQLModel](),
+            RbacProviderExtension[UpdateError, EventGQLModel](),
+            LoadDataExtension[UpdateError, EventGQLModel]()
+        ]            
+    )
+    async def event_ensure_reservations(
+        self,
+        info: strawberry.Info,
+        event: EventEnsureFacilityReservationsModel,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+        db_row: typing.Any
+    ) -> typing.Union[UpdateError[EventGQLModel], EventGQLModel]:
+        return EventGQLModel.from_dataclass(db_row)
+        pass
+
     @strawberry.mutation(
         description="""Delete a Event""",
         permission_classes=[
-            SimpleDeletePermission[EventGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized,
+            # SimpleDeletePermission[EventGQLModel](roles=["administrátor"])
+        ],
+        extensions=[
+            # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
+            UserAccessControlExtension[DeleteError, EventGQLModel](
+                roles=[
+                    "plánovací administrátor", 
+                    # "personalista"
+                ]
+            ),
+            UserRoleProviderExtension[DeleteError, EventGQLModel](),
+            RbacProviderExtension[DeleteError, EventGQLModel](),
+            LoadDataExtension[DeleteError, EventGQLModel]()
+        ],
     )   
     async def event_delete(
         self,

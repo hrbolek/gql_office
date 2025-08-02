@@ -34,16 +34,34 @@ class DigitalSubmissionModel(BaseModel):
     # def submitted_sections_all(self) -> Optional[List["DigitalSubmissionSectionModel"]]:
     #     return []
 
-    parent_id: Mapped[IDType] = UUIDFKey()
+    # parent_id: Mapped[IDType] = UUIDFKey()
+    parent_id: Mapped[IDType] = mapped_column(ForeignKey("digital_submissions.id"), default=None, nullable=True)
+    # parent = relationship(
+    #     "DigitalSubmissionModel",
+    #     # back_populates="submission",
+    #     primaryjoin=lambda: foreign(DigitalSubmissionModel.parent_id)==DigitalSubmissionModel.id,
+    #     remote_side=lambda: DigitalSubmissionModel.id,
+    #     viewonly=True,
+    #     # cascade="all, delete-orphan",
+    #     lazy="select"
+    # )
 
+    # Relationship to parent document.
     parent = relationship(
         "DigitalSubmissionModel",
-        # back_populates="submission",
-        primaryjoin=lambda: foreign(DigitalSubmissionModel.parent_id)==DigitalSubmissionModel.id,
-        remote_side=lambda: DigitalSubmissionModel.id,
-        viewonly=True,
-        # cascade="all, delete-orphan",
-        lazy="select"
+        remote_side="DigitalSubmissionModel.id",
+        primaryjoin="DigitalSubmissionModel.parent_id==DigitalSubmissionModel.id",
+        back_populates="children",
+        uselist=False
+    )
+    
+    # Relationship to child document.
+    children = relationship(
+        "DigitalSubmissionModel",
+        back_populates="parent",
+        uselist=True,
+        init=True,
+        cascade="save-update",
     )
 
     form = relationship(
@@ -78,3 +96,13 @@ class DigitalSubmissionModel(BaseModel):
         viewonly=True,
         lazy="select"
     )
+
+    request = relationship(
+        "RequestModel",
+        remote_side="RequestModel.active_submission_id",
+        uselist=False,
+        init=False,
+        viewonly=True
+    )
+
+    

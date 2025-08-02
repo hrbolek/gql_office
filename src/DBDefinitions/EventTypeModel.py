@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional, List
 from sqlalchemy import (
     Column,
     String,
@@ -21,10 +22,49 @@ from .BaseModel import BaseModel, UUIDColumn, UUIDFKey, IDType
 class EventTypeModel(BaseModel):
     __tablename__ = "eventtypes"
 
+    path_attribute_name = "path"
+    parent_attribute_name = "parent"
+    parent_id_attribute_name = "parent_id"
+    children_attribute_name = "children"
+
+    # Materialized path technique
+    path: Mapped[str] = mapped_column(
+        index=True,
+        nullable=True,
+        default=None,
+        comment="Materialized path technique, not implemented"
+    )
+
     name: Mapped[str] = mapped_column(default=None, nullable=True, comment="aka lecture, laboratory, ...")
     name_en: Mapped[str] = mapped_column(default=None, nullable=True, comment="aka lecture, laboratory, ...")
 
-    parent_id = Column(ForeignKey("eventtypes.id"), index=True, nullable=True, comment="aka academic, admnistrative, ...")
+    parent_id: Mapped[IDType] = mapped_column(
+        ForeignKey("eventtypes.id"), 
+        index=True, 
+        nullable=True, 
+        default=None,
+        comment="aka academic, admnistrative, ..."
+    )
 
+    parent = relationship(
+        "EventTypeModel",
+        viewonly=True, 
+        remote_side="EventTypeModel.id",
+        uselist=False,
+        # back_populates="children",
+    ) # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
 
-    events = relationship("EventModel", back_populates="type")
+    children = relationship(
+        "EventTypeModel", 
+        back_populates="parent",
+        uselist=True,
+        init=True,
+        cascade="save-update"
+    ) # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
+    # https://docs.sqlalchemy.org/en/20/_modules/examples/materialized_paths/materialized_paths.html
+
+    events = relationship(
+        "EventModel", 
+        back_populates="type",
+        viewonly=True
+    )

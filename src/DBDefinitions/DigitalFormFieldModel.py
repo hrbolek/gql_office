@@ -42,3 +42,22 @@ class DigitalFormFieldModel(BaseModel):
     type_id: Mapped[IDType] = mapped_column(default=None, nullable=True)
     backend_formula: Mapped[str] = mapped_column(String, default=None, nullable=True)
     flatten_formula: Mapped[str] = mapped_column(String, default=None, nullable=True)
+
+    section = relationship(
+        "DigitalFormSectionModel",
+        remote_side="DigitalFormSectionModel.id",
+        back_populates="fields",
+        uselist=False,
+        init=False
+        # cascade="save-update",
+    )
+
+    form = relationship(
+        "DigitalFormModel",
+        remote_side="DigitalFormModel.id",
+        back_populates="fields",
+        uselist=False,
+        init=False
+        # cascade="save-update",
+    )
+    

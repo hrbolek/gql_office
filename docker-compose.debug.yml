@@ -1,7 +1,7 @@
 x-services-volume:
   &system-data-volume
   type: bind
-  source: ./systemdata.rnd.json
+  source: ./systemdata.all.json
   target: /app/systemdata.json
 
 

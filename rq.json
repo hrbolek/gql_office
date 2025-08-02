@@ -1,0 +1,79 @@
+{
+    "requests": [
+        {
+            "id": "72e5ab9a-23f0-46a3-ad87-e8a567338258",
+            "name": "Zadost o",
+            "state_id": "fe69e8a1-1dba-44bb-9624-9687b555a590",
+            "active_submission_id": "b0f1a7da-9f58-4e9d-bdc1-19d94770b20b",
+            "request_type_id": "97188a8d-5e4e-4c38-85d7-791c379dd7c8",
+            "rbacobject_id": "51d101a0-81f1-44ca-8366-6cf51432e8d6"
+        }
+    ],
+    "request_types": [
+        {
+            "id": "97188a8d-5e4e-4c38-85d7-791c379dd7c8",
+            "name": "Zadost o prominuti zkousky",
+            "state_id": "fe69e8a1-1dba-44bb-9624-9687b555a590",
+            "initial_form_id": "29617a51-e2d4-4ae1-aae9-8221b624683c"
+        }
+    ],
+    "histories": [],
+    "digital_forms": [
+        {
+            "id": "29617a51-e2d4-4ae1-aae9-8221b624683c",
+            "name": "DigiDoc",
+            "name_en": "DigiDoc",
+            "description": "Test digi doc"
+        }
+    ],
+    "digital_form_sections": [
+        {
+            "id": "e8c28ee1-3504-4bd5-90c6-0d0f1b7fc3ef",
+            "name": "DigiSection",
+            "form_id": "29617a51-e2d4-4ae1-aae9-8221b624683c"
+        }
+    ],
+    "digital_form_fields": [
+        {
+            "id": "bba1f6b1-2175-4106-a602-8e878fd48245",
+            "name": "DigiField",
+            "label": "Popisek",
+            "label_en": "Popisek",
+            "description": "zadejte hodnotu pro ulozeni",
+            "required": true,
+            "order": 1,
+
+            "form_section_id": "e8c28ee1-3504-4bd5-90c6-0d0f1b7fc3ef",
+            "form_id": "29617a51-e2d4-4ae1-aae9-8221b624683c",
+            "type_id": "cc335bb5-4e4e-40ce-8dc1-e7bfedf4d3cf"
+        }
+    ],
+    "digital_submissions": [
+        {
+            "id": "b0f1a7da-9f58-4e9d-bdc1-19d94770b20b",
+            "name": "DigiSubmission",
+            "form_id": "29617a51-e2d4-4ae1-aae9-8221b624683c",
+            "rbacobject_id": "51d101a0-81f1-44ca-8366-6cf51432e8d6"
+        }
+    ],
+    "digital_submission_sections": [
+        {
+            "id": "dc4eb08a-7a80-4834-9021-c759c94a5d50",
+            "name": "DigiSubmissionSection",
+            "form_section_id": "e8c28ee1-3504-4bd5-90c6-0d0f1b7fc3ef",
+            "submission_id": "b0f1a7da-9f58-4e9d-bdc1-19d94770b20b",
+            "rbacobject_id": "51d101a0-81f1-44ca-8366-6cf51432e8d6"
+        }
+    ],
+    "digital_submission_fields": [
+        {
+            "id": "34eced54-f6b9-4ff1-804b-42ed2de8f2bf",
+            "name": "DigiSubmissionField",
+            "value": "Ulozena hodnota",
+            "field_id": "bba1f6b1-2175-4106-a602-8e878fd48245",
+            "submission_id": "b0f1a7da-9f58-4e9d-bdc1-19d94770b20b",
+            "section_id": "dc4eb08a-7a80-4834-9021-c759c94a5d50",
+            "rbacobject_id": "51d101a0-81f1-44ca-8366-6cf51432e8d6"
+        }
+    ]    
+}

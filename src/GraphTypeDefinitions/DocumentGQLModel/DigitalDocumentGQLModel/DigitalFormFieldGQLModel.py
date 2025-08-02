@@ -181,7 +181,7 @@ class DigitalFormFieldQuery:
     )
     pass
 
-from ...utils import InputModelMixin
+from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldInsertGQLModel(InputModelMixin):
     # type_id: IDType = strawberry.field(description="type id of the field")
@@ -217,18 +217,21 @@ class DigitalFormFieldInsertGQLModel(InputModelMixin):
         default=None
     )
     required: typing.Optional[bool] = strawberry.field(
-        description="", 
+        description="if the field is mandatory", 
         default=False
     )
     order: typing.Optional[int] = strawberry.field(
-        description="", 
+        description="field order for visual presentation", 
         default=0
     )
     computed: typing.Optional[int] = strawberry.field(
-        description="", 
+        description="statement of computation", 
         default=None
     )
     
+    rbacobject_id: strawberry.Private[IDType] = None
+    createdby_id: strawberry.Private[IDType] = None
+
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldUpdateGQLModel:
     id: IDType = strawberry.field(description="primary key")
@@ -268,11 +271,11 @@ class DigitalFormFieldDeleteGQLModel:
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
 
 
-async def digital_form_field_insert_internal(self, info: strawberry.types.Info, form_field: DigitalFormFieldInsertGQLModel):
-    return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)
+# async def digital_form_field_insert_internal(self, info: strawberry.types.Info, form_field: DigitalFormFieldInsertGQLModel):
+#     return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)
 
-@strawberry.type(
-    description=""
+@strawberry.interface(
+    description="set of mutations"
 )
 class DigitalFormFieldMutation:
     @strawberry.mutation(
@@ -284,7 +287,7 @@ class DigitalFormFieldMutation:
     async def digital_form_field_insert(
         self,
         info: strawberry.types.Info,
-        form_field: DigitalFormFieldInsertGQLModel
+        form_field: typing.Annotated[DigitalFormFieldInsertGQLModel, strawberry.argument(description="form field attributes to be inserted")]
     ) -> typing.Union[DigitalFormFieldGQLModel, InsertError[DigitalFormFieldGQLModel]]:
         modelinstance = form_field.intoModel(info=info)
         return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=modelinstance)
@@ -299,7 +302,7 @@ class DigitalFormFieldMutation:
     async def digital_form_field_update(
         self,
         info: strawberry.types.Info,
-        form_field: DigitalFormFieldUpdateGQLModel
+        form_field: typing.Annotated[DigitalFormFieldUpdateGQLModel, strawberry.argument(description="form field attributes to be updated")]
     ) -> typing.Union[DigitalFormFieldGQLModel, UpdateError[DigitalFormFieldGQLModel]]:
         return await Update[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)
     
@@ -312,6 +315,6 @@ class DigitalFormFieldMutation:
     async def digital_form_field_delete(
         self,
         info: strawberry.types.Info,
-        form_field: DigitalFormFieldDeleteGQLModel
+        form_field: typing.Annotated[DigitalFormFieldDeleteGQLModel, strawberry.argument(description="id and lastchange of form field to be deleted")]
     ) -> typing.Optional[DeleteError[DigitalFormFieldGQLModel]]:
         return await Delete[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)

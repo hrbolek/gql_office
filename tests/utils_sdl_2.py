@@ -268,7 +268,7 @@ def get_insert_mutations(sdl_doc: DocumentNode) -> dict:
             # pro každou možnou typovou variantu v unii
             for pt in union_def.types or []:  # NamedTypeNode
                 # jen OBJECT a bez "Error" v názvu
-                if isinstance(pt, NamedTypeNode) and "Error" not in pt.name.value:
+                if isinstance(pt, NamedTypeNode) and ("Error" not in pt.name.value):
                     # ověříme, že je to skutečný ObjectTypeDefinition
                     obj_def = next(
                         (d for d in sdl_doc.definitions
@@ -277,11 +277,105 @@ def get_insert_mutations(sdl_doc: DocumentNode) -> dict:
                         None
                     )
                     if obj_def:
-                        type_name = pt.name.value
+                        type_name = obj_def.name.value
                         if type_name not in result:
                             result[type_name] = []
 
                         result[type_name].append(field.name.value)
+
+    return result
+
+
+def get_insert_mutations_(sdl_doc: DocumentNode) -> dict:
+    """
+    Extrahuje mapu { ObjektovýTyp: [mutace_pro_insert] } i pro ty unie,
+    které mají jiné jméno než návratový typ.
+    """
+    result = {}
+
+    # najdi Mutation type
+    mutation_def = next(
+        (
+            d for d in sdl_doc.definitions
+            if isinstance(d, ObjectTypeDefinitionNode)
+               and d.name.value == "Mutation"
+        ),
+        None
+    )
+    if not mutation_def or not mutation_def.fields:
+        return result
+
+    for field in mutation_def.fields:
+        args = field.arguments or []
+        # hledáme právě jeden NON_NULL INPUT_OBJECT argument
+        if not (len(args) == 1 and isinstance(args[0].type, NonNullTypeNode)):
+            continue
+
+        # unwrapneme na base input typ
+        base_arg = unwrap_type(args[0].type)
+        input_def = next(
+            (
+                d for d in sdl_doc.definitions
+                if isinstance(d, InputObjectTypeDefinitionNode)
+                   and d.name.value == base_arg.name.value
+            ), None
+        )
+        if not input_def:
+            continue
+
+        # nesmí obsahovat lastchange
+        input_field_names = [f.name.value for f in input_def.fields or []]
+        if "lastchange" in input_field_names:
+            continue
+
+        # unwrap návratového typu
+        ret = field.type
+        while isinstance(ret, (NonNullTypeNode, ListTypeNode)):
+            ret = ret.type
+        ret_name = ret.name.value
+
+        # 1) Zkuste najít UNION podle jména nebo členství ret_name
+        union_def = None
+        for d in sdl_doc.definitions:
+            if not isinstance(d, UnionTypeDefinitionNode):
+                continue
+            # buď psoto jméno unie sedí, nebo se ret_name objevuje jako člen
+            if d.name.value == ret_name or any(
+                isinstance(pt, NamedTypeNode) and pt.name.value == ret_name
+                for pt in (d.types or [])
+            ):
+                union_def = d
+                break
+
+        candidates = []
+        if union_def:
+            # projdeme všechny členy unie
+            for member in union_def.types or []:
+                if (isinstance(member, NamedTypeNode)
+                        and "Error" not in member.name.value):
+                    candidates.append(member.name.value)
+
+        else:
+            # 2) Fallback na plain object (payload objekt)
+            obj_def = next(
+                (
+                    d for d in sdl_doc.definitions
+                    if isinstance(d, ObjectTypeDefinitionNode)
+                       and d.name.value == ret_name
+                ),
+                None
+            )
+            if obj_def:
+                # Projdeme všechna pole payload-objektu,
+                # najdeme ta, která vrací NamedType != *Error*
+                for f in obj_def.fields or []:
+                    inner = unwrap_type(f.type)
+                    if isinstance(inner, NamedTypeNode) and "Error" not in inner.name.value:
+                        candidates.append(inner.name.value)
+
+        # zapíšeme do výsledku
+        for obj_name in set(candidates):
+            result.setdefault(obj_name, []).append(field.name.value)
 
     return result
 
@@ -644,8 +738,20 @@ def build_selection_optional(sdl_doc: DocumentNode,
         if ret_name in scalar_names:
             parts.append(name)
         else:
-            # otherwise treat it as an object/external/union: only __typename and id
-            parts.append(f"{name} {{ __typename id }}")
+            union_def = next(
+                (
+                    d for d in sdl_doc.definitions
+                    if isinstance(d, UnionTypeDefinitionNode)
+                    and d.name.value == ret_name
+                ),
+                None
+            )
+
+            if union_def:            
+                parts.append(f"{name} {{ __typename }}")
+            else:
+                # otherwise treat it as an object/external/union: only __typename and id
+                parts.append(f"{name} {{ __typename id }}")
 
     if not parts:
         return ""
@@ -1030,7 +1136,11 @@ async def test_insert(sdl_doc, ops, executor):
     entity, *_ = page
     
     # 3) Prepare variables by cloning and removing id & lastchange
-    variable_values = {**entity}
+    variable_values = {}
+    for key, value in entity.items():
+        if isinstance(value, (dict, list)):
+            continue
+        variable_values[key] = value
     variable_values.pop("id", None)
     variable_values.pop("lastchange", None)
 
@@ -1203,6 +1313,9 @@ def createTests(schema):
 
     result = {}
     for typename, ops in cruds.items():
+        if len(ops) == 1:
+            logging.warning(f"{typename} {ops} has not full set of operations (CRUD) including page read")
+            continue
         for optype in ("readp", "read", "insert", "update", "delete"):
             if optype not in ops:
                 continue

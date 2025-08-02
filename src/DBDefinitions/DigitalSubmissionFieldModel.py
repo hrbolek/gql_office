@@ -40,23 +40,24 @@ class DigitalSubmissionFieldModel(BaseModel):
         primaryjoin="DigitalSubmissionFieldModel.field_id==DigitalFormFieldModel.id",
         # cascade="all, delete-orphan",
         viewonly=True,
-        lazy="select"
+        # lazy="select"
     )
 
     section = relationship(
         "DigitalSubmissionSectionModel",
-        # back_populates="submission",
-        primaryjoin="DigitalSubmissionFieldModel.section_id==DigitalSubmissionSectionModel.id",
+        back_populates="fields",
+        # primaryjoin="DigitalSubmissionFieldModel.section_id==DigitalSubmissionSectionModel.id",
         # cascade="all, delete-orphan",
         viewonly=True,
-        lazy="select"
+        # lazy="select"
     )    
 
     submission = relationship(
         "DigitalSubmissionModel",
-        # back_populates="submission",
-        primaryjoin="DigitalSubmissionFieldModel.submission_id==DigitalSubmissionModel.id",
+        remote_side="DigitalSubmissionModel.id",
+        back_populates="fields",
+        # primaryjoin="DigitalSubmissionFieldModel.submission_id==DigitalSubmissionModel.id",
         # cascade="all, delete-orphan",
         viewonly=True,
-        lazy="select"
+        # lazy="select"
     )        

@@ -23,7 +23,19 @@ from .BaseModel import BaseModel, UUIDColumn, UUIDFKey, IDType
 class DocumentTypeModel(BaseModel):
     __tablename__ = "document_types"
 
-    id: Mapped[IDType] = mapped_column(primary_key=True, default=None, nullable=True)
+    path_attribute_name = "path"
+    parent_attribute_name = "parent"
+    parent_id_attribute_name = "parent_id"
+    children_attribute_name = "children"
+
+    # Materialized path technique
+    path: Mapped[str] = mapped_column(
+        index=True,
+        nullable=True,
+        default=None,
+        comment="Materialized path technique, not implemented"
+    )
+
     name: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True, comment="Document type name")
     name_en: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True, comment="Document eng name")
     description: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True, comment="Document type description")
@@ -41,6 +53,7 @@ class DocumentTypeModel(BaseModel):
     children = relationship(
         "DocumentTypeModel",
         back_populates="parent",
-        cascade="all, delete-orphan",
-        lazy="select"
+        uselist=True,
+        init=True,
+        cascade="save-update",
     )

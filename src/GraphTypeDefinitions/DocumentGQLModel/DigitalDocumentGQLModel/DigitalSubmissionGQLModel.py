@@ -35,7 +35,7 @@ DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInpu
 DigitalSubmissionSectionGQLModel = typing.Annotated["DigitalSubmissionSectionGQLModel", strawberry.lazy(".DigitalSubmissionSectionGQLModel")]
 DigitalFormGQLModel = typing.Annotated["DigitalFormGQLModel", strawberry.lazy(".DigitalFormGQLModel")]
 
-DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInputFilter", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
+# DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInputFilter", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
 @createInputs
 @dataclasses.dataclass
 class DigitalSubmissionInputFilter:
@@ -189,7 +189,7 @@ class DigitalSubmissionQuery:
         resolver=PageResolver[DigitalSubmissionInputFilter](whereType=DigitalSubmissionInputFilter)
     )
 
-from ...utils import InputModelMixin
+from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
 
 @strawberry.input(
     description="""DigitalSubmission insert mutation"""
@@ -229,9 +229,11 @@ class DigitalSubmissionInsertGQLModel(InputModelMixin):
 
     from .DigitalSubmissionFieldGQLModel import DigitalSubmissionFieldInsertGQLModel
     fields: typing.Optional[typing.List[DigitalSubmissionFieldInsertGQLModel]] = strawberry.field(
-        description="",
+        description="fields of submission",
         default_factory=list
     )
+    rbacobject_id: strawberry.Private[IDType] = None
+    createdby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(
     description="""DigitalSubmission update mutation"""
@@ -264,30 +266,30 @@ class DigitalSubmissionDeleteGQLModel:
         description="""DigitalSubmission lastchange"""
     )
 
-from .DigitalSubmissionSectionGQLModel import section_into_dbmodel
-import logging
-async def digital_form_submission_insert_internal(
-    self,
-    info: strawberry.types.Info,
-    digital_form_submission: DigitalSubmissionInsertGQLModel
-) -> typing.Union[DigitalSubmissionGQLModel, InsertError[DigitalSubmissionGQLModel]]:
+# from .DigitalSubmissionSectionGQLModel import section_into_dbmodel
+# import logging
+# async def digital_form_submission_insert_internal(
+#     self,
+#     info: strawberry.types.Info,
+#     digital_form_submission: DigitalSubmissionInsertGQLModel
+# ) -> typing.Union[DigitalSubmissionGQLModel, InsertError[DigitalSubmissionGQLModel]]:
 
-    loader = DigitalSubmissionGQLModel.getLoader(info=info)
-    DBModel = loader.getModel()
-    # digital_form_submission.id = digital_form_submission.id if digital_form_submission.id is not None else uuid.uuid4()
-    # for section in (digital_form_submission.sections or []):
-    #     section.submission_id = digital_form_submission.id
+#     loader = DigitalSubmissionGQLModel.getLoader(info=info)
+#     DBModel = loader.getModel()
+#     # digital_form_submission.id = digital_form_submission.id if digital_form_submission.id is not None else uuid.uuid4()
+#     # for section in (digital_form_submission.sections or []):
+#     #     section.submission_id = digital_form_submission.id
 
-    sections = [section_into_dbmodel(self, info, section) for section in (digital_form_submission.sections or [])]
-    digital_form_submission_as_dict = strawberry.asdict(digital_form_submission)
-    del digital_form_submission_as_dict["sections"]
-    model = DBModel(**digital_form_submission_as_dict)
-    model.submitted_sections.extend(sections)
+#     sections = [section_into_dbmodel(self, info, section) for section in (digital_form_submission.sections or [])]
+#     digital_form_submission_as_dict = strawberry.asdict(digital_form_submission)
+#     del digital_form_submission_as_dict["sections"]
+#     model = DBModel(**digital_form_submission_as_dict)
+#     model.submitted_sections.extend(sections)
 
-    return await Insert[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=model)
+#     return await Insert[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=model)
 
 
-@strawberry.type(
+@strawberry.interface(
     description="""DigitalSubmission mutation"""
 )
 class DigitalSubmissionMutation:

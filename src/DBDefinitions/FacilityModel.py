@@ -13,6 +13,19 @@ class FacilityModel(BaseModel):
     __tablename__ = "facilities"
     # id = UUIDColumn()
 
+    path_attribute_name = "path"
+    parent_attribute_name = "masterfacility"
+    parent_id_attribute_name = "master_facility_id"
+    children_attribute_name = "subfacilities"
+
+    # Materialized path technique
+    path: Mapped[str] = mapped_column(
+        index=True,
+        nullable=True,
+        default=None,
+        comment="Materialized path technique"
+    )
+
     name: Mapped[str] = mapped_column(nullable=True, default=None) # Column(String)
     name_en: Mapped[str] = mapped_column(nullable=True, default=None) # Column(String)
     label: Mapped[str] = mapped_column(nullable=True, default=None, comment="Facility label = name including master facilities like S/1/9") # Column(String, comment="Facility label = name including master facilities like S/1/9")
@@ -32,8 +45,24 @@ class FacilityModel(BaseModel):
     def type_id(self):
         return self.facilitytype_id
 
-    masterfacility = relationship("FacilityModel", viewonly=True) # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
-    subfacilities = relationship ("FacilityModel", remote_side="FacilityModel.id", viewonly=True, uselist=True) # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
+    masterfacility = relationship(
+        "FacilityModel", 
+        viewonly=True,
+        remote_side="FacilityModel.id",
+        uselist=False,
+        back_populates="subfacilities",
+    ) # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
+    
+    subfacilities = relationship(
+        "FacilityModel", 
+        back_populates="masterfacility",
+        uselist=True,
+        init=True,
+        cascade="save-update"
+) # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
     # # https://docs.sqlalchemy.org/en/20/_modules/examples/materialized_paths/materialized_paths.html
-    type = relationship("FacilityTypeModel", viewonly=True)#, lazy="joined") # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
+    type = relationship(
+        "FacilityTypeModel", 
+        viewonly=True
+    )#, lazy="joined") # https://docs.sqlalchemy.org/en/20/orm/self_referential.html
 
