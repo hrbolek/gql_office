@@ -30,8 +30,8 @@ class DigitalSubmissionFieldModel(BaseModel):
     path: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
     value: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
     field_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_form_fields.id"), default=None, nullable=True)
-    section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submission_sections.id"), default=None, nullable=True)
-    submission_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submissions.id"), default=None, nullable=True)
+    section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submission_sections.id", ondelete="CASCADE"), default=None, nullable=True)
+    submission_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submissions.id", ondelete="CASCADE"), default=None, nullable=True)
     state_id: Mapped[Optional[IDType]] = UUIDFKey(ForeignKey("states.id"), default=None, nullable=True)
 
     form_field = relationship(

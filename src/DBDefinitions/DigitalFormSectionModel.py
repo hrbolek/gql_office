@@ -42,12 +42,12 @@ class DigitalFormSectionModel(BaseModel):
     label_en: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
     description: Mapped[Optional[str]] = mapped_column(String, default=None, nullable=True)
     order: Mapped[Optional[int]] = mapped_column(Integer, default=None, nullable=True)
-    repatable_min: Mapped[Optional[int]] = mapped_column(Integer, default=None, nullable=True)
-    repatable_max: Mapped[Optional[int]] = mapped_column(Integer, default=None, nullable=True)
+    repeatable_min: Mapped[Optional[int]] = mapped_column(Integer, default=None, nullable=True)
+    repeatable_max: Mapped[Optional[int]] = mapped_column(Integer, default=None, nullable=True)
     repeatable: Mapped[Optional[bool]] = mapped_column(Boolean, default=None, nullable=True)
 
-    section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_form_sections.id"), default=None, nullable=True)
-    form_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_forms.id"), default=None, nullable=True)
+    section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_form_sections.id", ondelete="CASCADE"), default=None, nullable=True)
+    form_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_forms.id", ondelete="CASCADE"), default=None, nullable=True)
 
     # Relationship: child sections (self-referential)
     sections = relationship(

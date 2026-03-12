@@ -28,6 +28,13 @@ from uoishelpers.resolvers import (
     ScalarResolver
 )
 
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.RbacInsertProviderExtension import RbacInsertProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
+
 from ..BaseGQLModel import BaseGQLModel, IDType
 # from ..TreeGQLModel import create_tree_parents_resolver, create_tree_parent_updater
 
@@ -46,6 +53,12 @@ class FacilityGQLModel(BaseGQLModel):
     def getLoader(cls, info: strawberry.types.Info):
         return getLoadersFromInfo(info).FacilityModel
  
+    path: typing.Optional[str] = strawberry.field(
+        description="""Materialized path .""",
+        default=None,
+        permission_classes=[OnlyForAuthentized]
+    )
+     
     name: typing.Optional[str] = strawberry.field(
         default=None,
         description="""Facility name assigned by an administrator""",
@@ -218,7 +231,7 @@ class FacilityInputFilter:
     address: str
 
 @strawberry.federation.interface(
-    keys=["id"], description="""Facility queries"""
+    description="""Facility queries"""
 )
 class FacilityQuery:
     
@@ -236,6 +249,7 @@ class FacilityQuery:
 
 @strawberry.input(description="initial attributes for facility insert")
 class FacilityInsertGQLModel:
+    master_facility_id: IDType = strawberry.field(description="to which facility this facility belongs", default=None)
     name: str = strawberry.field(description="name of the new facility")
     facilitytype_id: typing.Optional[IDType] = strawberry.field(description="facility type", default=None)
     id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default_factory=uuid.uuid4)
@@ -249,9 +263,26 @@ class FacilityInsertGQLModel:
     geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default="")
 
     group_id: typing.Optional[IDType] = strawberry.field(description="group which is responsible for management of this facility", default=None)
-    master_facility_id: typing.Optional[IDType] = strawberry.field(description="to which facility this facility belongs", default=None)
-    rbacobject_id: typing.Optional[IDType] = \
-        strawberry.field(description="group_id or user_id defines access rights", default=None)
+    rbacobject_id: strawberry.Private[IDType] = None
+    createdby_id: strawberry.Private[IDType] = None
+
+@strawberry.input(description="initial attributes for facility insert")
+class FacilityInsertMasterGQLModel:
+    rbacobject_id: IDType = strawberry.field(description="Rbac object id for master facility, it defines access rights to the facility")
+    name: str = strawberry.field(description="name of the new facility")
+    facilitytype_id: typing.Optional[IDType] = strawberry.field(description="facility type", default=None)
+    id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default_factory=uuid.uuid4)
+
+    name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default="")
+    label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default="")
+    address: typing.Optional[str] = strawberry.field(description="postal address", default="")
+    valid: typing.Optional[bool] = strawberry.field(description="if facility exists", default=True)
+    capacity: typing.Optional[int] = strawberry.field(description="facility capacity", default=0)
+    geometry: typing.Optional[str] = strawberry.field(description="SVG overlay for leaflet", default="")
+    geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default="")
+
+    group_id: typing.Optional[IDType] = strawberry.field(description="group which is responsible for management of this facility", default=None)
+    rbacobject_id: strawberry.Private[IDType] = None
     createdby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for facility update")
@@ -279,12 +310,47 @@ class FacilityDeleteGQLModel:
 class FacilityMutation:
 
     @strawberry.field(
-        description="Insert a facility",
+        description="Insert a facility under master facility, if master_facility_id is not provided, facility will be inserted as a master facility. rbacobject_id is id of group or user the facility is for, it defines access rights to the facility",
         permission_classes=[
-            SimpleInsertPermission[FacilityGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, FacilityGQLModel](
+                roles=[
+                    "nemovitostní administrátor", 
+                    # "personalista"
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, FacilityGQLModel](),
+            RbacProviderExtension[UpdateError, FacilityGQLModel](),
+            LoadDataExtension[UpdateError, FacilityGQLModel](
+                getLoader=FacilityGQLModel.getLoader,
+                primary_key_name="master_facility_id"
+            )
         ]
     )
-    async def facility_insert(self, info: strawberry.types.Info, facility: FacilityInsertGQLModel) -> typing.Union[FacilityGQLModel, InsertError[FacilityGQLModel]]:
+    async def facility_insert(
+        self, 
+        info: strawberry.types.Info, 
+        facility: FacilityInsertGQLModel
+    ) -> typing.Union[FacilityGQLModel, InsertError[FacilityGQLModel]]:
+        return await Insert[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
+    
+    @strawberry.field(
+        description="Insert a facility under master facility, if master_facility_id is not provided, facility will be inserted as a master facility. rbacobject_id is id of group or user the facility is for, it defines access rights to the facility",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAbsoluteAccessControlExtension[InsertError, FacilityGQLModel](roles=["administrátor"]),
+
+        ]
+    )
+    async def facility_master_insert(
+        self, 
+        info: strawberry.types.Info, 
+        facility: FacilityInsertMasterGQLModel
+    ) -> typing.Union[FacilityGQLModel, InsertError[FacilityGQLModel]]:
         return await Insert[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
     @strawberry.field(

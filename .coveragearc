@@ -1,0 +1,6 @@
+[run]
+source = src
+branch = True
+concurrency =
+    greenlet
+    thread

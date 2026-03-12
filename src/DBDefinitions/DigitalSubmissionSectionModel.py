@@ -39,9 +39,11 @@ class DigitalSubmissionSectionModel(BaseModel):
 
     index: Mapped[Optional[int]] = mapped_column(Integer, default=None, nullable=True)
     # This column stores the parent section's id.
+    submission_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submissions.id", ondelete="CASCADE"), default=None, nullable=True)
+
     section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submission_sections.id"), default=None, nullable=True)
     # This column references the submission owning this section.
-    submission_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submissions.id"), default=None, nullable=True)
+    submission_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_submissions.id", ondelete="CASCADE"), default=None, nullable=True)
     form_section_id: Mapped[Optional[IDType]] = mapped_column(ForeignKey("digital_form_sections.id"), default=None, nullable=True)
     state_id: Mapped[Optional[IDType]] = UUIDFKey(ForeignKey("states.id"), default=None, nullable=True)
 

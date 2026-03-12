@@ -124,6 +124,10 @@ class HistoryInsertGQLModel(InputModelMixin):
     state_id: IDType = strawberry.field(
         description="The state to which this history entry is related"
     )
+    name: typing.Optional[str] = strawberry.field(
+        description="Message attached to history",
+        default=None
+    )
     
     id: typing.Optional[IDType] = strawberry.field(
         description="""HistoryGQLModel primary key""",

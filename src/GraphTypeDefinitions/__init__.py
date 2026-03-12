@@ -56,11 +56,16 @@ schema.extensions.append(WhoAmIExtension)
 # schema.extensions.append(ProfilingExtension())        
 # schema.extensions.append(PyInstrument())
 # schema.extensions.append(PrometheusExtension(prefix="gql_facilities"))
-from uoishelpers.schema import WhoAmIExtension
-schema.extensions.append(WhoAmIExtension)
 
 from uoishelpers.gqlpermissions.RolePermissionSchemaExtension import RolePermissionSchemaExtension, GraphQLBatchLoader
 schema.extensions.append(RolePermissionSchemaExtension)
+
+from strawberry.extensions import ParserCache, ValidationCache
+
+from uoishelpers.schema.PyInstrumentHtmlExtension import PyInstrumentHtmlExtension
+# schema.extensions.append(PyInstrumentHtmlExtension(enabled=True))
+schema.extensions.append(ParserCache(1000))
+schema.extensions.append(ValidationCache(1000))
 
 # from aiodataloader import DataLoader
 # import uuid

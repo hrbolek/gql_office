@@ -26,6 +26,7 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
 from ..BaseGQLModel import BaseGQLModel, IDType
 
@@ -50,6 +51,11 @@ class EventTypeGQLModel(BaseGQLModel):
     def getLoader(cls, info: strawberry.types.Info):
         return getLoadersFromInfo(info).EventTypeModel
   
+    path: typing.Optional[str] = strawberry.field(
+        description="""Materialized path .""",
+        default=None,
+        permission_classes=[OnlyForAuthentized]
+    )
 
     name: typing.Optional[str] = strawberry.field(
         default=None,
@@ -157,33 +163,59 @@ class EventTypeMutation:
     @strawberry.mutation(
         description="standard insert operation",
         permission_classes=[
-            OnlyForAuthentized,
-            SimpleInsertPermission[EventTypeGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAbsoluteAccessControlExtension[InsertError, EventTypeGQLModel](
+                roles=["superadmin"]
+            )
+        ],
     )
-    async def event_type_insert(self, info: strawberry.types.Info, event_type: EventTypeInsertGQLModel) -> typing.Union[EventTypeGQLModel, InsertError[EventTypeGQLModel]]:
-        result = await Insert[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
-        return result
+    async def event_type_insert(
+        self, 
+        info: strawberry.types.Info, 
+        event_type: EventTypeInsertGQLModel,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[EventTypeGQLModel, InsertError[EventTypeGQLModel]]:
+        return await Insert[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
     
     @strawberry.mutation(
         description="standard update operation",
         permission_classes=[
-            OnlyForAuthentized,
-            SimpleUpdatePermission[EventTypeGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAbsoluteAccessControlExtension[InsertError, EventTypeGQLModel](
+                roles=["superadmin"]
+            )
+        ],
     )
-    async def event_type_update(self, info: strawberry.types.Info, event_type: EventTypeUpdateGQLModel) -> typing.Union[EventTypeGQLModel, UpdateError[EventTypeGQLModel]]:
-        result = await Update[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
-        return result
+    async def event_type_update(
+        self, 
+        info: strawberry.types.Info, 
+        event_type: EventTypeUpdateGQLModel,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[EventTypeGQLModel, UpdateError[EventTypeGQLModel]]:
+        return await Update[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
+        
 
 
     @strawberry.mutation(
         description="standard delete operation",
         permission_classes=[
             OnlyForAuthentized,
-            SimpleDeletePermission[EventTypeGQLModel](roles=["administrátor"])
+        ],
+        extensions=[
+            UserAbsoluteAccessControlExtension[InsertError, EventTypeGQLModel](
+                roles=["superadmin"]
+            )
         ]
     )
-    async def event_type_delete(self, info: strawberry.types.Info, event_type: EventTypeDeleteGQLModel) -> typing.Optional[DeleteError[EventTypeGQLModel]]:
-        result = await Delete[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
-        return result        
+    async def event_type_delete(
+        self, 
+        info: strawberry.types.Info, 
+        event_type: EventTypeDeleteGQLModel,
+        user_roles: typing.List[dict],
+    ) -> typing.Optional[DeleteError[EventTypeGQLModel]]:
+        return await Delete[EventTypeGQLModel].DoItSafeWay(info=info, entity=event_type)
+        

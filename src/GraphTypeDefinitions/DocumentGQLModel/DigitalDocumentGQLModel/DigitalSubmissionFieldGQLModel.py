@@ -179,11 +179,12 @@ class DigitalSubmissionFieldInsertGQLModel(InputModelMixin):
         description="client side generated id", 
         default=None
         )
-    value: typing.Optional[str] = strawberry.field(
-        description="field value", 
-        default=None
-        )
+    # value: typing.Optional[str] = strawberry.field(
+    #     description="field value", 
+    #     default=None
+    #     )
     path: strawberry.Private[str] = None
+    state_id: strawberry.Private[IDType] = None 
     rbacobject_id: strawberry.Private[IDType] = None
     createdby_id: strawberry.Private[IDType] = None
     
@@ -236,7 +237,7 @@ class DigitalSubmissionFieldMutation:
     async def digital_submission_field_update(
         self,
         info: strawberry.types.Info,
-        submission_field: typing.Annotated[DigitalSubmissionFieldInsertGQLModel, strawberry.argument(description="submission field attributes, to be updated")]
+        submission_field: typing.Annotated[DigitalSubmissionFieldUpdateGQLModel, strawberry.argument(description="submission field attributes, to be updated")]
     ) -> typing.Union[DigitalSubmissionFieldGQLModel, UpdateError[DigitalSubmissionFieldGQLModel]]:
         return await Update[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)
     

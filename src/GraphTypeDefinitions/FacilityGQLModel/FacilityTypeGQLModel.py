@@ -25,6 +25,7 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
 from ..BaseGQLModel import BaseGQLModel, IDType
 
@@ -45,6 +46,12 @@ class FacilityTypeGQLModel(BaseGQLModel):
     @classmethod
     def getLoader(cls, info: strawberry.types.Info):
         return getLoadersFromInfo(info).FacilityTypeModel
+    
+    path: typing.Optional[str] = strawberry.field(
+        description="""Materialized path .""",
+        default=None,
+        permission_classes=[OnlyForAuthentized]
+    )
     
     name: typing.Optional[str] = strawberry.field(
         default=None,
@@ -168,38 +175,56 @@ class FacilityTypeMutation:
     @strawberry.mutation(
         description="""Insert a FacilityType""",
         permission_classes=[
-            SimpleInsertPermission[FacilityTypeGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAbsoluteAccessControlExtension[InsertError, FacilityTypeGQLModel](
+                roles=["superadmin"]
+            )
+        ],
     )
     async def facility_type_insert(
         self,
         info: strawberry.types.Info,
-        facility_type: FacilityTypeInsertGQLModel
+        facility_type: FacilityTypeInsertGQLModel,
+        user_roles: typing.List[dict],
     ) -> typing.Union[FacilityTypeGQLModel, InsertError[FacilityTypeGQLModel]]:
         return await Insert[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility_type)
     
     @strawberry.mutation(
         description="""Update a FacilityType""",
         permission_classes=[
-            SimpleUpdatePermission[FacilityTypeGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAbsoluteAccessControlExtension[UpdateError, FacilityTypeGQLModel](
+                roles=["superadmin"]
+            )
+        ],
     )
     async def facility_type_update(
         self,
         info: strawberry.types.Info,
-        facility_type: FacilityTypeUpdateGQLModel
+        facility_type: FacilityTypeUpdateGQLModel,
+        user_roles: typing.List[dict],
     ) -> typing.Union[FacilityTypeGQLModel, UpdateError[FacilityTypeGQLModel]]:
         return await Update[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility_type)
     
     @strawberry.mutation(
         description="""Delete a FacilityType""",
         permission_classes=[
-            SimpleDeletePermission[FacilityTypeGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAbsoluteAccessControlExtension[DeleteError, FacilityTypeGQLModel](
+                roles=["superadmin"]
+            )
+        ],
     )
     async def facility_type_delete(
         self,
         info: strawberry.types.Info,
-        facility_type: FacilityTypeDeleteGQLModel
+        facility_type: FacilityTypeDeleteGQLModel,
+        user_roles: typing.List[dict],
     ) -> typing.Optional[DeleteError[FacilityTypeGQLModel]]:
         return await Delete[FacilityTypeGQLModel].DoItSafeWay(info=info, entity=facility_type)

@@ -1,4 +1,4 @@
-
+import typing
 import datetime
 from sqlalchemy import (
     Column,
@@ -26,3 +26,11 @@ class RequestTypeModel(BaseModel):
     initial_form_id: Mapped[IDType] = mapped_column(ForeignKey("digital_forms.id"), default=None, nullable=True)
     state_id: Mapped[IDType] = UUIDFKey(ForeignKey("states.id"), default=None, nullable=True, comment="initial state")
     statemachine_id: Mapped[IDType] = UUIDFKey(ForeignKey("statemachines.id"), default=None, nullable=True, comment="statemachine ruling requesttype")
+
+    initial_form = relationship(
+        "DigitalFormModel",
+        foreign_keys=[initial_form_id],
+        uselist=False,
+        init=True,
+        cascade="save-update"
+    )

@@ -73,8 +73,7 @@ class EventGQLModel(BaseGQLModel):
         return getLoadersFromInfo(info).EventModel
 
     path: typing.Optional[str] = strawberry.field(
-        description="""Materialized path representing the group's hierarchical location.  
-Materializovaná cesta reprezentující umístění skupiny v hierarchii.""",
+        description="""Materialized path .""",
         default=None,
         permission_classes=[OnlyForAuthentized]
     )
@@ -137,6 +136,7 @@ Materializovaná cesta reprezentující umístění skupiny v hierarchii.""",
 
     valid: typing.Optional[bool] = strawberry.field(
         description="""If it intersects current date""",
+        default=None,
         permission_classes=[OnlyForAuthentized]
     )
 
@@ -496,15 +496,15 @@ class EventMutation:
         ],
         extensions=[
             # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
-            UserAccessControlExtension[UpdateError, EventGQLModel](
+            UserAccessControlExtension[InsertError, EventGQLModel](
                 roles=[
                     "plánovací administrátor", 
                     # "personalista"
                 ]
             ),
-            UserRoleProviderExtension[UpdateError, EventGQLModel](),
-            RbacProviderExtension[UpdateError, EventGQLModel](),
-            LoadDataExtension[UpdateError, EventGQLModel](
+            UserRoleProviderExtension[InsertError, EventGQLModel](),
+            RbacProviderExtension[InsertError, EventGQLModel](),
+            LoadDataExtension[InsertError, EventGQLModel](
                 getLoader=EventGQLModel.getLoader,
                 primary_key_name="masterevent_id"
             )
@@ -524,14 +524,11 @@ class EventMutation:
         description="""Insert a plan, it could be connected to master plan, rbacobject_id is id of group the plan is for""",
         permission_classes=[
             OnlyForAuthentized
-            # SimpleInsertPermission[EventGQLModel](roles=["administrátor"])
         ],
         extensions=[
-            # UpdatePermissionCheckRoleFieldExtension[GroupGQLModel](roles=["administrátor", "personalista"]),
             UserAccessControlExtension[UpdateError, EventGQLModel](
                 roles=[
                     "plánovací administrátor", 
-                    # "personalista"
                 ]
             ),
             UserRoleProviderExtension[UpdateError, EventGQLModel](),
@@ -572,7 +569,10 @@ class EventMutation:
     async def event_update(
         self,
         info: strawberry.Info,
-        event: EventUpdateGQLModel
+        event: EventUpdateGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[EventGQLModel, UpdateError[EventGQLModel]]:
         return await Update[EventGQLModel].DoItSafeWay(info=info, entity=event)
     
@@ -643,7 +643,10 @@ class EventMutation:
     async def event_delete(
         self,
         info: strawberry.Info,
-        event: EventDeleteGQLModel
+        event: EventDeleteGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Optional[DeleteError[EventGQLModel]]:
         return await Delete[EventGQLModel].DoItSafeWay(info=info, entity=event)
     

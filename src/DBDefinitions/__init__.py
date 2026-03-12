@@ -37,8 +37,16 @@ from .RequestTypeModel import RequestTypeModel
 
 async def startEngine(connectionstring, makeDrop=False, makeUp=True):
     """Provede nezbytne ukony a vrati asynchronni SessionMaker"""
-    asyncEngine = create_async_engine(connectionstring)
 
+    from sqlalchemy.ext.asyncio import (
+        async_scoped_session,
+        async_sessionmaker,
+    )
+    from asyncio import current_task
+
+    asyncEngine = create_async_engine(connectionstring, pool_pre_ping=True)
+
+ 
     async with asyncEngine.begin() as conn:
         if makeDrop:
             await conn.run_sync(BaseModel.metadata.drop_all)
@@ -52,9 +60,21 @@ async def startEngine(connectionstring, makeDrop=False, makeUp=True):
                 print("Unable automaticaly create tables")
                 return None
 
-    async_sessionMaker = sessionmaker(
-        asyncEngine, expire_on_commit=False, class_=AsyncSession
+    # async_sessionMaker = sessionmaker(
+    #     asyncEngine, expire_on_commit=False, class_=AsyncSession
+    # )
+
+    async_session_factory = async_sessionmaker(
+        asyncEngine,
+        expire_on_commit=False,
+        class_=AsyncSession
     )
+
+    async_sessionMaker = async_scoped_session(
+        async_session_factory,
+        scopefunc=current_task,
+    )
+
     return async_sessionMaker
 
 import os

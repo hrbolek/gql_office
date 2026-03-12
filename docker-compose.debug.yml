@@ -6,13 +6,6 @@ x-services-volume:
 
 
 services:
-  proxy:
-    image: proxy
-    restart: unless-stopped
-    # build:
-    #   context: ./proxy  # Path to the directory containing the Dockerfile
-    environment:
-      - TARGET_SERVER=http://host.docker.internal:8001
 
   frontend:
     image: hrbolek/frontend
@@ -47,6 +40,7 @@ services:
     depends_on:
       - postgres_credentials
 
+#{"name": "ug", "url": "http://gql_ug:8000/gql"}
   apollo:
     image: hrbolek/apollo_federation
     # image: apollofederation:latest
@@ -57,8 +51,8 @@ services:
       - |
         SERVICES=
         [
-          {"name": "office", "url": "http://proxy:8000/gql"},
-          {"name": "ug", "url": "http://gql_ug:8000/gql"}
+          {"name": "office", "url": "http://host.docker.internal:8000/gql"},
+          {"name": "ug", "url": "http://host.docker.internal:8001/gql"}
         ]       
     healthcheck:
       # definice, umoznujici provest test, zda je kontejner v poradku (vsimnete si portu a srovnejte s portem v environment)
@@ -73,7 +67,6 @@ services:
     deploy:
       replicas: 1
     depends_on:
-      - proxy
       - gql_ug
 
   gql_ug:

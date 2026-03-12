@@ -6,6 +6,7 @@ from sqlalchemy import (
     Integer,
     DateTime,
     ForeignKey,
+    select
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -105,4 +106,16 @@ class DigitalSubmissionModel(BaseModel):
         viewonly=True
     )
 
-    
+async def load_submission_dataset(session, submission_id):
+    from .DigitalSubmissionSectionModel import DigitalSubmissionSectionModel as SubSec
+    from .DigitalSubmissionFieldModel import DigitalSubmissionFieldModel as SubField
+
+    sec_stmt = select(SubSec).where(SubSec.submission_id == submission_id)
+    fld_stmt = select(SubField).where(SubField.submission_id == submission_id)
+
+    sec_res = await session.execute(sec_stmt)
+    fld_res = await session.execute(fld_stmt)
+
+    submission_sections = list(sec_res.scalars())
+    submission_fields = list(fld_res.scalars())
+    return submission_sections, submission_fields

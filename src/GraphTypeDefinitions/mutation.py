@@ -15,7 +15,11 @@ from .DocumentGQLModel import (
     DocumentMutation,
     DigitalFormMutation,
     DigitalFormSectionMutation,
-    DigitalSubmissionMutation
+    DigitalFormFieldMutations,
+
+    DigitalSubmissionMutation,
+    SubmissionSectionMutation,
+    DigitalSubmissionFieldMutation
 )
 
 from .RequestGQLModel import RequestMutations, RequestTypeMutations, HistoryMutations
@@ -29,10 +33,13 @@ class Mutation(
     FacilityMutation,
     FacilityTypeMutation,
 
-    DocumentMutation,
+    # DocumentMutation,
     DigitalFormMutation,
     DigitalFormSectionMutation,
+    DigitalFormFieldMutations,
     DigitalSubmissionMutation,
+    DigitalSubmissionFieldMutation,
+    SubmissionSectionMutation,
 
     RequestMutations, 
     RequestTypeMutations, 

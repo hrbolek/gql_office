@@ -53,6 +53,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     name: typing.Optional[str] = strawberry.field(
         description="""name for reference, must be unique and must start with a lower letter""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -60,6 +61,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     label: typing.Optional[str] = strawberry.field(
         description="""Digital Form Field label for display""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -67,6 +69,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     label_en: typing.Optional[str] = strawberry.field(
         description="""Digital Form Field label for display in english""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -74,6 +77,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     description: typing.Optional[str] = strawberry.field(
         description="""Digital Form Field placeholder""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -81,6 +85,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     form_section_id: typing.Optional[IDType] = strawberry.field(
         description="""Digital form section where this field belongs""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -96,6 +101,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     form_id: typing.Optional[IDType] = strawberry.field(
         description="""Digital form where this field belongs""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -111,6 +117,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     required: typing.Optional[bool] = strawberry.field(
         description="Indicates whether this field is mandatory.",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -118,6 +125,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
 
     order: typing.Optional[int] = strawberry.field(
         description="Order index to determine the field's position within its section.",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -126,6 +134,7 @@ class DigitalFormFieldGQLModel(BaseGQLModel):
     computed: typing.Optional[int] = strawberry.field(
         description="""Indicates whether the field's value is computed automatically from other fields.
 Probably alias for `formula is not None`""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -134,6 +143,7 @@ Probably alias for `formula is not None`""",
     formula: typing.Optional[str] = strawberry.field(
         description="""A mathematical formula (as a string) for computing the field's value.
 Example: "price * quantity" where "price" and "quantity" reference other fields.""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -141,6 +151,7 @@ Example: "price * quantity" where "price" and "quantity" reference other fields.
 
     type_id: typing.Optional[IDType] = strawberry.field(
         description="""Specifies the type of input (e.g., "text", "number", "date", "boolean", "select").""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -148,6 +159,7 @@ Example: "price * quantity" where "price" and "quantity" reference other fields.
 
     backend_formula: typing.Optional[str] = strawberry.field(
         description="""Specifies the backend payload constant(s).""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -155,6 +167,7 @@ Example: "price * quantity" where "price" and "quantity" reference other fields.
 
     flatten_formula: typing.Optional[str] = strawberry.field(
         description="""Specifies the operation on incomming data.""",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -189,6 +202,10 @@ class DigitalFormFieldInsertGQLModel(InputModelMixin):
     
     form_id: typing.Optional[IDType] = strawberry.field(
         description="form id where the field is placed",
+        default=None
+    )
+    type_id: typing.Optional[IDType] = strawberry.field(
+        description="id of the field type",
         default=None
     )
     form_section_id: typing.Optional[IDType] = strawberry.field(
@@ -232,7 +249,7 @@ class DigitalFormFieldInsertGQLModel(InputModelMixin):
     rbacobject_id: strawberry.Private[IDType] = None
     createdby_id: strawberry.Private[IDType] = None
 
-@strawberry.input(description="DigitalFormField insert parameter description")
+@strawberry.input(description="DigitalFormField update parameter description")
 class DigitalFormFieldUpdateGQLModel:
     id: IDType = strawberry.field(description="primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
@@ -264,6 +281,27 @@ class DigitalFormFieldUpdateGQLModel:
         description="", 
         default=None
     )
+    type_id: typing.Optional[IDType] = strawberry.field(
+        description="id of the field type",
+        default=None
+    )
+    formula: typing.Optional[str] = strawberry.field(
+        description="for client computation, usage depends on typeId", 
+        default=None
+    )
+    backend_formula: typing.Optional[str] = strawberry.field(
+        description="for backend computation, usage depends on typeId", 
+        default=None
+    )
+    flatten_formula: typing.Optional[str] = strawberry.field(
+        description="for client and backend computation, usage depends on typeId", 
+        default=None
+    )
+
+    form_section_id: strawberry.Private[IDType] = strawberry.UNSET
+    form_id: strawberry.Private[IDType] = strawberry.UNSET
+    changedby_id: strawberry.Private[IDType] = None
+    
     
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalFormFieldDeleteGQLModel:
@@ -277,7 +315,7 @@ class DigitalFormFieldDeleteGQLModel:
 @strawberry.interface(
     description="set of mutations"
 )
-class DigitalFormFieldMutation:
+class DigitalFormFieldMutations:
     @strawberry.mutation(
         description="""Insert a DigitalFormField""",
         permission_classes=[
@@ -289,7 +327,22 @@ class DigitalFormFieldMutation:
         info: strawberry.types.Info,
         form_field: typing.Annotated[DigitalFormFieldInsertGQLModel, strawberry.argument(description="form field attributes to be inserted")]
     ) -> typing.Union[DigitalFormFieldGQLModel, InsertError[DigitalFormFieldGQLModel]]:
-        modelinstance = form_field.intoModel(info=info)
+        from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
+        modelinstance = await form_field.intoModel(info=info)
+
+        if modelinstance.form_id is None:
+            section_id = modelinstance.form_section_id
+            form_id = None
+            loader = DigitalFormSectionGQLModel.getLoader(info=info)
+            while form_id is None:
+                section = await loader.load(section_id)
+                assert section is not None, f"badly defined section_id and / or field_id"
+                form_id = section.form_id
+                section_id = section.section_id
+                if form_id:
+                    break
+            modelinstance.form_id = form_id
+
         return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=modelinstance)
         # return await digital_form_field_insert_internal(self, info=info, form_field=form_field)
     

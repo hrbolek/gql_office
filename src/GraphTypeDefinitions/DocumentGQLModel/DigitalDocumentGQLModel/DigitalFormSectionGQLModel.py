@@ -42,7 +42,9 @@ class DigitalFormSectionInputFilter:
     name: str = strawberry.field(description="name of section")
     label_en: str = strawberry.field(description="english label for section")
     description: str = strawberry.field(description="description of section")
-    parent_id: IDType
+    
+    section_id: IDType
+    form_id: IDType
 
 @strawberry.federation.type(
     keys=["id"], description="""Represents a section (group) of a digital form.
@@ -62,6 +64,7 @@ class DigitalFormSectionGQLModel(BaseGQLModel):
 
     path: typing.Optional[str] = strawberry.field(
         description="aka materialized path",
+        default=None,
         permission_classes=[
             OnlyForAuthentized
         ]
@@ -91,15 +94,39 @@ class DigitalFormSectionGQLModel(BaseGQLModel):
         ]
     )
 
-    section_id: strawberry.Private[IDType] = None
-    form_id: strawberry.Private[IDType] = None
+    # section_id: strawberry.Private[IDType] = None
+    # form_id: strawberry.Private[IDType] = None
 
-    parent_id: typing.Optional[IDType] = strawberry.field(
+    section_id: typing.Optional[IDType] = strawberry.field(
         default=None,
         description="""Digital document form section parent id which this section belongs to""",
         permission_classes=[
             OnlyForAuthentized
         ]
+    )
+
+    form_id: typing.Optional[IDType] = strawberry.field(
+        default=None,
+        description="""Digital document form parent id which this section belongs to""",
+        permission_classes=[
+            OnlyForAuthentized
+        ]
+    )
+
+    form: typing.Optional[DigitalFormGQLModel] = strawberry.field(
+        description="""Digital document form parent which this section belongs to""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver[DigitalFormGQLModel](fkey_field_name="form_id")
+    )
+
+    section: typing.Optional["DigitalFormSectionGQLModel"] = strawberry.field(
+        description="""Digital document form section parent which this section belongs to""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver["DigitalFormSectionGQLModel"](fkey_field_name="section_id")
     )
 
     # parent: typing.Optional["DigitalFormSectionGQLModel"] = strawberry.field(
@@ -119,7 +146,7 @@ class DigitalFormSectionGQLModel(BaseGQLModel):
     async def parent(self, info: strawberry.types.Info) -> typing.Union["DigitalFormSectionGQLModel", DigitalFormGQLModel, None]:
         from .DigitalFormGQLModel import DigitalFormGQLModel
 
-        futures = [DigitalFormGQLModel.load_with_loader(info=info, id=self.parent_id), DigitalFormSectionGQLModel.load_with_loader(info=info, id=self.parent_id)]
+        futures = [DigitalFormGQLModel.load_with_loader(info=info, id=self.form_id), DigitalFormSectionGQLModel.load_with_loader(info=info, id=self.section_id)]
         [document, section] = await asyncio.gather(*futures)
         return document or section
     
@@ -148,7 +175,7 @@ class DigitalFormSectionGQLModel(BaseGQLModel):
         ]
     )
 
-    repatable_min: typing.Optional[int] = strawberry.field(
+    repeatable_min: typing.Optional[int] = strawberry.field(
         default=None,
         description="""Minimum number of repetitions""",
         permission_classes=[
@@ -156,7 +183,7 @@ class DigitalFormSectionGQLModel(BaseGQLModel):
         ]
     )
 
-    repatable_max: typing.Optional[int] = strawberry.field(
+    repeatable_max: typing.Optional[int] = strawberry.field(
         default=None,
         description="""Maximum number of repetitions""",
         permission_classes=[
@@ -213,6 +240,14 @@ class DigitalFormSectionInsertGQLModel(TreeInputStructureMixin):
         description="""DigitalFormSection eng label""",
         default=None
     )
+    description: typing.Optional[str] = strawberry.field(
+        description="""DigitalFormSection description / explanation""",
+        default=None
+    )
+    order: typing.Optional[int] = strawberry.field(
+        description="""DigitalFormSection order""",
+        default=None
+    )
 
     section_id: typing.Optional[IDType] = strawberry.field(
         description="""DigitalFormSection master id""",
@@ -220,7 +255,7 @@ class DigitalFormSectionInsertGQLModel(TreeInputStructureMixin):
     )
     
     form_id: typing.Optional[IDType] = strawberry.field(
-        description="""DigitalFormSection master id""",
+        description="""DigitalForm id""",
         default=None
     )
 
@@ -228,6 +263,19 @@ class DigitalFormSectionInsertGQLModel(TreeInputStructureMixin):
         description="""DigitalFormSection id client generated""",
         default=None,
         # default_factory=lambda: uuid.uuid4()
+    )
+
+    repeatable_min: typing.Optional[int] = strawberry.field(
+        description="""Minimum number of repetitions""",
+        default=None
+    )
+    repeatable_max: typing.Optional[int] = strawberry.field(
+        description="""Maximum number of repetitions""",
+        default=None
+    )
+    repeatable: typing.Optional[bool] = strawberry.field(
+        description="""Is section repeatable""",
+        default=False
     )
 
     from .DigitalFormFieldGQLModel import DigitalFormFieldInsertGQLModel
@@ -342,8 +390,32 @@ class DigitalFormSectionUpdateGQLModel:
         description="""DigitalFormSection name""",
         default=None
     )
-    name_en: typing.Optional[str] = strawberry.field(
-        description="""DigitalFormSection eng name""",
+    label: typing.Optional[str] = strawberry.field(
+        description="""visual label""",
+        default=None
+    )
+    label_en: typing.Optional[str] = strawberry.field(
+        description="""visual label in english""",
+        default=None
+    )
+    description: typing.Optional[str] = strawberry.field(
+        description="""detailed description""",
+        default=None
+    )
+    order: typing.Optional[int] = strawberry.field(
+        description="""parameter for ordering within siblings""",
+        default=None
+    )
+    repeatable_min: typing.Optional[int] = strawberry.field(
+        description="""Minimum number of repetitions""",
+        default=None
+    )
+    repeatable_max: typing.Optional[int] = strawberry.field(
+        description="""Maximum number of repetitions""",
+        default=None
+    )
+    repeatable: typing.Optional[bool] = strawberry.field(
+        description="""Is section repeatable""",
         default=None
     )
 
@@ -391,8 +463,22 @@ class DigitalFormSectionMutation:
         # digital_form_section.path = path + f".{digital_form_section.id}"
 
         # # return await digital_form_section_insert_internal(self=self, info=info, digital_form_section=digital_form_section)
-        entitymodel = digital_form_section.intoModel(info=info)
-        return await Insert[DigitalFormSectionGQLModel].DoItSafeWay(info=info, entity=entitymodel)
+        
+        
+        # entitymodel = await digital_form_section.intoModel(info=info)
+        # if entitymodel.form_id is None:
+        #     section_id = entitymodel.section_id
+        #     form_id = None
+        #     loader = DigitalFormSectionGQLModel.getLoader(info=info)
+        #     while form_id is None:
+        #         section = await loader.load(section_id)
+        #         assert section is not None, f"badly defined section_id and / or field_id"
+        #         form_id = section.form_id
+        #         section_id = section.section_id
+        #         if form_id:
+        #             break
+        #     entitymodel.form_id = form_id
+        return await Insert[DigitalFormSectionGQLModel].DoItSafeWay(info=info, entity=digital_form_section)
     
     @strawberry.mutation(
         description="""Update a DigitalFormSection""",

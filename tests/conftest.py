@@ -1,139 +1,21 @@
-import pytest
+import asyncio
 import logging
-import fastapi
-import uvicorn
+import pytest
 import pytest_asyncio
-import pydantic
-import time
-
-from contextlib import contextmanager
-
-class Item(pydantic.BaseModel):
-    query: str
-    variables: dict = None
-    operationName: str = None
-
-serversTestscope = "session"
-# serversTestscope = "function"
-
-def runOAuthServer(port, resolvers):
-    mainapp = fastapi.FastAPI()
-    @mainapp.post("/gql")
-    async def post(item: Item):
-        responses = (resolver(item) for resolver in resolvers)
-        responses = (item for item in responses if item is not None)
-        firstresponse = next(responses, None)
-        return firstresponse
-        # return {"hello": "world", "resolvers": len(resolvers), "item": item}
-    logging.info(f"resolvers: {len(resolvers)}")
-    uvicorn.run(mainapp, port=port)
-
-@contextmanager
-def runOauth(port, resolvers):
-    from multiprocessing import Process
-    
-    _api_process = Process(target=runOAuthServer, daemon=True, kwargs={"port": port, "resolvers": resolvers})
-    _api_process.start()
-    # time.sleep(2)
-    logging.info(f"OAuthServer started at {port}")
-    
-    yield _api_process
-    _api_process.terminate()
-    _api_process.join()
-    assert _api_process.is_alive() == False, "Server still alive :("
-    logging.info(f"OAuthServer stopped at {port}")
-
-# @pytest.fixture(scope=serversTestscope)
-# def UserInfoServer(monkeypatch, AdminUser):
-#     UserInfoServerPort = 8126
-#     monkeypatch.setenv("JWTRESOLVEUSERPATHURL", f"http://localhost:{UserInfoServerPort}/oauth/userinfo") #/oauth/publickey
-#     logging.info(f"JWTRESOLVEUSERPATHURL set to `http://localhost:{UserInfoServerPort}/oauth/userinfo`")
-#     yield from runUserInfo(UserInfoServerPort, AdminUser)
-
-# @pytest.fixture(scope="session")
-
-import aiohttp
-import pydantic
-
-def serveMe(item: Item):
-    logging.info(f"serveMe {item}")
-    if "me {" in item.query:
-        result = {
-            "data": {
-                "me": {
-                    "id": "51d101a0-81f1-44ca-8366-6cf51432e8d6",
-                    "roles": [
-                        {
-                            "roletype": {"name": "administrátor"}
-                        }
-                    ]
-                }
-            }
-        }
-        
-    else:
-        result = None
-    return result
-
-server_resolvers = [
-    serveMe
-]
-
-@pytest.fixture(autouse=True, scope=serversTestscope)
-def Server():
-    serverport = 8125
-
-    url = f"http://localhost:{serverport}/gql"
-    async def client(query="", variables={}):
-        payload = {
-            "query": query,
-            "variables": variables
-        }
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload) as resp:
-                assert resp.status == 200, resp
-                accessjson = await resp.json()
-        return accessjson
-
-    with runOauth(serverport, resolvers=server_resolvers):
-        yield client
-
-NoRole_UG_Server = Server
-
-# @pytest_asyncio.fixture(autouse=True, scope=serversTestscope)
-# async def AccessToken(Server):
-#     token = await Server()
-#     logging.info(f"have token {token}")
-#     yield token
-#     logging.info(f"expiring token {token} ")
-
-# @pytest.fixture
-# def LoadersContext(SQLite):
-#     from src.Dataloaders import createLoadersContext
-#     context = createLoadersContext(SQLite)
-#     return context
-
-# @pytest.fixture
-# def Context(AdminUser, SQLite, LoadersContext, Request):
-#     # from src.gql_ug_proxy import get_ug_connection
-    
-#     Async_Session_Maker = SQLite
-#     return {
-#         **LoadersContext,
-#         "request": Request,
-#         "": Async_Session_Maker,
-#         "user": AdminUser,
-#         "x": "",
-#         # "ug_connection": get_ug_connection
-#     }
 
 @pytest_asyncio.fixture
-async def Context():
+async def ContextBase():
     # async_session_maker
     from sqlalchemy.ext.asyncio import create_async_engine
     from sqlalchemy.ext.asyncio import AsyncSession
     from sqlalchemy.orm import sessionmaker
     from src.DBDefinitions import BaseModel
+    from uoishelpers.dataloaders.IDLoader import set_GLOBAL_ASYNCIO_LOCK
+    GLOBAL_ASYNCIO_LOCK = asyncio.Lock()
+    set_GLOBAL_ASYNCIO_LOCK(GLOBAL_ASYNCIO_LOCK)
+    from uoishelpers.dataloaders.IDLoader import GLOBAL_ASYNCIO_LOCK as lock
+    assert lock == GLOBAL_ASYNCIO_LOCK, "GLOBAL_ASYNCIO_LOCK is not the same as lock in IDLoader"
+
     asyncEngine = create_async_engine("sqlite+aiosqlite:///:memory:")
     # asyncEngine = create_async_engine("sqlite+aiosqlite:///data.sqlite")
     async with asyncEngine.begin() as conn:
@@ -149,12 +31,10 @@ async def Context():
     monkeypatch.setenv("DEMODATA", "True")
 
     from src.DBFeeder import initDB
-    await initDB(asyncSessionMaker=async_session_maker, filename="./systemdata.json")
+    await initDB(asyncSessionMaker=async_session_maker, filename="./systemdata.test.json")
     # context
     from src.Dataloaders import createLoadersContext
-    loadersContext = createLoadersContext(asyncSessionMaker=async_session_maker)
-    # ...
-
+    
     class Request:
         @property
         def cookies(self):
@@ -162,39 +42,132 @@ async def Context():
         @property
         def headers(self):
             return {}
-        
+    async with async_session_maker() as session:
+        loadersContext = createLoadersContext(session=session)
+        logging.info(f"ContextBase created with session: {session}")
+        yield {
+            **loadersContext, 
+            "request": Request(),
+        }
+        await session.commit()
+        logging.info(f"ContextBase teardown with session: {session}")
+    await asyncEngine.dispose()
+
+@pytest.fixture
+def UserPatch():
+    local_roles = [
+        {"roletype": {"name": "administrátor"}, "valid": True},
+        {"roletype": {"name": "editor"}, "valid": True},
+    ]
+    def exec(roles: list = None):
+        nonlocal local_roles
+        local_roles = roles or []
+    
+    
+    class PseudoLoader:
+        async def load(self, params):
+            # mock response for user roles query
+            # logging.info(f"userRolesForRBACQuery_loader called with params: {params}")
+            return {
+                "result": local_roles
+            }    
+    return exec, PseudoLoader()
+
+@pytest_asyncio.fixture
+async def FullContext(ContextBase, UserPatch):
+    
+    loadersContext = ContextBase
+    userRolesForRBACQuery_patch, userRolesForRBACQuery_loader = UserPatch
     context_ = {
         **loadersContext,
-        "request": Request(),
-        # "": async_session_maker,
-        # "user": AdminUser,
-        # "x": "",
-        # "ug_connection": get_ug_connection
+        "userRolesForRBACQuery_loader": userRolesForRBACQuery_loader,
+        "userRolesForRBACQuery_patch": userRolesForRBACQuery_patch
     }
-    # class _Info():
-    #     @property
-    #     def context(self):
-    #         context = context_
-    #         # context["request"] = Request
-    #         return context
-
-    # return _Info()
-    logging.info(f"Context created")
     return context_
 
 @pytest.fixture
-def SchemaExecutor(Context):
+def WhoAmIExtensionOverride(FullContext):
+    from uoishelpers.schema import WhoAmIExtension
+    class WhoAmIExtension_Debug(WhoAmIExtension):
+        user = None
+        async def on_execute(self):
+            user = self.__class__.user or {
+                "id": "30bc16ac-946a-4d73-a1ad-3fd3ddd038f7",
+                "roles": [{
+                    "roletype": {"name": "superadmin"}
+                }]
+            }
+
+            self.execution_context.context["user"] = user
+            yield
+
+        @classmethod
+        def set_user(cls, user):
+            cls.user = user
+
+        
+    return WhoAmIExtension_Debug
+
+
+@pytest.fixture
+def RolePermissionSchemaExtensionOverride(FullContext):
+    from uoishelpers.gqlpermissions.RolePermissionSchemaExtension import RolePermissionSchemaExtension
+    class RolePermissionSchemaExtension_Debug(RolePermissionSchemaExtension):
+        response_override = None
+
+        async def load(self, key):
+            response = self.__class__.response_override
+            if response is None:
+                response = {
+                    "result": self.execution_context.context["user"].get("roles", [])
+                }
+            return response
+
+        async def on_execute(self):
+            self.execution_context.context["userRolesForRBACQuery_loader"] = self
+            yield
+
+        @classmethod
+        def set_response(cls, response):
+            cls.response_override = response
+
+    return RolePermissionSchemaExtension_Debug
+
+@pytest.fixture
+def SchemaExecutor(
+    FullContext,
+    WhoAmIExtensionOverride,
+    RolePermissionSchemaExtensionOverride
+):
     # GQLUG_ENDPOINT_URL
-    monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setenv("GQLUG_ENDPOINT_URL", "http://localhost:8125/gql")
+    # monkeypatch = pytest.MonkeyPatch()
+    # monkeypatch.setenv("GQLUG_ENDPOINT_URL", "http://localhost:8125/gql")
+
+    from uoishelpers.schema import WhoAmIExtension
+    # schema.extensions.append(WhoAmIExtension)
+    from uoishelpers.gqlpermissions.RolePermissionSchemaExtension import RolePermissionSchemaExtension
+
 
     from src.GraphTypeDefinitions import schema
+    schema.extensions = list(
+        filter(lambda ex: ex not in [WhoAmIExtension, RolePermissionSchemaExtension], schema.extensions)
+    )
+    
+    schema.extensions.append(WhoAmIExtensionOverride)
+    schema.extensions.append(RolePermissionSchemaExtensionOverride)
+
+    for ext in schema.extensions:
+        logging.info(f"Schema extension: {ext}")
+    FullContext["user"] = {
+        "id": "30bc16ac-946a-4d73-a1ad-3fd3ddd038f7",
+        "roles": [{
+            "roletype": {"name": "superadmin"}
+        }]
+    }
     async def Execute(query, variable_values={}):
-        result = await schema.execute(query=query, variable_values=variable_values, context_value=Context)
+        result = await schema.execute(query=query, variable_values=variable_values, context_value=FullContext)
         value = {"data": result.data} 
         if result.errors:
             value["errors"] = result.errors
         return value
     return Execute
-
-SchemaExecutorDemo = SchemaExecutor

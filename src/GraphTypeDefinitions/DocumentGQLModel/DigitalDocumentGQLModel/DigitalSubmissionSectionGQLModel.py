@@ -208,6 +208,10 @@ class SubmissionSectionInsertGQLModel(InputModelMixin):
         description="id of sumbission where new section is being created, regardless of deep",
         default=None
         )
+    section_id: typing.Optional[IDType] = strawberry.field(
+        description="id of section where new section is being created",
+        default=None
+        )
     form_section_id: typing.Optional[IDType] = strawberry.field(
         description="section of the form",
         default=None
@@ -236,6 +240,7 @@ class SubmissionSectionInsertGQLModel(InputModelMixin):
     )
 
     path: strawberry.Private[str] = None
+    state_id: strawberry.Private[IDType] = None
     rbacobject_id: strawberry.Private[IDType] = None
     createdby_id: strawberry.Private[IDType] = None
 
@@ -337,7 +342,7 @@ class SubmissionSectionMutation:
         description="standard insert operation",
         permission_classes=[
             OnlyForAuthentized,
-            SimpleInsertPermission[DigitalSubmissionSectionGQLModel](roles=["administrátor"])
+            # SimpleInsertPermission[DigitalSubmissionSectionGQLModel](roles=["administrátor"])
         ]
     )
     async def submission_section_insert(self, info: strawberry.types.Info, submission_section: SubmissionSectionInsertGQLModel) -> typing.Union[DigitalSubmissionSectionGQLModel, InsertError[DigitalSubmissionSectionGQLModel]]:
@@ -379,8 +384,92 @@ class SubmissionSectionMutation:
         #     )
         #     [form_section, neibs] = await asyncio.gather(*futures)
         #     pass
-        futures = (subLoader.load(submission_section.submission_id), secLoader.load(submission_section.parent_id))
-        modelinstance = submission_section.intoModel(info=info)
+
+        from .DigitalFormFieldGQLModel import DigitalFormFieldGQLModel
+        from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
+        # from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
+
+        fieldLoader = DigitalFormFieldGQLModel.getLoader(info=info)
+        sectionLoader = DigitalFormSectionGQLModel.getLoader(info=info)
+        submission_section_loader = DigitalSubmissionSectionGQLModel.getLoader(info=info)
+
+        # TODO problem s https://docs.sqlalchemy.org/en/20/errors.html#error-isce
+        # form_fields, form_sections, form_section = await asyncio.gather(
+        #     fieldLoader.filter_by(form_section_id=submission_section.form_section_id),
+        #     sectionLoader.filter_by(section_id=submission_section.form_section_id),
+        #     sectionLoader.load(submission_section.form_section_id)
+        # )
+
+        # form_fields, form_sections = await asyncio.gather(
+        #     fieldLoader.filter_by(form_section_id=submission_section.form_section_id),
+        #     sectionLoader.filter_by(section_id=submission_section.form_section_id),
+        # )
+
+        form_fields = await fieldLoader.filter_by(form_section_id=submission_section.form_section_id)
+        form_sections = await sectionLoader.filter_by(section_id=submission_section.form_section_id)
+        form_section = await sectionLoader.load(submission_section.form_section_id)
+        
+
+        # if master_section is None:
+        #     return InsertError[DigitalSubmissionSectionGQLModel](
+        #         _input=submission_section,
+        #         msg=f"submission section with id {id} does not exists",
+        #         code="1083bfd4-7742-4631-aa76-4dde1059f082",
+        #         failed=True,
+        #         location="submission_section_insert"
+        #     )
+        
+        form_section_map = {
+            section.id: {
+                "section": dataclasses.asdict(section),
+                "name": section.name,
+                "sections": [],
+                "fields": []
+            } for section in form_sections
+        }
+        form_section_map[submission_section.form_section_id] = {
+            
+                "section": dataclasses.asdict(form_section),
+                "name": form_section.name,
+                "sections": [],
+                "fields": []
+        }
+
+        for section in form_section_map.values():
+            parent_id = section["section"]["section_id"]
+            if parent_id is None:
+                continue
+            parent = form_section_map.get(parent_id)
+            if parent:
+                parent["sections"].append(section)
+
+        
+        form_field_map = {
+            field.id: {
+                "field": dataclasses.asdict(field),
+                "name": field.name,
+                "section": form_section_map[field.form_section_id]
+            }
+            for field in form_fields
+        }
+
+        for field in form_field_map.values():
+            form_section_id = field["field"]["form_section_id"]
+            form_section_map[form_section_id]["fields"].append(field)
+
+        from .helpers import create_SubmissionSectionInsertGQLModel
+
+
+        form_section = form_section_map[submission_section.form_section_id]
+        submission_section_i = create_SubmissionSectionInsertGQLModel(
+            form_section,
+            submission_id=submission_section.submission_id,
+            submission_section_id=submission_section.section_id,
+            index=submission_section.index,
+        )
+
+        modelinstance = await submission_section_i.intoModel(info=info)
+
         result = await Insert[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=modelinstance)
         return result
     

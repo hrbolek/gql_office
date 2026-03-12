@@ -21,9 +21,6 @@ from .BaseModel import BaseModel, UUIDColumn, UUIDFKey, IDType
 class DigitalFormFieldModel(BaseModel):
     __tablename__ = "digital_form_fields"
 
-    # Primary key (if you have an id column, you might want to include it)
-    id: Mapped[IDType] = mapped_column(primary_key=True, default=None, nullable=True)
-
     name: Mapped[str] = mapped_column(String, default=None, nullable=True)
     label: Mapped[str] = mapped_column(String, default=None, nullable=True)
     label_en: Mapped[str] = mapped_column(String, default=None, nullable=True)
@@ -36,8 +33,8 @@ class DigitalFormFieldModel(BaseModel):
     formula: Mapped[str] = mapped_column(String, default=None, nullable=True)
 
     # Foreign key references (but here declared simply as nullable columns)
-    form_section_id: Mapped[IDType] = mapped_column(ForeignKey("digital_form_sections.id"), default=None, nullable=True)
-    form_id: Mapped[IDType] = mapped_column(ForeignKey("digital_forms.id"), default=None, nullable=True)
+    form_section_id: Mapped[IDType] = mapped_column(ForeignKey("digital_form_sections.id", ondelete="CASCADE"), default=None, nullable=True)
+    form_id: Mapped[IDType] = mapped_column(ForeignKey("digital_forms.id", ondelete="CASCADE"), default=None, nullable=True)
 
     type_id: Mapped[IDType] = mapped_column(default=None, nullable=True)
     backend_formula: Mapped[str] = mapped_column(String, default=None, nullable=True)

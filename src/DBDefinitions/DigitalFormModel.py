@@ -5,6 +5,7 @@ from sqlalchemy import (
     String,
     DateTime,
     ForeignKey,
+    select,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -64,3 +65,17 @@ class DigitalFormModel(BaseModel):
         uselist=True,
         init=True,
     )
+
+
+async def load_form_structure(session, form_id):
+    from .DigitalFormSectionModel import DigitalFormSectionModel as FormSec
+    from .DigitalFormFieldModel import DigitalFormFieldModel as FormField
+    sec_stmt = select(FormSec).where(FormSec.form_id == form_id)
+    fld_stmt = select(FormField).where(FormField.form_id == form_id)
+
+    sec_res = await session.execute(sec_stmt)
+    fld_res = await session.execute(fld_stmt)
+
+    form_sections = list(sec_res.scalars())
+    form_fields = list(fld_res.scalars())
+    return form_sections, form_fields
