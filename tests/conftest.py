@@ -3,6 +3,10 @@ import logging
 import pytest
 import pytest_asyncio
 
+from graphql import parse
+
+from tests._deprecated.utils import build_expanded_mutation
+
 @pytest_asyncio.fixture
 async def ContextBase():
     # async_session_maker
@@ -10,11 +14,6 @@ async def ContextBase():
     from sqlalchemy.ext.asyncio import AsyncSession
     from sqlalchemy.orm import sessionmaker
     from src.DBDefinitions import BaseModel
-    from uoishelpers.dataloaders.IDLoader import set_GLOBAL_ASYNCIO_LOCK
-    GLOBAL_ASYNCIO_LOCK = asyncio.Lock()
-    set_GLOBAL_ASYNCIO_LOCK(GLOBAL_ASYNCIO_LOCK)
-    from uoishelpers.dataloaders.IDLoader import GLOBAL_ASYNCIO_LOCK as lock
-    assert lock == GLOBAL_ASYNCIO_LOCK, "GLOBAL_ASYNCIO_LOCK is not the same as lock in IDLoader"
 
     asyncEngine = create_async_engine("sqlite+aiosqlite:///:memory:")
     # asyncEngine = create_async_engine("sqlite+aiosqlite:///data.sqlite")
@@ -150,7 +149,12 @@ def SchemaExecutor(
 
     from src.GraphTypeDefinitions import schema
     schema.extensions = list(
-        filter(lambda ex: ex not in [WhoAmIExtension, RolePermissionSchemaExtension], schema.extensions)
+        filter(lambda ex: ex not in [
+            WhoAmIExtension, 
+            RolePermissionSchemaExtension,
+            WhoAmIExtensionOverride,
+            RolePermissionSchemaExtensionOverride
+        ], schema.extensions)
     )
     
     schema.extensions.append(WhoAmIExtensionOverride)
@@ -171,3 +175,29 @@ def SchemaExecutor(
             value["errors"] = result.errors
         return value
     return Execute
+
+
+@pytest.fixture
+async def Sdl(SchemaExecutor):
+    SERVICE_SDL_QUERY = """
+      query {
+        _service {
+          sdl
+        }
+      }
+    """
+    sdl_json_result = await SchemaExecutor(query=SERVICE_SDL_QUERY)
+    data = sdl_json_result.get("data", {})
+    sdl_str = data["_service"]["sdl"]
+    sdl_doc = parse(sdl_str)
+
+    return sdl_doc
+
+@pytest.fixture
+async def CreateMutation(Sdl):
+    from .utils_sdl_2 import build_expanded_mutation
+    def createMutation(name):
+        query = build_expanded_mutation(Sdl, name)
+        logging.info(f"query {name}\n{query}")
+        return query
+    return createMutation

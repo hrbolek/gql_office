@@ -960,7 +960,8 @@ def build_expanded_mutation(sdl_doc: DocumentNode, mutation_name: str) -> str:
                  if isinstance(d, ObjectTypeDefinitionNode) and d.name.value == name),
                 None
             )
-            if obj_def and "Error" not in name:
+            # if obj_def and "Error" not in name:
+            if obj_def:
                 sel = build_selection(sdl_doc, NamedTypeNode(name=pt.name))
                 parts.append(f"... on {name} {sel}")
         joined = "\n   ".join(parts)

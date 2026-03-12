@@ -1,4 +1,7 @@
 
+import logging
+
+
 def assert_same(major, minor):
     for key in major:
         assert key in minor, f"Expected key '{key}' not found in minor result"
@@ -18,6 +21,7 @@ def assert_insert(result):
 
     assert "__typename" in value, f"Expected __typename field not found: {value}"
     if "Error" in value["__typename"]:
+        logging.error(f"Insert failed with error: {result}")
         assert "msg" in value, f"Expected msg field not found in error: {value}"
         assert "code" in value, f"Expected code field not found in error: {value}"
         assert False, f"Insert failed with error: {value['msg']} (code: {value['code']})"

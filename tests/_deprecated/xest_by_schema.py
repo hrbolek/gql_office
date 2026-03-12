@@ -2,7 +2,7 @@ import logging
 import pytest
 from src.GraphTypeDefinitions import schema
 
-from .utils_sdl_2 import createTests
+from ..utils_sdl_2 import createTests
 
 # logging.info("starting tests")
 tests  = createTests(schema)

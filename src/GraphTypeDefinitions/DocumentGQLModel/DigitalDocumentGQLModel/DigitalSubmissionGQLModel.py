@@ -34,7 +34,7 @@ from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProvide
 from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
 from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
-from ...BaseGQLModel import BaseGQLModel, IDType, selection_has, private_list_field
+from ...BaseGQLModel import BaseGQLModel, IDType, selection_has
 from ..DocumentInterfaceGQLModel import DocumentInterfaceGQLModel
 
 DigitalSubmissionFieldGQLModel = typing.Annotated["DigitalSubmissionFieldGQLModel", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
@@ -78,9 +78,9 @@ class DigitalSubmissionGQLModel(BaseGQLModel): #, DocumentInterfaceGQLModel
         _id = IDType(id) if isinstance(id, str) else id
         loader = cls.getLoader(info=info)
 
-        is_complex = selection_has(["sections", "fields"], info.selected_fields[0].selections)
-        if is_complex:
-            print("value: complex =", is_complex, flush=True)
+        # is_complex = selection_has(["sections", "fields"], info.selected_fields[0].selections)
+        # if is_complex:
+        #     print("value: complex =", is_complex, flush=True)
 
         db_row = await loader.load(_id)
         db_row_dict = dataclasses.asdict(db_row) if db_row is not None else None

@@ -58,7 +58,7 @@ class FacilityGQLModel(BaseGQLModel):
         default=None,
         permission_classes=[OnlyForAuthentized]
     )
-     
+
     name: typing.Optional[str] = strawberry.field(
         default=None,
         description="""Facility name assigned by an administrator""",
@@ -268,7 +268,7 @@ class FacilityInsertGQLModel:
 
 @strawberry.input(description="initial attributes for facility insert")
 class FacilityInsertMasterGQLModel:
-    rbacobject_id: IDType = strawberry.field(description="Rbac object id for master facility, it defines access rights to the facility")
+    # rbacobject_id: IDType = strawberry.field(description="Rbac object id for master facility, it defines access rights to the facility")
     name: str = strawberry.field(description="name of the new facility")
     facilitytype_id: typing.Optional[IDType] = strawberry.field(description="facility type", default=None)
     id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default_factory=uuid.uuid4)
@@ -299,6 +299,14 @@ class FacilityUpdateGQLModel:
     geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default=None)
     changedby_id: strawberry.Private[IDType] = None
 
+@strawberry.input(description="Input definition for facility master change")
+class FacilityMoveGQLModel:
+    id: IDType = strawberry.field(description="client generated primary key")
+    lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
+    master_facility_id: IDType = strawberry.field(description="to which facility this facility belongs", default=None)
+
+    changedby_id: strawberry.Private[IDType] = None
+
 @strawberry.input(description="Input definition for facility delete")
 class FacilityDeleteGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
@@ -310,20 +318,19 @@ class FacilityDeleteGQLModel:
 class FacilityMutation:
 
     @strawberry.field(
-        description="Insert a facility under master facility, if master_facility_id is not provided, facility will be inserted as a master facility. rbacobject_id is id of group or user the facility is for, it defines access rights to the facility",
+        description="Insert a facility under master facility.",
         permission_classes=[
             OnlyForAuthentized
         ],
         extensions=[
-            UserAccessControlExtension[UpdateError, FacilityGQLModel](
+            UserAccessControlExtension[InsertError, FacilityGQLModel](
                 roles=[
                     "nemovitostní administrátor", 
-                    # "personalista"
                 ]
             ),
-            UserRoleProviderExtension[UpdateError, FacilityGQLModel](),
-            RbacProviderExtension[UpdateError, FacilityGQLModel](),
-            LoadDataExtension[UpdateError, FacilityGQLModel](
+            UserRoleProviderExtension[InsertError, FacilityGQLModel](),
+            RbacProviderExtension[InsertError, FacilityGQLModel](),
+            LoadDataExtension[InsertError, FacilityGQLModel](
                 getLoader=FacilityGQLModel.getLoader,
                 primary_key_name="master_facility_id"
             )
@@ -332,50 +339,104 @@ class FacilityMutation:
     async def facility_insert(
         self, 
         info: strawberry.types.Info, 
-        facility: FacilityInsertGQLModel
+        facility: FacilityInsertGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[FacilityGQLModel, InsertError[FacilityGQLModel]]:
+        # TODO create rbacobject_id for the new facility based on provided master_facility_id and rbacobject_id of the master facility, then set it to the new facility, so the new facility is properly connected to RBAC hierarchy and permissions are properly applied to it without need to reload the whole tree of facilities
         return await Insert[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
     @strawberry.field(
-        description="Insert a facility under master facility, if master_facility_id is not provided, facility will be inserted as a master facility. rbacobject_id is id of group or user the facility is for, it defines access rights to the facility",
+        description="Insert a facility without master facility. ",
         permission_classes=[
             OnlyForAuthentized
         ],
         extensions=[
-            UserAbsoluteAccessControlExtension[InsertError, FacilityGQLModel](roles=["administrátor"]),
-
+            UserAbsoluteAccessControlExtension[InsertError, FacilityGQLModel](roles=["superadmin"]),
         ]
     )
     async def facility_master_insert(
         self, 
         info: strawberry.types.Info, 
-        facility: FacilityInsertMasterGQLModel
+        facility: FacilityInsertMasterGQLModel,
+        user_roles: typing.List[dict],
     ) -> typing.Union[FacilityGQLModel, InsertError[FacilityGQLModel]]:
+        # TODO check facility.group_id exists
+        facility.rbacobject_id = facility.group_id
         return await Insert[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
     @strawberry.field(
         description="Update a facility",
         permission_classes=[
-            SimpleUpdatePermission[FacilityGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, FacilityGQLModel](
+                roles=[
+                    "nemovitostní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, FacilityGQLModel](),
+            RbacProviderExtension[UpdateError, FacilityGQLModel](),
+            LoadDataExtension[UpdateError, FacilityGQLModel]()
+        ],
     )
-    async def facility_update(self, info: strawberry.types.Info, facility: FacilityUpdateGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
+    async def facility_update(
+        self, 
+        info: strawberry.types.Info, 
+        facility: FacilityUpdateGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
         return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
     @strawberry.field(
         description="Delete a facility",
         permission_classes=[
-            SimpleDeletePermission[FacilityGQLModel](roles=["administrátor"])
-        ]
+            OnlyForAuthentized,
+        ],
+        extensions=[
+            UserAccessControlExtension[DeleteError, FacilityGQLModel](
+                roles=[
+                    "nemovitostní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[DeleteError, FacilityGQLModel](),
+            RbacProviderExtension[DeleteError, FacilityGQLModel](),
+            LoadDataExtension[DeleteError, FacilityGQLModel]()
+        ],
     )
-    async def facility_delete(self, info: strawberry.types.Info, facility: FacilityDeleteGQLModel) -> typing.Optional[DeleteError[FacilityGQLModel]]:
+    async def facility_delete(
+        self, 
+        info: strawberry.types.Info, 
+        facility: FacilityDeleteGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Optional[DeleteError[FacilityGQLModel]]:
         return await Delete[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
     
-    # @strawberry.field(
-    #     description="Move a facility",
-    #     permission_classes=[
-    #         SimpleUpdatePermission[FacilityGQLModel](roles=["administrátor"])
-    #     ]
-    # )
-    # async def facility_move(self, info: strawberry.types.Info, facility: FacilityUpdateGQLModel) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
-    #     return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)
+    @strawberry.field(
+        description="Move a facility aka changes master facility of a facility",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, FacilityGQLModel](
+                roles=[
+                    "nemovitostní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, FacilityGQLModel](),
+            RbacProviderExtension[UpdateError, FacilityGQLModel](),
+            LoadDataExtension[UpdateError, FacilityGQLModel]()
+        ],
+    )
+    async def facility_move(
+        self, 
+        info: strawberry.types.Info, 
+        facility: FacilityMoveGQLModel
+    ) -> typing.Union[FacilityGQLModel, UpdateError[FacilityGQLModel]]:
+        return await Update[FacilityGQLModel].DoItSafeWay(info=info, entity=facility)

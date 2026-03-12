@@ -3,216 +3,25 @@ import logging
 
 from .asserts import assert_insert, assert_update, assert_delete, assert_same
 
-async def facility_type_insert(SchemaExecutor, facility):
-    query = """mutation facilityTypeInsert(
-	$name: String # null, 
-	$nameEn: String # null, 
-	$parentId: UUID # null, 
-	$id: UUID # null
-) {
-  facilityTypeInsert(
-	facilityType: {
-	name: $name, 
-	nameEn: $nameEn, 
-	parentId: $parentId, 
-	id: $id}
-  ) {
-    ... on FacilityTypeGQLModel { ...FacilityType }
-    ... on FacilityTypeGQLModelInsertError { ...FacilityTypeGQLModelInsertError }
-  }
-}
 
-fragment User on UserGQLModel {
-    __typename
-    id
-    }
-
-fragment RBACObject on RBACObjectGQLModel {
-    __typename
-    id
-    }
-
-fragment FacilityType on FacilityTypeGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby {
-  ...User
-}
-  changedby {
-  ...User
-}
-  rbacobject {
-  ...RBACObject
-}
-  name
-  nameEn
-  parent { __typename }
-  parentId
-  children { __typename }
-  }
-
-fragment FacilityTypeGQLModelInsertError on FacilityTypeGQLModelInsertError {
-  __typename
-  Entity {
-  ...FacilityType
-}
-  msg
-  failed
-  code
-  location
-  input
-  }
-
-"""
-    variable_values = {**facility}
-    result = await SchemaExecutor(query=query, variable_values=variable_values)
+async def facility_type_insert(SchemaExecutor, CreateMutation, variables):
+    query = CreateMutation("facilityTypeInsert")
+    result = await SchemaExecutor(query=query, variable_values=variables)
     return result
 
-async def facility_type_update(SchemaExecutor, facility):
-    query = """mutation facilityTypeUpdate(
-	$id: UUID! # null, 
-	$lastchange: DateTime! # null, 
-	$name: String # null, 
-	$nameEn: String # null
-) {
-  facilityTypeUpdate(
-	facilityType: {
-	id: $id, 
-	lastchange: $lastchange, 
-	name: $name, 
-	nameEn: $nameEn}
-  ) {
-    ... on FacilityTypeGQLModel { ...FacilityType }
-    ... on FacilityTypeGQLModelUpdateError { ...Error }
-  }
-}
-
-fragment User on UserGQLModel {
-    __typename
-    id
-    }
-
-fragment RBACObject on RBACObjectGQLModel {
-    __typename
-    id
-    }
-
-fragment FacilityType on FacilityTypeGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby {
-  ...User
-}
-  changedby {
-  ...User
-}
-  rbacobject {
-  ...RBACObject
-}
-  name
-  nameEn
-  parent { __typename }
-  parentId
-  children { __typename }
-  }
-
-fragment Error on FacilityTypeGQLModelUpdateError {
-  __typename
-  Entity {
-  ...FacilityType
-}
-  msg
-  failed
-  code
-  location
-  input
-  }
-
-"""
-    variable_values = {**facility}
-    result = await SchemaExecutor(query=query, variable_values=variable_values)
+async def facility_type_update(SchemaExecutor, CreateMutation, variables):
+    query = CreateMutation("facilityTypeUpdate")
+    result = await SchemaExecutor(query=query, variable_values=variables)
     return result
 
-async def facility_type_delete(SchemaExecutor, facility):
-    query = """mutation facilityTypeDelete(
-	$id: UUID! # null, 
-	$lastchange: DateTime! # null
-) {
-  facilityTypeDelete(
-	facilityType: {
-	id: $id, 
-	lastchange: $lastchange}
-  ) {
-  ...FacilityTypeGQLModelDeleteError
-}
-}
-
-fragment User on UserGQLModel {
-    __typename
-    id
-    }
-
-fragment RBACObject on RBACObjectGQLModel {
-    __typename
-    id
-    }
-
-fragment FacilityType on FacilityTypeGQLModel {
-  __typename
-  id
-  lastchange
-  created
-  createdbyId
-  changedbyId
-  rbacobjectId
-  createdby {
-  ...User
-}
-  changedby {
-  ...User
-}
-  rbacobject {
-  ...RBACObject
-}
-  name
-  nameEn
-  parent { __typename }
-  parentId
-  children { __typename }
-  }
-
-fragment FacilityTypeGQLModelDeleteError on FacilityTypeGQLModelDeleteError {
-__typename
-Entity {
-  ...FacilityType
-}
-msg
-code
-failed
-location
-input
-}
-
-"""
-    variable_values = {
-        **facility
-    }
-    result = await SchemaExecutor(query=query, variable_values=variable_values)
+async def facility_type_delete(SchemaExecutor, CreateMutation, variables):
+    query = CreateMutation("facilityTypeDelete")
+    result = await SchemaExecutor(query=query, variable_values=variables)
     return result
 
 
 @pytest.mark.asyncio
-async def test_facility_type_insert(SchemaExecutor, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
+async def test_facility_type_insert(SchemaExecutor, CreateMutation, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
     WhoAmIExtensionOverride.set_user(
         {
             "id": "30bc16ac-946a-4d73-a1ad-3fd3ddd038f7",
@@ -237,11 +46,11 @@ async def test_facility_type_insert(SchemaExecutor, WhoAmIExtensionOverride, Rol
     input = {
         "name": "Test Facility",
     }
-    result = await facility_type_insert(SchemaExecutor, input)
+    result = await facility_type_insert(SchemaExecutor, CreateMutation, input)
     assert_insert(result)
 
 @pytest.mark.asyncio
-async def test_facility_type_update(SchemaExecutor, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
+async def test_facility_type_update(SchemaExecutor, CreateMutation, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
     WhoAmIExtensionOverride.set_user(
         {
             "id": "30bc16ac-946a-4d73-a1ad-3fd3ddd038f7",
@@ -271,19 +80,19 @@ async def test_facility_type_update(SchemaExecutor, WhoAmIExtensionOverride, Rol
         "name": "Updated Test Facility",
         "nameEn": "Updated Test Facility",
     }
-    result = await facility_type_insert(SchemaExecutor, input)
+    result = await facility_type_insert(SchemaExecutor, CreateMutation, input)
     facility_type_inserted = assert_insert(result)
     payload = {
         **input,
         **facility_type_inserted,
         **delta
     }
-    result = await facility_type_update(SchemaExecutor, payload)
+    result = await facility_type_update(SchemaExecutor, CreateMutation, payload)
     facility_type_updated = assert_update(result)
     assert_same(delta, facility_type_updated)
 
 @pytest.mark.asyncio
-async def test_facility_type_delete(SchemaExecutor, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
+async def test_facility_type_delete(SchemaExecutor, CreateMutation, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
     WhoAmIExtensionOverride.set_user(
         {
             "id": "30bc16ac-946a-4d73-a1ad-3fd3ddd038f7",
@@ -308,11 +117,17 @@ async def test_facility_type_delete(SchemaExecutor, WhoAmIExtensionOverride, Rol
     input = {
         "name": "Test Facility",
     }
-    result = await facility_type_insert(SchemaExecutor, input)
+    result = await facility_type_insert(SchemaExecutor, CreateMutation, input)
     facility_type_inserted = assert_insert(result)
     payload = {
         **input,
         **facility_type_inserted
     }
-    result = await facility_type_delete(SchemaExecutor, payload)
+    result = await facility_type_delete(SchemaExecutor, CreateMutation, payload)
     assert_delete(result)
+
+# @pytest.mark.asyncio
+# async def test_facility_query(CreateMutation):
+#     query = CreateMutation("facilityInsert")
+#     logging.info(f"{query}")
+#     assert False
