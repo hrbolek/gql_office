@@ -68,6 +68,7 @@ async def test_facility_update(SchemaExecutor, CreateMutation, RolePermissionSch
     )
 
     facility = {
+        # "id": "63902412-1443-4038-8619-6b9c32ebb7c3",
         "masterFacilityId": "d5f66675-11DB-4c65-9f11-bfe4e3cc25e2",
         "name": "Test Facility",
     }

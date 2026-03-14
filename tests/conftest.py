@@ -7,33 +7,30 @@ from graphql import parse
 
 from tests._deprecated.utils import build_expanded_mutation
 
-@pytest_asyncio.fixture
-async def ContextBase():
-    # async_session_maker
-    from sqlalchemy.ext.asyncio import create_async_engine
-    from sqlalchemy.ext.asyncio import AsyncSession
-    from sqlalchemy.orm import sessionmaker
-    from src.DBDefinitions import BaseModel
+@pytest_asyncio.fixture(scope="session")
+async def Database():
+    # create in-memory SQLite database and run migrations
+    from src.DBDefinitions import startEngine
 
-    asyncEngine = create_async_engine("sqlite+aiosqlite:///:memory:")
-    # asyncEngine = create_async_engine("sqlite+aiosqlite:///data.sqlite")
-    async with asyncEngine.begin() as conn:
-        await conn.run_sync(BaseModel.metadata.create_all)
+    connectionstring = "sqlite+aiosqlite:///:memory:"
+    async_session_maker = await startEngine(connectionstring, makeDrop=True, makeUp=True)
 
-    async_session_maker = sessionmaker(
-        asyncEngine, expire_on_commit=False, class_=AsyncSession
-    )
-
-    # fill data
-    # patch DEMODATA to True
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setenv("DEMODATA", "True")
 
     from src.DBFeeder import initDB
     await initDB(asyncSessionMaker=async_session_maker, filename="./systemdata.test.json")
-    # context
+
+    yield async_session_maker
+
+    # await asyncEngine.dispose()
+
+@pytest_asyncio.fixture
+async def ContextBase(Database):
+
     from src.Dataloaders import createLoadersContext
     
+    async_session_maker = Database
     class Request:
         @property
         def cookies(self):
@@ -50,7 +47,6 @@ async def ContextBase():
         }
         await session.commit()
         logging.info(f"ContextBase teardown with session: {session}")
-    await asyncEngine.dispose()
 
 @pytest.fixture
 def UserPatch():
@@ -156,7 +152,12 @@ def SchemaExecutor(
             RolePermissionSchemaExtensionOverride
         ], schema.extensions)
     )
-    
+    schema.extensions = list(
+        filter(lambda ex: getattr(ex, "__name__", None) not in [
+            "WhoAmIExtension_Debug",
+            "RolePermissionSchemaExtension_Debug"
+        ], schema.extensions)
+    )
     schema.extensions.append(WhoAmIExtensionOverride)
     schema.extensions.append(RolePermissionSchemaExtensionOverride)
 
@@ -199,5 +200,18 @@ async def CreateMutation(Sdl):
     def createMutation(name):
         query = build_expanded_mutation(Sdl, name)
         logging.info(f"query {name}\n{query}")
+        assert query is not None, f"Failed to build mutation for {name}"
         return query
     return createMutation
+
+@pytest.fixture
+async def CreateQuery(Sdl):
+    from .utils_sdl_2 import build_query_scalar, build_query_page
+    def createQuery(name):
+        query = build_query_scalar(Sdl, name)
+        if not query:
+            query = build_query_page(Sdl, name)
+        assert query is not None, f"Failed to build mutation for {name}"
+        logging.info(f"query {name}\n{query}")
+        return query
+    return createQuery

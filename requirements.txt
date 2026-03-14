@@ -9,7 +9,7 @@ sqlalchemy-cockroachdb
 aiohttp
 requests
 
-sqlalchemy
+sqlalchemy[asyncio]
 sqlalchemy_utils
 
 pydantic

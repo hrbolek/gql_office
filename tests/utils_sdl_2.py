@@ -720,7 +720,7 @@ def build_selection_optional(sdl_doc: DocumentNode,
     if not type_def or not type_def.fields:
         return ""
 
-    parts = []
+    parts = ["__typename"]  # always include __typename for type discrimination
     for f in type_def.fields:
         name = f.name.value
         if name.startswith("__"):
@@ -791,7 +791,7 @@ def build_selection(sdl_doc: DocumentNode, field_type: TypeNode) -> str:
     )
     if obj_def:
         result = build_selection_optional(sdl_doc, field_type)
-        logging.info(f"{obj_def.name} -> {result}")
+        # logging.info(f"{obj_def.name} -> {result}")
         return result
 
     # Try UNION

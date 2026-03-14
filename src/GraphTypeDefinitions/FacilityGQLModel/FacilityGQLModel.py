@@ -252,7 +252,7 @@ class FacilityInsertGQLModel:
     master_facility_id: IDType = strawberry.field(description="to which facility this facility belongs", default=None)
     name: str = strawberry.field(description="name of the new facility")
     facilitytype_id: typing.Optional[IDType] = strawberry.field(description="facility type", default=None)
-    id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default_factory=uuid.uuid4)
+    id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default=None)
 
     name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default="")
     label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default="")
@@ -271,7 +271,7 @@ class FacilityInsertMasterGQLModel:
     # rbacobject_id: IDType = strawberry.field(description="Rbac object id for master facility, it defines access rights to the facility")
     name: str = strawberry.field(description="name of the new facility")
     facilitytype_id: typing.Optional[IDType] = strawberry.field(description="facility type", default=None)
-    id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default_factory=uuid.uuid4)
+    id: typing.Optional[IDType] = strawberry.field(description="primary key (UUID), could be client generated", default=None)
 
     name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default="")
     label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default="")
