@@ -289,21 +289,21 @@ class FacilityInsertMasterGQLModel:
 class FacilityUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
-    name: typing.Optional[str] = strawberry.field(description="name of the type", default=None)
-    name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default=None)
-    label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default=None)
-    address: typing.Optional[str] = strawberry.field(description="postal address", default=None)
-    valid: typing.Optional[bool] = strawberry.field(description="if facility exists", default=True)
-    capacity: typing.Optional[int] = strawberry.field(description="facility capacity", default=0)
-    geometry: typing.Optional[str] = strawberry.field(description="SVG overlay for leaflet", default=None)
-    geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default=None)
+    name: typing.Optional[str] = strawberry.field(description="name of the type", default=strawberry.UNSET)
+    name_en: typing.Optional[str] = strawberry.field(description="english name of facility", default=strawberry.UNSET)
+    label: typing.Optional[str] = strawberry.field(description="full name (including masterfacility)", default=strawberry.UNSET)
+    address: typing.Optional[str] = strawberry.field(description="postal address", default=strawberry.UNSET)
+    valid: typing.Optional[bool] = strawberry.field(description="if facility exists", default=strawberry.UNSET)
+    capacity: typing.Optional[int] = strawberry.field(description="facility capacity", default=strawberry.UNSET)
+    geometry: typing.Optional[str] = strawberry.field(description="SVG overlay for leaflet", default=strawberry.UNSET)
+    geolocation: typing.Optional[str] = strawberry.field(description="WSGBLX;WGSBLY;ZOOM", default=strawberry.UNSET)
     changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for facility master change")
 class FacilityMoveGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
-    master_facility_id: IDType = strawberry.field(description="to which facility this facility belongs", default=None)
+    master_facility_id: IDType = strawberry.field(description="to which facility this facility belongs")
 
     changedby_id: strawberry.Private[IDType] = None
 

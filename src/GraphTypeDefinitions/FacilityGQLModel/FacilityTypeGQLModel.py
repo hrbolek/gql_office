@@ -52,7 +52,7 @@ class FacilityTypeGQLModel(BaseGQLModel):
         default=None,
         permission_classes=[OnlyForAuthentized]
     )
-    
+
     name: typing.Optional[str] = strawberry.field(
         default=None,
         description="""Facility type name assigned by an administrator""",
@@ -148,11 +148,11 @@ class FacilityTypeUpdateGQLModel:
 
     name: typing.Optional[str] = strawberry.field(
         description="""FacilityType name""",
-        default=None
+        default=strawberry.UNSET
     )
     name_en: typing.Optional[str] = strawberry.field(
         description="""FacilityType eng name""",
-        default=None
+        default=strawberry.UNSET
     )
     changedby_id: strawberry.Private[IDType] = None
 

@@ -148,8 +148,8 @@ class EventTypeInsertGQLModel:
 class EventTypeUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
-    name: typing.Optional[str] = strawberry.field(description="name of the type", default=None)
-    name_en: typing.Optional[str] = strawberry.field(description="eng name of the type", default=None)
+    name: typing.Optional[str] = strawberry.field(description="name of the type", default=strawberry.UNSET)
+    name_en: typing.Optional[str] = strawberry.field(description="eng name of the type", default=strawberry.UNSET)
     changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for EventType delete")

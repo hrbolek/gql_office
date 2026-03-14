@@ -449,27 +449,27 @@ class EventUpdateGQLModel:
     )
     name: typing.Optional[str] = strawberry.field(
         description="""Event name assigned by an administrator""",
-        default=None
+        default=strawberry.UNSET
     )
     name_en: typing.Optional[str] = strawberry.field(
         description="""Event eng name assigned by an administrator""",
-        default=None
+        default=strawberry.UNSET
     )
     description: typing.Optional[str] = strawberry.field(
         description="""Event description""",
-        default=None
+        default=strawberry.UNSET
     )
     startdate: typing.Optional[datetime.datetime] = strawberry.field(
         description="""Event start date""",
-        default=None
+        default=strawberry.UNSET
     )
     enddate: typing.Optional[datetime.datetime] = strawberry.field(
         description="""Event end date""",
-        default=None
+        default=strawberry.UNSET
     )
     # parent_id: typing.Optional[IDType] = strawberry.field(
     #     description="""Event parent id""",
-    #     default=None
+    #     default=strawberry.UNSET
     # )
     changedby_id: strawberry.Private[IDType] = None
 
