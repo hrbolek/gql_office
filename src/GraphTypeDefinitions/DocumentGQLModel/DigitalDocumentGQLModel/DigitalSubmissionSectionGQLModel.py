@@ -30,6 +30,12 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.RbacInsertProviderExtension import RbacInsertProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
 from ...BaseGQLModel import BaseGQLModel, IDType
 
@@ -204,16 +210,15 @@ from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
 @strawberry.input(description="Input definition for SubmissionSection create")
 class SubmissionSectionInsertGQLModel(InputModelMixin):
     getLoader = DigitalSubmissionSectionGQLModel.getLoader
-    submission_id: typing.Optional[IDType] = strawberry.field(
-        description="id of sumbission where new section is being created, regardless of deep",
-        default=None
+    submission_id: IDType = strawberry.field(
+        description="id of sumbission where new section is being created, regardless of deep"
         )
+    form_section_id: IDType = strawberry.field(
+        description="section of the form"
+        )
+
     section_id: typing.Optional[IDType] = strawberry.field(
         description="id of section where new section is being created",
-        default=None
-        )
-    form_section_id: typing.Optional[IDType] = strawberry.field(
-        description="section of the form",
         default=None
         )
     # name: str = strawberry.field(description="name of the section, must start with Capitalized letter")
@@ -337,15 +342,35 @@ class SubmissionSectionDeleteGQLModel:
 
 @strawberry.interface(description="Submission secion mutations")
 class SubmissionSectionMutation:
-
+    from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
     @strawberry.mutation(
         description="standard insert operation",
         permission_classes=[
-            OnlyForAuthentized,
-            # SimpleInsertPermission[DigitalSubmissionSectionGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[InsertError, DigitalSubmissionSectionGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[InsertError, DigitalSubmissionSectionGQLModel](),
+            RbacProviderExtension[InsertError, DigitalSubmissionSectionGQLModel](),
+            LoadDataExtension[InsertError, DigitalSubmissionSectionGQLModel](
+                getLoader=DigitalSubmissionGQLModel.getLoader,
+                primary_key_name="submission_id"
+            )
         ]
     )
-    async def submission_section_insert(self, info: strawberry.types.Info, submission_section: SubmissionSectionInsertGQLModel) -> typing.Union[DigitalSubmissionSectionGQLModel, InsertError[DigitalSubmissionSectionGQLModel]]:
+    async def submission_section_insert(
+        self, 
+        info: strawberry.types.Info, 
+        submission_section: SubmissionSectionInsertGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[DigitalSubmissionSectionGQLModel, InsertError[DigitalSubmissionSectionGQLModel]]:
+        submission_section.rbacobject_id = rbacobject_id
         # from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
         # from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
         # subLoader = DigitalSubmissionGQLModel.getLoader(info=info)
@@ -476,11 +501,27 @@ class SubmissionSectionMutation:
     @strawberry.mutation(
         description="standard insert operation",
         permission_classes=[
-            OnlyForAuthentized,
-            SimpleUpdatePermission[DigitalSubmissionSectionGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, DigitalSubmissionSectionGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, DigitalSubmissionSectionGQLModel](),
+            RbacProviderExtension[UpdateError, DigitalSubmissionSectionGQLModel](),
+            LoadDataExtension[UpdateError, DigitalSubmissionSectionGQLModel]()
         ]
     )
-    async def submission_section_update(self, info: strawberry.types.Info, submission_section: SubmissionSectionUpdateGQLModel) -> typing.Union[DigitalSubmissionSectionGQLModel, UpdateError[DigitalSubmissionSectionGQLModel]]:
+    async def submission_section_update(
+        self, 
+        info: strawberry.types.Info, 
+        submission_section: SubmissionSectionUpdateGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[DigitalSubmissionSectionGQLModel, UpdateError[DigitalSubmissionSectionGQLModel]]:
         result = await Update[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=submission_section)
         return result
 
@@ -488,10 +529,26 @@ class SubmissionSectionMutation:
     @strawberry.mutation(
         description="standard insert operation",
         permission_classes=[
-            OnlyForAuthentized,
-            SimpleDeletePermission[DigitalSubmissionSectionGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[DeleteError, DigitalSubmissionSectionGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[DeleteError, DigitalSubmissionSectionGQLModel](),
+            RbacProviderExtension[DeleteError, DigitalSubmissionSectionGQLModel](),
+            LoadDataExtension[DeleteError, DigitalSubmissionSectionGQLModel]()
         ]
     )
-    async def submission_section_delete(self, info: strawberry.types.Info, submission_section: SubmissionSectionDeleteGQLModel) -> typing.Optional[DeleteError[DigitalSubmissionSectionGQLModel]]:
+    async def submission_section_delete(
+        self, 
+        info: strawberry.types.Info, 
+        submission_section: SubmissionSectionDeleteGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Optional[DeleteError[DigitalSubmissionSectionGQLModel]]:
         result = await Delete[DigitalSubmissionSectionGQLModel].DoItSafeWay(info=info, entity=submission_section)
         return result        

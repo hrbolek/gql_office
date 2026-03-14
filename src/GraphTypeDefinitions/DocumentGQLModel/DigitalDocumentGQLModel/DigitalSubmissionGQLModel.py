@@ -40,6 +40,7 @@ from ..DocumentInterfaceGQLModel import DocumentInterfaceGQLModel
 DigitalSubmissionFieldGQLModel = typing.Annotated["DigitalSubmissionFieldGQLModel", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
 DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInputFilter", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
 DigitalSubmissionSectionGQLModel = typing.Annotated["DigitalSubmissionSectionGQLModel", strawberry.lazy(".DigitalSubmissionSectionGQLModel")]
+DigitalSubmissionSectionInputFilter = typing.Annotated["DigitalSubmissionSectionInputFilter", strawberry.lazy(".DigitalSubmissionSectionGQLModel")]
 DigitalFormGQLModel = typing.Annotated["DigitalFormGQLModel", strawberry.lazy(".DigitalFormGQLModel")]
 
 # DigitalSubmissionFieldInputFilter = typing.Annotated["DigitalSubmissionFieldInputFilter", strawberry.lazy(".DigitalSubmissionFieldGQLModel")]
@@ -55,7 +56,7 @@ class DigitalSubmissionInputFilter:
     # parent: "DigitalSubmissionInputFilter"
     # from .DigitalSubmissionFieldGQLModel import DigitalSubmissionFieldInputFilter
     submitted_fields: DigitalSubmissionFieldInputFilter
-    from .DigitalSubmissionSectionGQLModel import DigitalSubmissionSectionInputFilter
+    # from .DigitalSubmissionSectionGQLModel import DigitalSubmissionSectionInputFilter
     submitted_sections: DigitalSubmissionSectionInputFilter
     from .DigitalFormGQLModel import DigitalFormInputFilter
     form: DigitalFormInputFilter
@@ -397,7 +398,7 @@ from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
 )
 class DigitalSubmissionInsertGQLModel(InputModelMixin):
     getLoader = DigitalSubmissionGQLModel.getLoader
-    form_id: typing.Optional[IDType] = strawberry.field(
+    form_id: IDType = strawberry.field(
         description="[form](#digitalformgqlmodel) for this submission",
         default=None
     )
@@ -575,6 +576,14 @@ class DigitalSubmissionMutation:
             OnlyForAuthentized
         ],
         extensions=[
+            # TODO redefine roles for Submission initialization
+            # 
+            UserAccessControlExtension[InsertError, DigitalSubmissionGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                    "inicializátor"
+                ]
+            ),
             UserRoleProviderExtension[UpdateError, DigitalSubmissionGQLModel](),
             RbacProviderExtension[UpdateError, DigitalSubmissionGQLModel](),
             LoadDataExtension[UpdateError, DigitalSubmissionGQLModel](
@@ -591,6 +600,8 @@ class DigitalSubmissionMutation:
         rbacobject_id: IDType,
         db_row: typing.Any
     ) -> typing.Union[DigitalSubmissionGQLModel, InsertError[DigitalSubmissionGQLModel]]:
+        # TODO create RBACObject Child
+        digital_form_submission.rbacobject_id = rbacobject_id
         from .DigitalFormFieldGQLModel import DigitalFormFieldGQLModel
         from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
 
@@ -970,25 +981,58 @@ class DigitalSubmissionMutation:
     @strawberry.mutation(
         description="""Update a DigitalSubmission""",
         permission_classes=[
-            SimpleUpdatePermission[DigitalSubmissionGQLModel](roles=["administrátor"])
+            # SimpleInsertPermission[DigitalSubmissionGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            # TODO redefine roles for Submission initialization
+            # 
+            UserAccessControlExtension[InsertError, DigitalSubmissionGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                    "autor"
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, DigitalSubmissionGQLModel](),
+            RbacProviderExtension[UpdateError, DigitalSubmissionGQLModel](),
+            LoadDataExtension[UpdateError, DigitalSubmissionGQLModel]()
         ]
     )
     async def digital_form_submission_update(
         self,
         info: strawberry.types.Info,
-        digital_form_submission: DigitalSubmissionUpdateGQLModel
+        digital_form_submission: DigitalSubmissionUpdateGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[DigitalSubmissionGQLModel, UpdateError[DigitalSubmissionGQLModel]]:
         return await Update[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)
     
     @strawberry.mutation(
         description="""Delete a DigitalSubmission""",
         permission_classes=[
-            SimpleDeletePermission[DigitalSubmissionGQLModel](roles=["administrátor"])
+            # SimpleInsertPermission[DigitalSubmissionGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            # TODO redefine roles for Submission delete
+            # 
+            UserAccessControlExtension[DeleteError, DigitalSubmissionGQLModel](
+                roles=[
+                    "procesní administrátor"
+                ]
+            ),
+            UserRoleProviderExtension[DeleteError, DigitalSubmissionGQLModel](),
+            RbacProviderExtension[DeleteError, DigitalSubmissionGQLModel](),
+            LoadDataExtension[DeleteError, DigitalSubmissionGQLModel]()
         ]
     )
     async def digital_form_submission_delete(
         self,
         info: strawberry.types.Info,
-        digital_form_submission: DigitalSubmissionDeleteGQLModel
+        digital_form_submission: DigitalSubmissionDeleteGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Optional[DeleteError[DigitalSubmissionGQLModel]]:
         return await Delete[DigitalSubmissionGQLModel].DoItSafeWay(info=info, entity=digital_form_submission)    

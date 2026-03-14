@@ -251,10 +251,13 @@ class DigitalFormMutation:
     @strawberry.mutation(
         description="""Update a DigitalForm""",
         permission_classes=[
-            
+            OnlyForAuthentized
         ],
         extensions=[
-            UserAccessControlExtension[UpdateError, DigitalFormGQLModel](roles=["administrátor", "personalista"]),
+            UserAccessControlExtension[UpdateError, DigitalFormGQLModel](
+                roles=[
+                    "procesní administrátor"
+                ]),
             UserRoleProviderExtension[UpdateError, DigitalFormGQLModel](),
             RbacProviderExtension[UpdateError, DigitalFormGQLModel](),
             LoadDataExtension[UpdateError, DigitalFormGQLModel]()
@@ -273,12 +276,24 @@ class DigitalFormMutation:
     @strawberry.mutation(
         description="""Delete a DigitalForm""",
         permission_classes=[
-            SimpleDeletePermission[DigitalFormGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, DigitalFormGQLModel](
+                roles=[
+                    "procesní administrátor"
+                ]),
+            UserRoleProviderExtension[UpdateError, DigitalFormGQLModel](),
+            RbacProviderExtension[UpdateError, DigitalFormGQLModel](),
+            LoadDataExtension[UpdateError, DigitalFormGQLModel]()
         ]
     )
     async def digital_form_delete(
         self,
         info: strawberry.types.Info,
-        digital_form: typing.Annotated[DigitalFormDeleteGQLModel, strawberry.argument(description="id and lastchange of the form, which will be deleted")]
+        digital_form: typing.Annotated[DigitalFormDeleteGQLModel, strawberry.argument(description="id and lastchange of the form, which will be deleted")],
+        user_roles: typing.List[typing.Any],
+        db_row: typing.Any,
+        rbacobject_id: IDType
     ) -> typing.Optional[DeleteError[DigitalFormGQLModel]]:
         return await Delete[DigitalFormGQLModel].DoItSafeWay(info=info, entity=digital_form)

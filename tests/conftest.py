@@ -174,6 +174,12 @@ def SchemaExecutor(
         value = {"data": result.data} 
         if result.errors:
             value["errors"] = result.errors
+        ORANGE = "\033[33m"
+        RESET = "\033[0m"
+
+        logging.info(
+            f"QUERY:\n{ORANGE}{query}{RESET}\nwith variables:\n{ORANGE}{variable_values}{RESET}\ngot response:\n{ORANGE}{value}{RESET}"
+        )
         return value
     return Execute
 

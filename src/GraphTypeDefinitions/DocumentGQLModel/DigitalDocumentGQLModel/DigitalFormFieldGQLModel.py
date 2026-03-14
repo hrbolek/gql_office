@@ -27,6 +27,13 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.RbacInsertProviderExtension import RbacInsertProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
+
 
 from ...BaseGQLModel import BaseGQLModel, IDType
 
@@ -200,16 +207,14 @@ class DigitalFormFieldInsertGQLModel(InputModelMixin):
     # type_id: IDType = strawberry.field(description="type id of the field")
     getLoader = DigitalFormFieldGQLModel.getLoader
     
-    form_id: typing.Optional[IDType] = strawberry.field(
-        description="form id where the field is placed",
-        default=None
+    form_id: IDType = strawberry.field(
+        description="form id where the field is placed"
+    )
+    form_section_id: IDType = strawberry.field(
+        description="section id where the field is placed"
     )
     type_id: typing.Optional[IDType] = strawberry.field(
         description="id of the field type",
-        default=None
-    )
-    form_section_id: typing.Optional[IDType] = strawberry.field(
-        description="section id where the field is placed",
         default=None
     )
     id: typing.Optional[IDType] = strawberry.field(
@@ -316,58 +321,102 @@ class DigitalFormFieldDeleteGQLModel:
     description="set of mutations"
 )
 class DigitalFormFieldMutations:
+    from .DigitalFormGQLModel import DigitalFormGQLModel
     @strawberry.mutation(
         description="""Insert a DigitalFormField""",
         permission_classes=[
-            SimpleInsertPermission[DigitalFormFieldGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[InsertError, DigitalFormFieldGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[InsertError, DigitalFormFieldGQLModel](),
+            RbacProviderExtension[InsertError, DigitalFormFieldGQLModel](),
+            LoadDataExtension[InsertError, DigitalFormFieldGQLModel](
+                getLoader=DigitalFormGQLModel.getLoader,
+                primary_key_name="form_id"
+            )
         ]
     )
     async def digital_form_field_insert(
         self,
         info: strawberry.types.Info,
-        form_field: typing.Annotated[DigitalFormFieldInsertGQLModel, strawberry.argument(description="form field attributes to be inserted")]
+        form_field: typing.Annotated[DigitalFormFieldInsertGQLModel, strawberry.argument(description="form field attributes to be inserted")],
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[DigitalFormFieldGQLModel, InsertError[DigitalFormFieldGQLModel]]:
-        from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
-        modelinstance = await form_field.intoModel(info=info)
+        form_field.rbacobject_id = rbacobject_id
+        # from .DigitalFormSectionGQLModel import DigitalFormSectionGQLModel
+        # modelinstance = await form_field.intoModel(info=info)
 
-        if modelinstance.form_id is None:
-            section_id = modelinstance.form_section_id
-            form_id = None
-            loader = DigitalFormSectionGQLModel.getLoader(info=info)
-            while form_id is None:
-                section = await loader.load(section_id)
-                assert section is not None, f"badly defined section_id and / or field_id"
-                form_id = section.form_id
-                section_id = section.section_id
-                if form_id:
-                    break
-            modelinstance.form_id = form_id
+        # if modelinstance.form_id is None:
+        #     section_id = modelinstance.form_section_id
+        #     form_id = None
+        #     loader = DigitalFormSectionGQLModel.getLoader(info=info)
+        #     while form_id is None:
+        #         section = await loader.load(section_id)
+        #         assert section is not None, f"badly defined section_id and / or field_id"
+        #         form_id = section.form_id
+        #         section_id = section.section_id
+        #         if form_id:
+        #             break
+        #     modelinstance.form_id = form_id
 
-        return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=modelinstance)
+        return await Insert[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)
         # return await digital_form_field_insert_internal(self, info=info, form_field=form_field)
     
     @strawberry.mutation(
         description="""Update a DigitalFormField""",
         permission_classes=[
-            SimpleUpdatePermission[DigitalFormFieldGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, DigitalFormFieldGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, DigitalFormFieldGQLModel](),
+            RbacProviderExtension[UpdateError, DigitalFormFieldGQLModel](),
+            LoadDataExtension[UpdateError, DigitalFormFieldGQLModel]()
         ]
     )
     async def digital_form_field_update(
         self,
         info: strawberry.types.Info,
-        form_field: typing.Annotated[DigitalFormFieldUpdateGQLModel, strawberry.argument(description="form field attributes to be updated")]
+        form_field: typing.Annotated[DigitalFormFieldUpdateGQLModel, strawberry.argument(description="form field attributes to be updated")],
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[DigitalFormFieldGQLModel, UpdateError[DigitalFormFieldGQLModel]]:
         return await Update[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)
     
     @strawberry.mutation(
         description="""Delete a DigitalFormField""",
         permission_classes=[
-            SimpleDeletePermission[DigitalFormFieldGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, DigitalFormFieldGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, DigitalFormFieldGQLModel](),
+            RbacProviderExtension[UpdateError, DigitalFormFieldGQLModel](),
+            LoadDataExtension[UpdateError, DigitalFormFieldGQLModel]()
         ]
     )
     async def digital_form_field_delete(
         self,
         info: strawberry.types.Info,
-        form_field: typing.Annotated[DigitalFormFieldDeleteGQLModel, strawberry.argument(description="id and lastchange of form field to be deleted")]
+        form_field: typing.Annotated[DigitalFormFieldDeleteGQLModel, strawberry.argument(description="id and lastchange of form field to be deleted")],
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Optional[DeleteError[DigitalFormFieldGQLModel]]:
         return await Delete[DigitalFormFieldGQLModel].DoItSafeWay(info=info, entity=form_field)

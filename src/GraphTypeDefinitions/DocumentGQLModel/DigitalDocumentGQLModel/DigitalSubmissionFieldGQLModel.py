@@ -25,6 +25,12 @@ from uoishelpers.resolvers import (
     VectorResolver,
     ScalarResolver
 )
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.RbacInsertProviderExtension import RbacInsertProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
 
 from ...BaseGQLModel import BaseGQLModel, IDType
 
@@ -155,17 +161,14 @@ from uoishelpers.resolvers import InputModelMixin, TreeInputStructureMixin
 @strawberry.input(description="DigitalFormField insert parameter description")
 class DigitalSubmissionFieldInsertGQLModel(InputModelMixin):
     getLoader = DigitalSubmissionFieldGQLModel.getLoader
-    field_id: typing.Optional[IDType] = strawberry.field(
-        description="link to the form field",
-        default=None
+    field_id: IDType = strawberry.field(
+        description="link to the form field"
         )
-    section_id: typing.Optional[IDType] = strawberry.field(
-        description="section id where the field is placed",
-        default=None
+    section_id: IDType = strawberry.field(
+        description="section id where the field is placed"
         )
-    submission_id: typing.Optional[IDType] = strawberry.field(
-        description="submission id where the field is placed",
-        default=None
+    submission_id: IDType = strawberry.field(
+        description="submission id where the field is placed"
         )
     id: typing.Optional[IDType] = strawberry.field(
         description="client side generated id", 
@@ -215,41 +218,84 @@ class DigitalSubmissionFieldDeleteGQLModel:
     description="Digital submission mutations"
 )
 class DigitalSubmissionFieldMutation:
+    from .DigitalSubmissionGQLModel import DigitalSubmissionGQLModel
     @strawberry.mutation(
         description="""Insert a DigitalSubmissionField""",
         permission_classes=[
-            SimpleInsertPermission[DigitalSubmissionFieldGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[InsertError, DigitalSubmissionFieldGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[InsertError, DigitalSubmissionFieldGQLModel](),
+            RbacProviderExtension[InsertError, DigitalSubmissionFieldGQLModel](),
+            LoadDataExtension[InsertError, DigitalSubmissionFieldGQLModel](
+                getLoader=DigitalSubmissionGQLModel.getLoader,
+                primary_key_name="submission_id"
+            )
         ]
     )
     async def digital_submission_field_insert(
         self,
         info: strawberry.types.Info,
-        submission_field: typing.Annotated[DigitalSubmissionFieldInsertGQLModel, strawberry.argument(description="submission field attributes, to be inserted")]
+        submission_field: typing.Annotated[DigitalSubmissionFieldInsertGQLModel, strawberry.argument(description="submission field attributes, to be inserted")],
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[DigitalSubmissionFieldGQLModel, InsertError[DigitalSubmissionFieldGQLModel]]:
         return await Insert[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)
     
     @strawberry.mutation(
         description="""Update a DigitalSubmissionField""",
         permission_classes=[
-            SimpleUpdatePermission[DigitalSubmissionFieldGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[UpdateError, DigitalSubmissionFieldGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[UpdateError, DigitalSubmissionFieldGQLModel](),
+            RbacProviderExtension[UpdateError, DigitalSubmissionFieldGQLModel](),
+            LoadDataExtension[UpdateError, DigitalSubmissionFieldGQLModel]()
         ]
     )
     async def digital_submission_field_update(
         self,
         info: strawberry.types.Info,
-        submission_field: typing.Annotated[DigitalSubmissionFieldUpdateGQLModel, strawberry.argument(description="submission field attributes, to be updated")]
+        submission_field: typing.Annotated[DigitalSubmissionFieldUpdateGQLModel, strawberry.argument(description="submission field attributes, to be updated")],
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Union[DigitalSubmissionFieldGQLModel, UpdateError[DigitalSubmissionFieldGQLModel]]:
         return await Update[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)
     
     @strawberry.mutation(
         description="""Delete a DigitalSubmissionField""",
         permission_classes=[
-            SimpleDeletePermission[DigitalSubmissionFieldGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[DeleteError, DigitalSubmissionFieldGQLModel](
+                roles=[
+                    "procesní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[DeleteError, DigitalSubmissionFieldGQLModel](),
+            RbacProviderExtension[DeleteError, DigitalSubmissionFieldGQLModel](),
+            LoadDataExtension[DeleteError, DigitalSubmissionFieldGQLModel]()
         ]
     )
     async def digital_submission_field_delete(
         self,
         info: strawberry.types.Info,
-        submission_field: typing.Annotated[DigitalSubmissionFieldDeleteGQLModel, strawberry.argument(description="id and lastchange of submission field, to be deleted")]
+        submission_field: typing.Annotated[DigitalSubmissionFieldDeleteGQLModel, strawberry.argument(description="id and lastchange of submission field, to be deleted")],
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
     ) -> typing.Optional[DeleteError[DigitalSubmissionFieldGQLModel]]:
         return await Delete[DigitalSubmissionFieldGQLModel].DoItSafeWay(info=info, entity=submission_field)

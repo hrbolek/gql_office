@@ -27,6 +27,13 @@ from uoishelpers.resolvers import (
     ScalarResolver
 )
 
+from uoishelpers.gqlpermissions.LoadDataExtension import LoadDataExtension
+from uoishelpers.gqlpermissions.RbacProviderExtension import RbacProviderExtension
+from uoishelpers.gqlpermissions.RbacInsertProviderExtension import RbacInsertProviderExtension
+from uoishelpers.gqlpermissions.UserRoleProviderExtension import UserRoleProviderExtension
+from uoishelpers.gqlpermissions.UserAccessControlExtension import UserAccessControlExtension
+from uoishelpers.gqlpermissions.UserAbsoluteAccessControlExtension import UserAbsoluteAccessControlExtension
+
 from ..BaseGQLModel import BaseGQLModel, IDType
 
 EventGQLModel = typing.Annotated["EventGQLModel", strawberry.lazy(".EventGQLModel")]
@@ -128,14 +135,15 @@ class EventFacilityReservationInsertGQLModel:
     event_id: IDType = strawberry.field(description="event")
     state_id: IDType = strawberry.field(description="reservation state")
     id: typing.Optional[IDType] = strawberry.field(description="client generated primary key", default=None)
-    createdby_id: strawberry.Private[IDType]
+    createdby_id: strawberry.Private[IDType] = None
+    rbacobject_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for EventFacilityReservation update")
 class EventFacilityReservationUpdateGQLModel:
     id: IDType = strawberry.field(description="client generated primary key")
     lastchange: datetime.datetime = strawberry.field(description="timestamp for concurrent update")
     state_id: typing.Optional[IDType] = strawberry.field(description="reservation state")
-    changedby_id: strawberry.Private[IDType]
+    changedby_id: strawberry.Private[IDType] = None
 
 @strawberry.input(description="Input definition for EventFacilityReservation delete")
 class EventFacilityReservationDeleteGQLModel:
@@ -144,37 +152,89 @@ class EventFacilityReservationDeleteGQLModel:
 
 @strawberry.federation.type(description="")
 class EventFacilityReservationMutation:
-
+    from ..FacilityGQLModel import FacilityGQLModel
     @strawberry.mutation(
         description="standard insert operation",
         permission_classes=[
-            OnlyForAuthentized,
-            SimpleInsertPermission[EventFacilityReservationGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[InsertError, EventFacilityReservationGQLModel](
+                roles=[
+                    "nemovitostní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[InsertError, EventFacilityReservationGQLModel](),
+            RbacProviderExtension[InsertError, EventFacilityReservationGQLModel](),
+            LoadDataExtension[InsertError, EventFacilityReservationGQLModel](
+                getLoader=FacilityGQLModel.getLoader,
+                primary_key_name="facility_id"
+            )
         ]
     )
-    async def event_facility_insert(self, info: strawberry.types.Info, event_type: EventFacilityReservationInsertGQLModel) -> typing.Union[EventFacilityReservationGQLModel, InsertError[EventFacilityReservationGQLModel]]:
-        result = await Insert[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
+    async def event_facility_insert(
+        self, 
+        info: strawberry.types.Info, 
+        reservation: EventFacilityReservationInsertGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[EventFacilityReservationGQLModel, InsertError[EventFacilityReservationGQLModel]]:
+        reservation.rbacobject_id = rbacobject_id
+        result = await Insert[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=reservation)
         return result
     
     @strawberry.mutation(
         description="standard update operation",
         permission_classes=[
-            OnlyForAuthentized,
-            SimpleUpdatePermission[EventFacilityReservationGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[InsertError, EventFacilityReservationGQLModel](
+                roles=[
+                    "nemovitostní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[InsertError, EventFacilityReservationGQLModel](),
+            RbacProviderExtension[InsertError, EventFacilityReservationGQLModel](),
+            LoadDataExtension[InsertError, EventFacilityReservationGQLModel]()
         ]
     )
-    async def event_facility_update(self, info: strawberry.types.Info, event_type: EventFacilityReservationUpdateGQLModel) -> typing.Union[EventFacilityReservationGQLModel, UpdateError[EventFacilityReservationGQLModel]]:
-        result = await Update[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
+    async def event_facility_update(
+        self, 
+        info: strawberry.types.Info, 
+        reservation: EventFacilityReservationUpdateGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Union[EventFacilityReservationGQLModel, UpdateError[EventFacilityReservationGQLModel]]:
+        result = await Update[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=reservation)
         return result
 
 
     @strawberry.mutation(
         description="standard delete operation",
         permission_classes=[
-            OnlyForAuthentized,
-            SimpleDeletePermission[EventFacilityReservationGQLModel](roles=["administrátor"])
+            OnlyForAuthentized
+        ],
+        extensions=[
+            UserAccessControlExtension[InsertError, EventFacilityReservationGQLModel](
+                roles=[
+                    "nemovitostní administrátor", 
+                ]
+            ),
+            UserRoleProviderExtension[InsertError, EventFacilityReservationGQLModel](),
+            RbacProviderExtension[InsertError, EventFacilityReservationGQLModel](),
+            LoadDataExtension[InsertError, EventFacilityReservationGQLModel]()
         ]
     )
-    async def event_facility_delete(self, info: strawberry.types.Info, event_type: EventFacilityReservationDeleteGQLModel) -> typing.Optional[DeleteError[EventFacilityReservationGQLModel]]:
-        result = await Delete[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=event_type)
+    async def event_facility_delete(
+        self, 
+        info: strawberry.types.Info, 
+        reservation: EventFacilityReservationDeleteGQLModel,
+        db_row: typing.Any,
+        rbacobject_id: IDType,
+        user_roles: typing.List[dict],
+    ) -> typing.Optional[DeleteError[EventFacilityReservationGQLModel]]:
+        result = await Delete[EventFacilityReservationGQLModel].DoItSafeWay(info=info, entity=reservation)
         return result        

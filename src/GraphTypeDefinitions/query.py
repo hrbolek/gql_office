@@ -19,7 +19,8 @@ from .DocumentGQLModel import (
 from .EventGQLModel import (
     EventQuery,
     EventTypeQuery,
-    EventInvitationQuery
+    EventInvitationQuery,
+    EventFacilityReservationQuery
 )
 
 from .RequestGQLModel import RequestQueries, RequestTypeQueries, HistoryQueries
@@ -29,6 +30,7 @@ class Query(
     EventQuery, 
     EventTypeQuery,
     EventInvitationQuery,
+    EventFacilityReservationQuery,
 
     FacilityQuery, 
     FacilityTypeQuery,

@@ -3,7 +3,8 @@ import strawberry
 from .EventGQLModel import (
     EventMutation,
     EventTypeMutation,
-    EventInvitationMutation
+    EventInvitationMutation,
+    EventFacilityReservationMutation
 )
 
 from .FacilityGQLModel import (
@@ -29,6 +30,7 @@ class Mutation(
     EventMutation,
     EventTypeMutation,
     EventInvitationMutation,
+    EventFacilityReservationMutation,
     
     FacilityMutation,
     FacilityTypeMutation,
