@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from .asserts import assert_insert, assert_update, assert_delete, assert_same
+from .asserts import assert_insert, assert_update, assert_delete, assert_same, assert_read
 
 async def form_submission_insert(SchemaExecutor, CreateMutation, variables):
     query = CreateMutation("digitalFormSubmissionInsert2")
@@ -15,6 +15,11 @@ async def form_submission_update(SchemaExecutor, CreateMutation, variables):
 
 async def form_submission_delete(SchemaExecutor, CreateMutation, variables):
     query = CreateMutation("digitalFormSubmissionDelete")
+    result = await SchemaExecutor(query=query, variable_values=variables)
+    return result
+
+async def form_submission_read(SchemaExecutor, CreateQuery, variables):
+    query = CreateQuery("digitalFormSubmissionById")
     result = await SchemaExecutor(query=query, variable_values=variables)
     return result
 
@@ -35,6 +40,19 @@ default_roles = {
         }
     ]
 }
+
+@pytest.mark.asyncio
+async def test_form_submission_read(SchemaExecutor, CreateQuery, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
+    WhoAmIExtensionOverride.set_user(default_user)
+    RolePermissionSchemaExtensionOverride.set_response(default_roles)
+
+    insert_data = {
+        "id": "b0f1a7da-9f58-4e9d-bdc1-19d94770b20b",
+    }
+    result = await form_submission_read(SchemaExecutor, CreateQuery, insert_data)
+    inserted = assert_read(result)
+    
+
 
 @pytest.mark.asyncio
 async def test_form_submission_insert(SchemaExecutor, CreateMutation, WhoAmIExtensionOverride, RolePermissionSchemaExtensionOverride):
