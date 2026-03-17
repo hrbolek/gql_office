@@ -62,7 +62,7 @@ schema.extensions.append(RolePermissionSchemaExtension)
 
 from strawberry.extensions import ParserCache, ValidationCache
 
-from uoishelpers.schema.PyInstrumentHtmlExtension import PyInstrumentHtmlExtension
+# from uoishelpers.schema.PyInstrumentHtmlExtension import PyInstrumentHtmlExtension
 # schema.extensions.append(PyInstrumentHtmlExtension(enabled=True))
 schema.extensions.append(ParserCache(1000))
 schema.extensions.append(ValidationCache(1000))
