@@ -84,8 +84,8 @@ async def RunOnceAndReturnSessionMaker():
         logging.info(f"all done")
         print(f"all done")
 
-    # asyncio.create_task(coro=initDBAndReport())
-    await initDBAndReport()
+    asyncio.create_task(coro=initDBAndReport())
+    # await initDBAndReport()
 
     #
     #
