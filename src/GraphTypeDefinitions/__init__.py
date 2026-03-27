@@ -2,6 +2,7 @@ import datetime
 import strawberry
 
 import strawberry.extensions
+from strawberry.schema.config import StrawberryConfig
 from uoishelpers.gqlpermissions import RBACObjectGQLModel
 ###########################################################################################################################
 #
@@ -29,14 +30,21 @@ from .DocumentGQLModel import DocumentInterfaceGQLModel
 # 
 ###########################################################################################################################
 
-timedelta = strawberry.scalar(
-    # NewType("TimeDelta", float),
-    datetime.timedelta,
-    name="timedelta",
-    serialize=lambda v: v.total_seconds() / 60,
-    parse_value=lambda v: datetime.timedelta(minutes=v),
-)
+# timedelta = strawberry.scalar(
+#     # NewType("TimeDelta", float),
+#     datetime.timedelta,
+#     name="timedelta",
+#     serialize=lambda v: v.total_seconds() / 60,
+#     parse_value=lambda v: datetime.timedelta(minutes=v),
+# )
 
+# @strawberry.scalar(
+#     name="timedelta",
+#     serialize=lambda v: v.total_seconds() / 60,
+#     parse_value=lambda v: datetime.timedelta(minutes=v),
+# )
+# class TimeDelta:
+#     pass
 
 from .BaseGQLModel import Relation
 from .query import Query
@@ -45,7 +53,15 @@ schema = strawberry.federation.Schema(
     query=Query, 
     mutation=Mutation, 
     types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentInterfaceGQLModel, StateGQLModel), 
-    scalar_overrides={datetime.timedelta: timedelta._scalar_definition},
+    config=StrawberryConfig(
+        scalar_map={
+            datetime.timedelta: strawberry.scalar(
+                name="timedelta",
+                serialize=lambda v: v.total_seconds() / 60,
+                parse_value=lambda v: datetime.timedelta(minutes=v),
+            ),
+        }
+    ),
 
     extensions=[],
     schema_directives=[Relation]
