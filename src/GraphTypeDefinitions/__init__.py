@@ -14,13 +14,9 @@ from uoishelpers.gqlpermissions import RBACObjectGQLModel
 ###########################################################################################################################
 
 from .BaseGQLModel import BaseGQLModel
-from .UserGQLModel import UserGQLModel
-from .GroupGQLModel import GroupGQLModel
-from .EventGQLModel import EventGQLModel
-from .StateGQLModel import StateGQLModel
-
-
-from .DocumentGQLModel import DocumentInterfaceGQLModel
+from .Domain_UG.UserGQLModel import UserGQLModel
+from .Domain_UG.GroupGQLModel import GroupGQLModel
+from .Domain_UG.StateGQLModel import StateGQLModel
 
 
 ###########################################################################################################################
@@ -47,12 +43,26 @@ from .DocumentGQLModel import DocumentInterfaceGQLModel
 #     pass
 
 from .BaseGQLModel import Relation
-from .query import Query
-from .mutation import Mutation
+# from .query import Query
+# from .mutation import Mutation
+
+from .Domain_Office import Query_Domain_Office, Mutation_Domain_Office
+@strawberry.type(description="""Type for query root""")
+class Query(
+    Query_Domain_Office
+):
+    pass
+
+@strawberry.type(description="""Type for query root""")
+class Mutation(
+    Mutation_Domain_Office
+):
+    pass
+
 schema = strawberry.federation.Schema(
     query=Query, 
     mutation=Mutation, 
-    types=(UserGQLModel, GroupGQLModel, EventGQLModel, RBACObjectGQLModel, BaseGQLModel, DocumentInterfaceGQLModel, StateGQLModel), 
+    types=(UserGQLModel, GroupGQLModel, RBACObjectGQLModel, BaseGQLModel, StateGQLModel), 
     config=StrawberryConfig(
         scalar_map={
             datetime.timedelta: strawberry.scalar(

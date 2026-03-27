@@ -12,7 +12,7 @@ from strawberry.utils.typing import eval_type
 from uoishelpers.gqlpermissions import OnlyForAuthentized, RBACObjectGQLModel
 
 IDType = uuid.UUID
-UserGQLModel = typing.Annotated["UserGQLModel", strawberry.lazy(".UserGQLModel")]
+UserGQLModel = typing.Annotated["UserGQLModel", strawberry.lazy("src.GraphTypeDefinitions.Domain_UG.UserGQLModel")]
 
 
 
@@ -267,7 +267,7 @@ class BaseGQLModel:
         permission_classes=[OnlyForAuthentized]
         )
     async def createdby(self) -> typing.Optional["UserGQLModel"]:
-        from .UserGQLModel import UserGQLModel
+        from .Domain_UG.UserGQLModel import UserGQLModel
         return None if self.createdby_id is None else UserGQLModel(id=self.createdby_id)
 
     @strawberry.field(
@@ -275,7 +275,7 @@ class BaseGQLModel:
         permission_classes=[OnlyForAuthentized]
         )
     async def changedby(self) -> typing.Optional["UserGQLModel"]:
-        from .UserGQLModel import UserGQLModel
+        from .Domain_UG.UserGQLModel import UserGQLModel
         return None if self.changedby_id is None else UserGQLModel(id=self.changedby_id)
 
     @strawberry.field(
