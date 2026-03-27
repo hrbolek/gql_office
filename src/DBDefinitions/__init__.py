@@ -15,25 +15,29 @@ import logging
 
 from .BaseModel import BaseModel, UUIDColumn, UUIDFKey
 
-from .DigitalFormFieldModel import DigitalFormFieldModel
-from .DigitalFormModel import DigitalFormModel
-from .DigitalFormSectionModel import DigitalFormSectionModel
-from .DigitalSubmissionFieldModel import DigitalSubmissionFieldModel
-from .DigitalSubmissionSectionModel import DigitalSubmissionSectionModel
-from .DigitalSubmissionModel import DigitalSubmissionModel
-from .DocumentModel import DocumentModel
-from .DocumentTypeModel import DocumentTypeModel
-from .ElectronicDocumentModel import ElectronicDocumentModel
-from .EventModel import EventModel
-from .EventTypeModel import EventTypeModel
-from .FacilityModel import FacilityModel
-from .FacilityTypeModel import FacilityTypeModel
-from .EventFacilityReservationModel import EventFacilityReservationModel
-from .EventInvitationModel import EventInvitationModel
+from .Domain_Office import (
+    DigitalFormFieldModel,
+    DigitalFormModel,
+    DigitalFormSectionModel,
+    DigitalSubmissionFieldModel,
+    DigitalSubmissionSectionModel,
+    DigitalSubmissionModel,
+    DigitalFormFieldPermissionModel,
+    
+    DocumentModel,
+    DocumentTypeModel,
+    ElectronicDocumentModel,
+    EventModel,
+    EventTypeModel,
+    FacilityModel,
+    FacilityTypeModel,
+    EventFacilityReservationModel,
+    EventInvitationModel,
 
-from .HistoryModel import HistoryModel
-from .RequestModel import RequestModel
-from .RequestTypeModel import RequestTypeModel
+    HistoryModel,
+    RequestModel,
+    RequestTypeModel
+)
 
 async def startEngine(connectionstring, makeDrop=False, makeUp=True):
     """Provede nezbytne ukony a vrati asynchronni SessionMaker"""

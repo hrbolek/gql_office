@@ -6,7 +6,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from .BaseModel import BaseModel, UUIDFKey, UUIDColumn, IDType
+from src.DBDefinitions.BaseModel import BaseModel, UUIDFKey, UUIDColumn, IDType
 class FacilityModel(BaseModel):
     """Spravuje data spojena s objektem daneho typu"""
 

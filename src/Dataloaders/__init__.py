@@ -2,7 +2,7 @@
 # from functools import cache
 
 from src.DBDefinitions import BaseModel
-from ..DBDefinitions import (
+from src.DBDefinitions import (
     DigitalFormFieldModel,
     DigitalFormFieldPermissionModel,
     DigitalFormModel,

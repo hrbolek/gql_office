@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from .BaseModel import BaseModel, UUIDFKey, IDType
+from src.DBDefinitions.BaseModel import BaseModel, UUIDFKey, IDType
 class FacilityTypeModel(BaseModel):
     """Urcuje typ objektu (areal, budova, patro, mistnost)"""
 
