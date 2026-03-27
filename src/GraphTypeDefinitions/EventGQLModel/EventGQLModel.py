@@ -209,6 +209,14 @@ class EventGQLModel(BaseGQLModel):
         ]
     )
 
+    masterevent: typing.Optional["EventGQLModel"] = strawberry.field(
+        description="""Event which contains this event""",
+        permission_classes=[
+            OnlyForAuthentized
+        ],
+        resolver=ScalarResolver["EventGQLModel"](fkey_field_name="masterevent_id")
+    )
+
     # parent: typing.Optional["EventGQLModel"] = strawberry.field(
     #     description="""Event parent""",
     #     permission_classes=[
